@@ -58,9 +58,7 @@ A well‑designed bidirectional `@OneToMany` association:
 - and performs significantly better than a unidirectional `@OneToMany`.
 
 Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------    
-<b>If you need a deep dive into the performance recipes exposed in this repository then I am sure that you will love my book "Spring Boot Persistence Best Practices"</b>
-<a href="https://www.apress.com/us/book/9781484256251"><p align="center"><img src="https://github.com/AnghelLeonard/Hibernate-SpringBoot/blob/master/Spring%20Boot%20Persistence%20Best%20Practices.jpg" height="500" width="450"/></p></a>
+-----------------------------------------------------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------------------------------------------------    
 
