@@ -1,6 +1,6 @@
 ---
 
-## **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
 
 Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
 
