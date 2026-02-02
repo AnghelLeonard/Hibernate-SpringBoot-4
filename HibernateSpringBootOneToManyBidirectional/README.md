@@ -1,5 +1,3 @@
-**Item 1: How to effectively shape the @OneToMany association**
-
 ---
 
 ## **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
