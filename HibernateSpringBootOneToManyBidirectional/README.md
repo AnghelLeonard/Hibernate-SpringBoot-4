@@ -1,1 +1,1 @@
-# Hibernate 7 Spring Boot 4
+# Hibernate 7+ Spring Boot 4+

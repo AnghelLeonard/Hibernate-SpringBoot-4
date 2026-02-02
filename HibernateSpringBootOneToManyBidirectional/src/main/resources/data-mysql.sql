@@ -5,7 +5,7 @@ INSERT INTO `author` (`age`, `name`, `genre`, `id`) VALUES
   (51, "Quartis Young", "Anthology", 3),
   (34, "Joana Nimar", "History", 4) 
 ON DUPLICATE KEY UPDATE `id`=`id`;
- 
+
 -- insert books
 INSERT INTO `book` (`isbn`, `title`, `author_id`, `id`) VALUES 
   ("001-JN", "A History of Ancient Prague", 4, 1),
