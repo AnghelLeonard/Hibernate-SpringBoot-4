@@ -1,9 +1,8 @@
+-- Recreate database
 USE `bookstoredb`;
-
--- Drop tables
-DROP TABLE IF EXISTS `author_book`;
-DROP TABLE IF EXISTS `book`;
-DROP TABLE IF EXISTS `author`;
+DROP DATABASE IF EXISTS `bookstoredb`;
+CREATE DATABASE `bookstoredb`;
+USE `bookstoredb`;
 
 -- Table `author`
 CREATE TABLE `author` (
