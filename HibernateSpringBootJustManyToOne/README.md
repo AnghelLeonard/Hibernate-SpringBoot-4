@@ -3,7 +3,8 @@
 # 📘 Item 3 summary - *How Efficient Is the Unidirectional @ManyToOne Association*
 
 ## 🧩 Core Idea  
-Item 3 evaluates the performance and behavior of a **unidirectional @ManyToOne** association (e.g., many Books → one Author) and compares it implicitly to the alternatives discussed earlier. The conclusion is straightforward:  
+Item 3 evaluates the performance and behavior of a **unidirectional @ManyToOne** association (e.g., many Books → one Author) and compares it implicitly to the alternatives discussed earlier. 
+The conclusion is straightforward
 👉 **Unidirectional @ManyToOne is highly efficient** and often preferable when you don’t need bidirectional navigation.
 
 ---
