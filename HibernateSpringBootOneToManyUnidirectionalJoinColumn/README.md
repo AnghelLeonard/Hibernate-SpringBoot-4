@@ -1,6 +1,6 @@
 --
 
-## ⭐ Item 2 Summary: Why to Avoid Unidirectional `@OneToMany`
+# 📘 Summary of Item 2: *Why to Avoid Unidirectional `@OneToMany`*
 
 Unidirectional `@OneToMany` (where only the parent knows about the children) seems simple, but it introduces **significant performance and design drawbacks** compared to bidirectional `@OneToMany` or unidirectional `@ManyToOne`.
 
