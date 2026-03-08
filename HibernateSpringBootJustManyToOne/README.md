@@ -1,6 +1,6 @@
 ---
 
-# 📘 Item 3 summary: *How Efficient Is the Unidirectional @ManyToOne Association*
+# 📘 Item 3 summary - *How Efficient Is the Unidirectional @ManyToOne Association*
 
 ## 🧩 Core Idea  
 Item 3 evaluates the performance and behavior of a **unidirectional @ManyToOne** association (e.g., many Books → one Author) and compares it implicitly to the alternatives discussed earlier. The conclusion is straightforward:  
@@ -101,10 +101,3 @@ No extra updates, no junction table cleanup.
 - When avoiding unnecessary collection management overhead
 
 ---
-
-If you want, I can also create:
-- A comparison table between @ManyToOne and @OneToMany  
-- A diagram of the relationship  
-- A cheat sheet of best practices for JPA associations  
-
-Just tell me what direction you’d like to explore next.
