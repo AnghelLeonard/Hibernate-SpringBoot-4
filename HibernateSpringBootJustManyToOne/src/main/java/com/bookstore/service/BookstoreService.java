@@ -40,7 +40,7 @@ public class BookstoreService {
         // book.setIsbn("not available"); // this will trigger an UPDATE
     }
     
-    // @Transactional
+    @Transactional
     public void fetchBooksOfAuthorById() {
         List<Book> books = bookRepository.fetchBooksOfAuthorById(4L);
 
