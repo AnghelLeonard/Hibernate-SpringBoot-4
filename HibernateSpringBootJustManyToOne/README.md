@@ -27,8 +27,10 @@ This is true for both unidirectional and bidirectional mappings.
 ### ✔️ Most efficient approach:
 ```java
 Author author = authorRepository.getReferenceById(4L);
+
 Book book = new Book();
 book.setAuthor(author);
+
 bookRepository.save(book);
 ```
 
