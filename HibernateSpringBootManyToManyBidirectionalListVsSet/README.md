@@ -7,6 +7,7 @@ Hibernate internally treats a `@ManyToMany` as **two unidirectional @OneToMany a
 Because of this, using a **List** causes Hibernate to delete and reinsert *all* join-table rows whenever an element is removed or reordered.  
 Using a **Set** avoids this and results in **far fewer SQL statements**.
 
+![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootManyToManyBidirectionalListVsSet/manytomany%20use%20always%20set%20not%20list.png)
 ---
 
 # 🔍 Why List Performs Poorly
