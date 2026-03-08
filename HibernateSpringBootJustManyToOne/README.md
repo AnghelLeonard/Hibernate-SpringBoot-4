@@ -1,6 +1,6 @@
 ---
 
-# 📘 Item 3 summary: *How Efficient Is the Unidirectional @ManyToOne Association*
+# 📘 Summary of Item 3: *How Efficient Is the Unidirectional @ManyToOne Association*
 
 ## 🧩 Core Idea  
 Item 3 evaluates the performance and behavior of a **unidirectional @ManyToOne** association (e.g., many Books → one Author) and compares it implicitly to the alternatives discussed earlier. 
