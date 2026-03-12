@@ -68,7 +68,6 @@ Bulk deletes avoid loading entities and reduce the number of SQL statements.
 These approaches:
 - Trigger **only two DELETE statements** (one for books, one for authors)
 - Scale well regardless of how many children exist  
-(Reference: )
 
 ---
 
