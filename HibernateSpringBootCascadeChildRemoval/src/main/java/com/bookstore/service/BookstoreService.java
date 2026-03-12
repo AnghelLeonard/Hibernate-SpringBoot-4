@@ -1,8 +1,10 @@
 package com.bookstore.service;
 
 import com.bookstore.entity.Author;
+import com.bookstore.entity.Book;
 import com.bookstore.repository.BookRepository;
 import com.bookstore.repository.AuthorRepository;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class BookstoreService {
         Author author = authorRepository.findByName("Joana Nimar");
 
         authorRepository.delete(author);
+        // authorRepository.deleteById(author.getId());
     }
 
     // not efficient
@@ -36,44 +39,41 @@ public class BookstoreService {
 
         author.removeBooks();
         authorRepository.delete(author);
+        // authorRepository.deleteById(author.getId());
     }
 
-    // One Author is loaded in the Persistent Context
+    // One Author is loaded in the Persistent Context (no books)
     @Transactional
     public void deleteViaIdentifiers() {
         Author author = authorRepository.findByName("Joana Nimar");
 
         bookRepository.deleteByAuthorIdentifier(author.getId());
         authorRepository.deleteByIdentifier(author.getId());
-     	// authorRepository.deleteInBatch(List.of(author));        
+        // authorRepository.deleteAllInBatch(List.of(author));                      
     }
 
-    // One Author and the associated Book are in Persistent Context
-    @Transactional
-    public void deleteViaIdentifiersX() {
-        Author author = authorRepository.findByNameWithBooks("Joana Nimar");
-
-        bookRepository.deleteByAuthorIdentifier(author.getId());
-        authorRepository.deleteByIdentifier(author.getId());
-    }
-
-    // More Author are loaded in the Persistent Context
+    // More Author are loaded in the Persistent Context (no books)
     @Transactional
     public void deleteViaBulkIn() {
         List<Author> authors = authorRepository.findByAge(34);
 
         bookRepository.deleteBulkByAuthors(authors);
-        authorRepository.deleteInBatch(authors);
+        authorRepository.deleteAllInBatch(authors);
     }
 
-    // More Author and the associated Book are in Persistent Context
+    // One/more Author and the associated Book are in Persistent Context
     @Transactional
-    public void deleteViaBulkInX() {
+    public void deleteViaDeleteAllInBatch() {
         List<Author> authors = authorRepository.findByGenreWithBooks("Anthology");
 
-        bookRepository.deleteBulkByAuthors(authors);
-        authorRepository.deleteInBatch(authors);
-    }
+        List<Book> books = new ArrayList<>();
+        for (Author author : authors) {
+            books.addAll(author.getBooks());
+        }
+
+        bookRepository.deleteAllInBatch(books);
+        authorRepository.deleteAllInBatch(authors);
+    }      
 
     // No Author or Book that should be deleted are loaded in the Persistent Context
     @Transactional
@@ -88,6 +88,6 @@ public class BookstoreService {
         List<Long> authorsIds = Arrays.asList(1L, 4L);
 
         bookRepository.deleteBulkByAuthorIdentifier(authorsIds);
-        authorRepository.deleteBulkByIdentifier(authorsIds);
-    }
+        authorRepository.deleteAllByIdInBatch(authorsIds);
+    }    
 }
