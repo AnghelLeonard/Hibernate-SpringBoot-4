@@ -36,7 +36,7 @@ public class Author implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
-    @SQLRestriction(value = "price > 20")
+    @SQLRestriction(value = "price > 20")    
     private List<Book> restOfBooks = new ArrayList<>();
 
     public void addBook(Book book) {
