@@ -1,64 +1,91 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 **Summary of Item 7 — How to Fetch Associations via JPA Entity Graphs**
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+Item 7 explains how **JPA Entity Graphs** provide a powerful, flexible, and efficient way to control which associations are fetched when loading entities. They help you avoid common performance pitfalls like the **N+1 query problem**, and they give you fine‑grained control without modifying your domain model.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 🎯 **Why Entity Graphs Matter**
+Entity Graphs let you specify, at query time, **which relationships should be eagerly fetched**, overriding the default `LAZY` or `EAGER` settings. This avoids:
+- Unpredictable lazy loading
+- Excessive joins
+- N+1 SELECT explosions
+- Hard‑coded fetch strategies in entity annotations
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+They are especially useful when different use cases require different fetch plans.
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+---
 
------------------------------------------------------------------------------------------------------------------------    
+## 🧩 **Two Types of Entity Graphs**
 
+### **1. Fetch Graph**
+- Only attributes explicitly listed in the graph are fetched eagerly.
+- Everything else remains lazy.
+- Ideal for **precise, minimal fetch plans**.
+
+### **2. Load Graph**
+- Attributes in the graph are fetched eagerly.
+- Attributes not listed fall back to their default fetch type.
+- Useful when you want to *add* eager associations without overriding everything.
+
+---
+
+## 🛠️ **How to Define Entity Graphs**
+
+### **A. Named Entity Graphs (via annotations)**
+Defined directly on the entity:
+
+```java
+@NamedEntityGraph(
+    name = "author-books",
+    attributeNodes = @NamedAttributeNode("books")
+)
+```
+
+Used in repositories or EntityManager queries.
+
+### **B. Dynamic Entity Graphs (built at runtime)**
+
+```java
+EntityGraph<Author> graph = em.createEntityGraph(Author.class);
+graph.addAttributeNodes("books");
+```
+
+More flexible — no need to modify entity classes.
+
+---
+
+## 🚀 **Using Entity Graphs in Queries**
+
+### **JPQL**
+```java
+TypedQuery<Author> q = em.createQuery(
+    "SELECT a FROM Author a WHERE a.id = :id", Author.class);
+q.setHint("javax.persistence.fetchgraph", graph);
+```
+
+### **Spring Data JPA**
+```java
+@EntityGraph(value = "author-books", type = EntityGraphType.FETCH)
+Author findByName(String name);
+```
+
+---
+
+## ⚡ **Performance Benefits**
+Entity Graphs help you:
+- Avoid N+1 queries by preloading required associations
+- Reduce unnecessary joins
+- Keep entities configured with `LAZY` loading while still fetching what you need
+- Tailor fetch plans per use case without touching the domain model
+
+---
+
+## 🧠 **Best Practices**
+- Keep default fetch types **LAZY** in your entities.
+- Use Entity Graphs to **opt‑in** to eager loading when needed.
+- Prefer **FETCH graphs** for predictable performance.
+- Use **Named graphs** for common fetch plans; dynamic graphs for special cases.
+
+---
