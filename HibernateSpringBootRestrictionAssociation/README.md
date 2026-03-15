@@ -19,7 +19,7 @@ It can also be useful for **soft delete** implementations.
 ---
 
 ## 📚 Example Scenario
-The PDF uses an `Author` entity with a bidirectional lazy `@OneToMany` association to `Book`.
+The item uses an `Author` entity with a bidirectional lazy `@OneToMany` association to `Book`.
 
 The goal is to lazily fetch:
 - All books
