@@ -62,7 +62,7 @@ More flexible — no need to modify entity classes.
 ```java
 TypedQuery<Author> q = em.createQuery(
     "SELECT a FROM Author a WHERE a.id = :id", Author.class);
-q.setHint("javax.persistence.fetchgraph", graph);
+q.setHint("jakarta.persistence.fetchgraph", graph);
 ```
 
 ### **Spring Data JPA**
