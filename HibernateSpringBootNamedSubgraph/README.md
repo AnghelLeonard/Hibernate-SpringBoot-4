@@ -3,7 +3,8 @@
 # 📘 Summary of **Item 8: How to Fetch Associations via Entity Sub Graphs**
 
 ### 🎯 **Purpose of Entity Sub Graphs**
-Entity sub‑graphs allow you to **control which associations are fetched** when loading an entity. They are part of JPA’s **Entity Graph** mechanism and help you avoid common performance pitfalls such as:
+Entity sub‑graphs allow you to **control which associations are fetched** when loading an entity. 
+They are part of JPA’s **Entity Graph** mechanism and help you avoid common performance pitfalls such as:
 - N+1 SELECT problems  
 - Unnecessary eager loading  
 - Over-fetching large object graphs  
