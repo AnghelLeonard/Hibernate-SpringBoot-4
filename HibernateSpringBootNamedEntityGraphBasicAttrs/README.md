@@ -3,7 +3,7 @@
 # 📘 Summary of Item 9: *Entity Graphs & Basic Attributes*
 
 ## 🎯 **Core Idea**
-This section explains how **JPA Entity Graphs** behave when used with **basic attributes** in Hibernate, why they don’t always work as expected, and how **Hibernate Bytecode Enhancement** is required to make lazy loading of basic fields effective.
+This item explains how **JPA Entity Graphs** behave when used with **basic attributes** in Hibernate, why they don’t always work as expected, and how **Hibernate Bytecode Enhancement** is required to make lazy loading of basic fields effective.
 
 ---
 
@@ -42,7 +42,7 @@ Hibernate treats basic attributes as eager by default and **does not honor** laz
 ---
 
 # 🔧 Solution: Enable Hibernate Bytecode Enhancement
-The PDF recommends enabling enhancement via Maven:
+The item recommends enabling enhancement via Maven:
 
 ```xml
 <plugin>
@@ -77,10 +77,3 @@ Once enabled:
   - Proper separation of what data is fetched in each use case
 
 ---
-
-If you want, I can also create:
-- A shorter cheat‑sheet version  
-- A diagram explaining fetch vs load graphs  
-- A practical example using your own entities  
-
-Just tell me what direction you’d like to explore next.
