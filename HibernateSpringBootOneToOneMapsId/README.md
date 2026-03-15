@@ -1,64 +1,106 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary of Item 11: *Optimizing `@OneToOne` with `@MapsId`*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+This document explains how to optimize **unidirectional** and **bidirectional** `@OneToOne` JPA associations by using the `@MapsId` annotation. It highlights performance drawbacks of the standard mappings and shows how `@MapsId` solves them.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 🔹 1. Regular Unidirectional `@OneToOne`
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+**Setup:**  
+- `Author` = parent  
+- `Book` = child  
+- Child holds a foreign key (`author_id`)
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+**Issue:**  
+When fetching a Book by its Author, the parent **does not know the child’s ID**, so Hibernate must run an extra query:
 
------------------------------------------------------------------------------------------------------------------------    
+- Even if both entities are in the **Second Level Cache**, Hibernate still hits the database to find the child.
 
+**Result:**  
+Unnecessary queries → performance penalty.
+
+---
+
+## 🔹 2. Regular Bidirectional `@OneToOne`
+
+**Setup:**  
+- Parent (`Author`) has `mappedBy` reference to child (`Book`)
+
+**Issue:**  
+Even with `FetchType.LAZY`, fetching the parent triggers **two queries**:
+
+1. Fetch Author  
+2. Fetch Book  
+
+Hibernate must load the child to know whether the parent’s reference should be `null` or a proxy.
+
+**Result:**  
+Extra query even when the child isn’t needed → wasted resources.
+
+---
+
+## 🔹 3. Using `@MapsId` to Optimize
+
+`@MapsId` allows the child entity to **share the same primary key** as the parent.  
+This means:
+
+- `Book.id` = `Author.id`
+- No `@GeneratedValue` on the child
+- The foreign key is also the primary key
+
+**Benefits:**
+
+### ✅ Eliminates extra queries  
+The parent now *knows* the child’s ID, so fetching the child can use `findById()` directly.
+
+### ✅ Works perfectly with Second Level Cache  
+If the Book is cached, Hibernate retrieves it **without** a database round trip.
+
+### ✅ No unnecessary child loading  
+Fetching the parent no longer forces Hibernate to load the child.
+
+### ✅ Reduced memory footprint  
+Only one key is stored instead of both a primary key and a foreign key.
+
+---
+
+## 🔹 4. Example Behavior with `@MapsId`
+
+When saving a new Book:
+
+```java
+book.setAuthor(author);
+bookRepository.save(book);
+```
+
+Hibernate inserts:
+
+```
+INSERT INTO book (isbn, title, author_id)
+VALUES (?, ?, ?)
+```
+
+The `author_id` becomes the Book’s primary key.
+
+Fetching the Book becomes trivial:
+
+```java
+bookRepository.findById(author.getId());
+```
+
+---
+
+## 🎯 Key Takeaway
+
+`@MapsId` is the **recommended approach** for `@OneToOne` associations because it:
+
+- Removes unnecessary queries  
+- Improves cache efficiency  
+- Avoids forced eager-like behavior  
+- Simplifies the model by sharing primary keys  
+
+It solves the major performance drawbacks of both unidirectional and bidirectional `@OneToOne` mappings.
+
+---
