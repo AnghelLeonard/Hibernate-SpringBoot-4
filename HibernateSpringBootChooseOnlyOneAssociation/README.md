@@ -3,7 +3,8 @@
 # 📘 Summary of *Item 12: How to Validate that Only One Association Is Non‑Null*
 
 ### 🎯 **Purpose**
-The document explains how to enforce a rule in a JPA/Hibernate application so that a `Review` entity can be linked to **exactly one** of three possible entities: `Book`, `Article`, or `Magazine`.
+The document explains how to enforce a rule in a JPA/Hibernate application so that a `Review` entity can be linked 
+to **exactly one** of three possible entities, `Book`, `Article`, or `Magazine`.
 
 ---
 
