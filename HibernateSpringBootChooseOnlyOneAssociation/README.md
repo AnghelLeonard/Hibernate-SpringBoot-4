@@ -73,20 +73,15 @@ A review linked to both an `Article` and a `Magazine` fails validation.
 
 ## 4. **Database‑Level Validation (Optional but Recommended)**
 
-Because **native SQL queries bypass Bean Validation**, the document recommends adding a **MySQL trigger** to enforce the rule at the database level.
+Because **native SQL queries bypass Bean Validation**, the document recommends adding a **(MySQL) trigger** to enforce the rule at the database level.
 
 ### ✔️ Trigger Logic
 The trigger checks combinations of non‑null foreign keys and raises an error if more than one is set.
 
 ---
 
-## 5. **Additional Resources**
-The full example application is available on GitHub (mentioned in the PDF).
-
----
-
 # 📝 **In Short**
-The PDF teaches you how to ensure that a `Review` entity is associated with **exactly one** of three possible parent entities. It covers:
+The item teaches you how to ensure that a `Review` entity is associated with **exactly one** of three possible parent entities. It covers:
 - Creating a custom Bean Validation annotation  
 - Implementing a validator  
 - Applying it to the entity  
