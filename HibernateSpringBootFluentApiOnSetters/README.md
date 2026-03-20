@@ -34,6 +34,8 @@ Author author = new Author()
         .setIsbn("002-JN"));
 ```
 
+![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootFluentApiOnSetters/fluent%20entity%20setters.png)
+
 ### Key Points:
 - All setters return the current object.
 - Helper methods like `addBook()` also return `this`.
@@ -57,6 +59,8 @@ Author author = new Author()
         .title("A People's History")
         .isbn("002-JN"));
 ```
+
+![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootFluentApiAdditionalMethods/fluent%20api%20with%20additional%20methods.png)
 
 ### Key Points:
 - Setters remain unchanged (void-returning).
