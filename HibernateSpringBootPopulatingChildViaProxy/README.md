@@ -1,5 +1,3 @@
-Here’s a clear, structured summary of the PDF you’re viewing, based on its content .
-
 ---
 
 # 📘 Summary of *Item 14: How to Populate a Child-Side Parent Association via a Hibernate Proxy*
