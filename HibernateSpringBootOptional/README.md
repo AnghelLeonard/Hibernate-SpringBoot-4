@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of Item 15: *How to Use Java 8 Optional in the Persistence Layer*
+# 📘 Summary of *Item 15: How to Use Java 8 Optional in the Persistence Layer*
 
 This item explains best practices for using **Java 8 Optional** within the **persistence layer**, especially in the context of JPA/Hibernate entities and repositories. It emphasizes using Optional only for its intended purpose: representing the *possible absence of a value* in a safe, expressive way.
 
