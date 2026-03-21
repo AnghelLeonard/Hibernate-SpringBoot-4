@@ -1,64 +1,81 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary of Item 15: *How to Use Java 8 Optional in the Persistence Layer*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+This item explains best practices for using **Java 8 Optional** within the **persistence layer**, especially in the context of JPA/Hibernate entities and repositories. It emphasizes using Optional only for its intended purpose: representing the *possible absence of a value* in a safe, expressive way.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 🎯 Core Principle
+Java architect **Brian Goetz** defines Optional as a mechanism to represent “no result” without relying on `null`, which often leads to errors. The document applies this principle to persistence design.
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+---
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+## 🧩 Using Optional in Entities
 
------------------------------------------------------------------------------------------------------------------------    
+### ✔️ Recommended
+Use Optional **only in getters** that may return `null`.  
+Examples:
 
+- `Author` entity: `getName()`, `getGenre()`
+- `Book` entity: `getTitle()`, `getIsbn()`, `getAuthor()`
+
+These getters wrap fields using:
+
+```java
+return Optional.ofNullable(field);
+```
+
+### ❌ Not Recommended
+Do **not** use Optional for:
+
+- Entity fields (Optional is **not Serializable**)
+- Constructor or setter parameters
+- Getters returning primitives or collections
+- Primary key getters
+
+---
+
+## 🗂️ Using Optional in Repositories
+
+### ✔️ Recommended
+Spring Data JPA already supports Optional in methods like:
+
+```java
+findById()
+findOne()
+```
+
+You can also define your own Optional-returning queries:
+
+```java
+Optional<Author> findByName(String name);
+Optional<Book> findByTitle(String title);
+```
+
+Optional works with:
+
+- Query Builder
+- JPQL
+- Native SQL
+
+Examples:
+
+```java
+@Query("SELECT a FROM Author a WHERE a.name=?1")
+Optional<Author> fetchByName(String name);
+
+@Query("SELECT a.genre FROM Author a WHERE a.name=?1")
+Optional<String> fetchGenreByName(String name);
+```
+
+---
+
+## 🧠 Key Takeaways
+
+- Use Optional **only where it adds clarity**, not everywhere.
+- In entities: Optional belongs in **getters**, not fields or constructors.
+- In repositories: Optional is ideal for representing **possibly empty query results**.
+- Optional works across all query types (JPQL, native, derived queries).
+
+---
