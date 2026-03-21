@@ -4,8 +4,6 @@
 
 This item explains best practices for using **Java 8 Optional** within the **persistence layer**, especially in the context of JPA/Hibernate entities and repositories. It emphasizes using Optional only for its intended purpose: representing the *possible absence of a value* in a safe, expressive way.
 
----
-
 ## 🎯 Core Principle
 Java architect **Brian Goetz** defines Optional as a mechanism to represent “no result” without relying on `null`, which often leads to errors. The document applies this principle to persistence design.
 
