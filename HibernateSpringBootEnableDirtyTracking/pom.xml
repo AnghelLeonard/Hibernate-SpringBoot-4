@@ -21,9 +21,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>24</java.version>
-        <maven.compiler.release>26</maven.compiler.release>
-        <hibernate.enhance.version>6.6.42.Final</hibernate.enhance.version>
+        <java.version>26</java.version>
+        <maven.compiler.release>26</maven.compiler.release>        
     </properties>
 
     <dependencies>
