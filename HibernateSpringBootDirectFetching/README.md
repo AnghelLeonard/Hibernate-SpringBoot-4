@@ -30,7 +30,7 @@ Keep *all* associations LAZY and manually fetch what you need.
 - Injected via `@PersistenceContext`.
 - Same SQL as Spring Data.
 
-## 3. **Hibernate Session.get()**
+## 3. **Hibernate Session.find()**
 - Requires unwrapping the Hibernate `Session`.
 - Same SQL as above.
 
