@@ -6,7 +6,7 @@
 A legacy database contains an `author` table where the `best_selling` column is stored as a `VARCHAR(3)` with values `"Yes"` or `"No"`.  
 Because the schema cannot be changed, Hibernate cannot directly map this column to a Java `Boolean` using its built‑in types.
 
-Hibernate’s default Boolean mappings expect:
+Hibernate’s default Boolean mappings expect
 - `BIT`
 - `INTEGER` (0/1)
 - `CHAR` (Y/N or T/F)
