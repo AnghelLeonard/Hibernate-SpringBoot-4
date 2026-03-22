@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of Item 17 – *How to Clone Entities*
+# 📘 Summary of *Item 17 – How to Clone Entities*
 
 This item explains practical techniques for cloning JPA/Hibernate entities—particularly when working with relationships such as `@ManyToMany`. It focuses on two scenarios:
 
