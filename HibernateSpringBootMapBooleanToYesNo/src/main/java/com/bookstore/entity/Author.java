@@ -21,7 +21,7 @@ public class Author implements Serializable {
     private String name;
     private String genre;
 
-    //@Convert(converter = BooleanConverter.class)
+    // @Convert(converter = BooleanConverter.class)
     @NotNull
     private Boolean bestSelling;
 
