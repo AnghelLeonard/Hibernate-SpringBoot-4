@@ -12,3 +12,12 @@ CREATE TABLE `author` (
   `name`  VARCHAR(255)  DEFAULT NULL,
   CONSTRAINT `author_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Table `book`
+CREATE TABLE `book` (
+  `id`        BIGINT        NOT NULL AUTO_INCREMENT,  
+  `price`     INT           NOT NULL,
+  `title`     VARCHAR(255)  DEFAULT NULL,
+  `isbn`      VARCHAR(255)  DEFAULT NULL,
+  CONSTRAINT `book_pk` PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

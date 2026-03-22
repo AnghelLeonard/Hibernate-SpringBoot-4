@@ -1,64 +1,116 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary of *Item 21: How to Use Direct Fetching*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+## 🎯 Core Idea
+Direct fetching—loading an entity by its ID—is the most efficient way to retrieve a single JPA entity **when you already know the identifier** and **don’t plan to navigate lazy associations** in the current Persistence Context.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+# 🔍 Key Concepts
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+## 💤 Lazy vs. ⚡ Eager Associations
+- **LAZY** (default for `@OneToMany`, `@ManyToMany`): Not loaded until accessed.
+- **EAGER** (default for `@OneToOne`, `@ManyToOne`): Always loaded with the entity.
+- Direct fetching still respects these defaults, which can cause unnecessary queries if not managed carefully.
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+**Best practice:**  
+Keep *all* associations LAZY and manually fetch what you need.
 
------------------------------------------------------------------------------------------------------------------------    
+---
 
+# 🛠️ Ways to Fetch by ID
+
+## 1. **Spring Data `findById()`**
+- Returns `Optional<T>`.
+- Internally uses `EntityManager.find()`.
+- Generates a simple `SELECT ... WHERE id=?`.
+
+## 2. **EntityManager.find()**
+- Injected via `@PersistenceContext`.
+- Same SQL as Spring Data.
+
+## 3. **Hibernate Session.get()**
+- Requires unwrapping the Hibernate `Session`.
+- Same SQL as above.
+
+All three methods behave identically in terms of SQL and caching.
+
+---
+
+# 🧠 Hibernate’s Session-Level Repeatable Reads
+Hibernate guarantees that within a single Persistence Context:
+- The **first** fetch loads the entity into the First-Level Cache.
+- **Subsequent** fetches of the same ID return the cached entity.
+- This prevents lost updates and ensures consistent reads.
+
+### Example:
+Calling:
+- `findById(1)`
+- `find(Author.class, 1)`
+- `findViaSession(Author.class, 1)`
+
+…within the same transaction triggers **only one SQL SELECT**.
+
+---
+
+# 🧪 Explicit JPQL/SQL Queries Behave Differently
+If you write:
+
+```java
+@Query("SELECT a FROM Author a WHERE a.id = ?1")
+```
+
+Hibernate **still executes the SQL**, even if the entity is already in the Persistence Context.
+
+But:
+- The returned entity is replaced with the cached one.
+- The fresh database snapshot is ignored.
+
+So:
+- **Two SELECTs** occur if you call `findById()` and then a JPQL query.
+
+---
+
+# 🔄 Behavior in Concurrent Transactions
+A detailed example shows:
+- Transaction A loads Author(id=1) → gets “Mark Janel”.
+- Transaction B loads and updates the same author → changes name to “Alicia Tom”.
+- Back in Transaction A:
+  - `findById()` returns “Mark Janel” (cached).
+  - JPQL/SQL entity queries also return “Mark Janel” (snapshot ignored).
+  - **But JPQL/SQL projections** (e.g., `SELECT a.name`) return **fresh DB values** (“Alicia Tom”).
+
+### Why?
+- Entity queries respect Hibernate’s session-level repeatable reads.
+- Projections do **not**; they always hit the database.
+
+---
+
+# 🧩 Isolation Levels Matter
+- Under **READ_COMMITTED**, projections return the latest DB state.
+- Under **REPEATABLE_READ**, projections also return the cached value.
+
+Hibernate’s session-level repeatable reads ≠ database isolation levels.
+
+---
+
+# 📦 Loading Multiple Entities by ID
+Options include:
+- `findAllById()`
+- JPQL `IN` queries
+- Spring Data `Specification`
+- Hibernate’s `MultiIdentifierLoadAccess` (supports batching and optional session checks)
+
+All benefit from session-level repeatable reads.
+
+---
+
+# 🧭 Practical Recommendations
+- Use `findById()` or `EntityManager.find()` for ID-based fetching.
+- Avoid explicit JPQL/SQL for simple ID lookups.
+- Keep associations LAZY and fetch manually when needed.
+- Use projections only when you *want* the latest DB state.
+- For multiple IDs, prefer `IN` queries or Hibernate batch loaders.
+
+---
