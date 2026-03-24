@@ -1,64 +1,112 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary: Lazy Loading Entity Attributes with Hibernate Bytecode Enhancement
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+This document explains **how to lazily load large entity attributes**—such as BLOBs—in Hibernate using **Bytecode Enhancement**, and how to avoid common pitfalls like **N+1 queries** and **LazyInitializationException**.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 🧩 Why Lazy Loading Attributes Matters
+- By default, Hibernate loads **all attributes eagerly**, even large ones like images.
+- In the example, the `Author` entity has an `avatar` field (a byte array).  
+  Loading this on every query wastes resources.
+- Lazy loading ensures the avatar is fetched **only when needed**.
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+---
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+## ⚙️ How to Enable Attribute Lazy Loading
 
------------------------------------------------------------------------------------------------------------------------    
+### **1. Add Hibernate Bytecode Enhancement**
+- Configure the `hibernate-maven-plugin` in `pom.xml`.
+- Enable:
+  ```
+  <enableLazyInitialization>true</enableLazyInitialization>
+  ```
+- Enhancement happens at **build time**, so no runtime overhead.
+- Without this step, attribute lazy loading **does not work**.
 
+### **2. Mark Attributes as Lazy**
+Annotate the large field:
+```java
+@Lob
+@Basic(fetch = FetchType.LAZY)
+private byte[] avatar;
+```
+
+---
+
+## 🔍 How Lazy Loading Behaves in Practice
+
+### Fetching authors by age:
+```sql
+SELECT id, age, genre, name FROM author WHERE age >= ?
+```
+The avatar is **not** loaded.
+
+### Accessing the avatar later:
+Calling `getAvatar()` triggers a **secondary SELECT**:
+```sql
+SELECT avatar FROM author WHERE id = ?
+```
+
+### Important:
+Accessing lazy attributes **outside a Hibernate session** causes a `LazyInitializationException`.
+
+---
+
+## ⚠️ The N+1 Problem with Lazy Attributes
+If you loop through authors and call `getAvatar()` for each, Hibernate fires:
+- 1 query for the list  
+- N queries for each avatar  
+
+This leads to performance degradation.
+
+### How to avoid it:
+- Use DTO projections:
+  ```java
+  @Query("SELECT a.name, a.avatar FROM Author a WHERE a.age >= ?1")
+  List<AuthorDto> findDtoByAgeGreaterThanEqual(int age);
+  ```
+- Or use subentities (referenced in Item 24).
+
+---
+
+## 🧨 LazyInitializationException in Spring Boot
+
+### Why it happens:
+- Spring Boot enables **Open Session in View (OSIV)** by default.
+- OSIV keeps the session open during view rendering, so lazy attributes load fine.
+- If OSIV is disabled (`spring.jpa.open-in-view=false`), and Jackson tries to serialize lazy attributes, it triggers a lazy load **without a session**, causing an exception.
+
+---
+
+## 🛠️ Solutions to Avoid LazyInitializationException
+
+### **1. Set Explicit Default Values**
+Before returning the entity:
+```java
+if (author.getAge() < 40) {
+    author.getAvatar(); // load it
+} else {
+    author.setAvatar(null); // default value
+}
+```
+Then configure Jackson to skip default values:
+```java
+@JsonInclude(Include.NON_DEFAULT)
+```
+
+### **2. Use a Custom Jackson Filter**
+- Configure Jackson to ignore certain fields (e.g., `avatar`).
+- Note: `jackson-datatype-hibernate5` helps with lazy associations, **not** lazy attributes.
+
+---
+
+# 🧾 Key Takeaways
+- Lazy loading large attributes improves performance.
+- Hibernate Bytecode Enhancement is **required** for attribute-level lazy loading.
+- Be careful with N+1 queries when accessing lazy fields in loops.
+- Disabling OSIV requires handling lazy attributes manually to avoid exceptions.
+- Use DTOs or Jackson configuration to control serialization.
+
+---
