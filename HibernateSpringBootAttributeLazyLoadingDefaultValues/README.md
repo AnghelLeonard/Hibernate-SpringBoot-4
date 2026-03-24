@@ -1,8 +1,8 @@
 ---
 
-# 📘 Summary: Lazy Loading Entity Attributes with Hibernate Bytecode Enhancement
+# 📘 Summary of Item 23: *Lazy Loading Entity Attributes with Hibernate Bytecode Enhancement*
 
-This document explains **how to lazily load large entity attributes**—such as BLOBs—in Hibernate using **Bytecode Enhancement**, and how to avoid common pitfalls like **N+1 queries** and **LazyInitializationException**.
+This item explains **how to lazily load large entity attributes**—such as BLOBs—in Hibernate using **Bytecode Enhancement**, and how to avoid common pitfalls like **N+1 queries** and **LazyInitializationException**.
 
 ---
 
@@ -98,7 +98,6 @@ Then configure Jackson to skip default values:
 
 ### **2. Use a Custom Jackson Filter**
 - Configure Jackson to ignore certain fields (e.g., `avatar`).
-- Note: `jackson-datatype-hibernate5` helps with lazy associations, **not** lazy attributes.
 
 ---
 

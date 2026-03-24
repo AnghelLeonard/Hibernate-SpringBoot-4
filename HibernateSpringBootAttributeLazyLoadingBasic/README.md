@@ -98,7 +98,6 @@ Then configure Jackson to skip default values:
 
 ### **2. Use a Custom Jackson Filter**
 - Configure Jackson to ignore certain fields (e.g., `avatar`).
-- Note: `jackson-datatype-hibernate5` helps with lazy associations, **not** lazy attributes.
 
 ---
 
