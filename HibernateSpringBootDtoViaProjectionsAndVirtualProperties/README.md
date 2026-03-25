@@ -1,64 +1,80 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# ✨ Summary of *Item 27: How to Enrich Spring Projections with Virtual Properties*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+## 🎯 Core Idea
+Spring Data projections can be enhanced with **virtual properties**—fields that **do not exist in the underlying Domain Model** but are computed at runtime. These are typically implemented using **interface-based open projections** combined with **Spring Expression Language (SpEL)**.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 🧩 What Are Open Projections?
+Open projections are Spring interfaces where:
+- Some methods map directly to entity fields.
+- Other methods compute values dynamically using `@Value` and SpEL.
+- They allow mixing real entity data with computed or constant values.
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+---
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+## 🛠 Example Explained
+The item shows a projection interface:
 
------------------------------------------------------------------------------------------------------------------------    
+```java
+public interface AuthorNameAge {
+    String getName();
+    @Value("#{target.age}")
+    String years();
+    @Value("#{ T(java.lang.Math).random() * 10000 }")
+    int rank();
+    @Value("5")
+    String books();
+}
+```
 
+![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootDtoViaProjectionsAndVirtualProperties/dto%20spring%20projection%20and%20virtual%20properties.png)
+
+### What each method does:
+- `getName()` → maps to the entity’s `name`.
+- `years()` → exposes the entity’s `age` under a different name.
+- `rank()` → generates a random number at runtime.
+- `books()` → returns a constant value `"5"`.
+
+---
+
+## 🗄 Repository Query
+The repository fetches only `name` and `age`:
+
+```java
+@Query("SELECT a.name AS name, a.age AS age FROM Author a WHERE a.age >= ?1")
+List<AuthorNameAge> fetchByAge(int age);
+```
+
+Even though the query returns only two fields, the projection enriches the result with additional computed properties.
+
+---
+
+## 📤 Example Output
+When iterating through results, the projection prints:
+
+- Name (from DB)
+- Age (via `years()`)
+- Rank (random)
+- Books (constant)
+
+Example output:
+
+```
+Author name: Olivia Goy | Age: 43 | Rank: 3435 | Books: 5
+```
+
+---
+
+## 📌 Key Takeaways
+- Spring projections can include **virtual fields** using SpEL.
+- These fields can:
+  - Map to existing entity fields under new names.
+  - Compute values dynamically.
+  - Provide constants.
+- This technique is useful for lightweight DTO-like views without creating separate classes.
+- Only the fields referenced in the query are fetched from the database; the rest are computed in memory.
+
+---
