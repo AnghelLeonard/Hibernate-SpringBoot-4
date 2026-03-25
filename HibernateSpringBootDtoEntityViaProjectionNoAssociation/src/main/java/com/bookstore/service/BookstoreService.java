@@ -22,7 +22,7 @@ public class BookstoreService {
         
         // the fetched Author are managed by Hibernate
         // the following line of code will trigger an UPDATE
-        // dto.get(0).getAuthor().setAge(47);
+         dto.get(0).getAuthor().setAge(47);
         
         return dto;
     }

@@ -10,7 +10,7 @@ CREATE TABLE `author` (
   `age`   INT(11)       NOT NULL,
   `genre` VARCHAR(255)  DEFAULT NULL,
   `name`  VARCHAR(255)  DEFAULT NULL,
-  CONSTRAINT `author_pk` PRIMARY KEY (id)
+  CONSTRAINT `author_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Table `book`
@@ -19,5 +19,5 @@ CREATE TABLE `book` (
   `genre`     VARCHAR(255)  DEFAULT NULL,
   `title`     VARCHAR(255)  DEFAULT NULL,
   `isbn`      VARCHAR(255)  DEFAULT NULL,
-  CONSTRAINT `book_pk` PRIMARY KEY (id)
+  CONSTRAINT `book_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

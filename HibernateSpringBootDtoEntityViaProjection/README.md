@@ -1,64 +1,77 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary of Item 26: *How to Add an Entity in a Spring Projection*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+This item explains how to include full JPA entities inside Spring projections (DTOs), even though projections are typically used for read‑only, partial data. It covers two scenarios:
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 🟦 1. **Materialized Association (Actual @OneToMany Relationship)**
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+### **Scenario**
+- `Author` and `Book` have a bidirectional lazy `@OneToMany` association.
+- The projection (`BookstoreDto`) needs:
+  - the full `Author` entity
+  - only the `title` from `Book`
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+### **Projection**
+```java
+public interface BookstoreDto {
+    Author getAuthor();
+    String getTitle();
+}
+```
 
------------------------------------------------------------------------------------------------------------------------    
+### **Repository Query**
+```java
+@Query("SELECT a AS author, b.title AS title FROM Author a JOIN a.books b")
+List<BookstoreDto> fetchAll();
+```
 
+### **Behavior**
+- Returned `Author` entities are **managed by Hibernate**.
+- Any modifications to them inside a transactional context trigger **automatic UPDATEs** via dirty checking.
+
+### **Example**
+```java
+dto.get(0).getAuthor().setGenre("Poetry"); // triggers UPDATE
+```
+
+---
+
+## 🟩 2. **Non‑Materialized Association (No Direct Relationship)**
+
+### **Scenario**
+- `Author` and `Book` are not related via JPA.
+- They share a common attribute: `genre`.
+- You still want to fetch both into the same projection.
+
+### **Repository Query**
+```java
+@Query("SELECT a AS author, b.title AS title 
+       FROM Author a JOIN Book b ON a.genre=b.genre ORDER BY a.id")
+List<BookstoreDto> fetchAll();
+```
+
+### **Behavior**
+- Even without a mapped relationship, the query joins the tables using `genre`.
+- Returned `Author` entities are still **managed**, so changes trigger UPDATEs.
+
+### **Example**
+```java
+dto.get(0).getAuthor().setAge(47); // triggers UPDATE
+```
+
+---
+
+## 📝 Key Takeaways
+
+- Spring projections **can include full entities**, not just scalar fields.
+- If the projection includes an entity, and the query loads it, Hibernate will:
+  - return it as a **managed entity**
+  - propagate any changes automatically via **dirty checking**
+- This works whether the association is:
+  - **materialized** (mapped with JPA annotations), or  
+  - **non‑materialized** (joined manually in JPQL)
+
+---
