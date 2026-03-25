@@ -2,7 +2,8 @@
 
 # 📘 Summary of Item 26: *How to Add an Entity in a Spring Projection*
 
-This item explains how to include full JPA entities inside Spring projections (DTOs), even though projections are typically used for read‑only, partial data. It covers two scenarios:
+This item explains how to include full JPA entities inside Spring projections (DTOs), even though projections are typically used for read‑only, 
+partial data. It covers two scenarios
 
 ---
 
