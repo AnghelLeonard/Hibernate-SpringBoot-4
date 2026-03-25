@@ -25,7 +25,7 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            List<AuthorNameAge> authors = bookstoreService.fetchByBirthplace();
+            List<AuthorNameAge> authors = bookstoreService.fetchByGenre3(); // fetchByGenre1(), fetchByGenre2()
 
             System.out.println("Number of authors:" + authors.size());
 
