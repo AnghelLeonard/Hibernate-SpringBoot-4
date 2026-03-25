@@ -1,64 +1,77 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary of Item 24: *Lazy Loading Entity Attributes via Subentities*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
+This item explains an alternative strategy for lazily loading large or optional entity attributes in Hibernate **without relying on bytecode enhancement** or dealing with issues like Open Session in View or Jackson serialization.
 
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+## 🎯 Goal
+Load the lightweight attributes of an `Author` entity eagerly (`id`, `age`, `name`, `genre`) while loading the heavy `avatar` field **only when needed**.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+# 🧩 Core Idea: Split the Entity into Subentities
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootSubentities/attributes%20lazy%20loading%20via%20subentites.png)
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+Instead of placing all fields in a single entity, the solution uses:
 
------------------------------------------------------------------------------------------------------------------------    
+### **1. A `@MappedSuperclass` (BaseAuthor)**
+Contains the attributes that should always be loaded eagerly:
+- `id`
+- `age`
+- `name`
+- `genre`
 
+This class is **not** an entity and has **no table** of its own.
+
+### **2. Two Subentities Mapped to the Same Table**
+Both extend `BaseAuthor` and are explicitly mapped to the same table (`author`):
+
+#### **AuthorShallow**
+- Contains only the base attributes.
+- Used when you want the lightweight version.
+- SQL loads only the basic fields.
+
+#### **AuthorDeep**
+- Inherits base attributes.
+- Adds the `avatar` field.
+- Used when you need the full profile.
+- SQL loads the avatar as well.
+
+Mapping both with `@Table(name = "author")` ensures:
+- No duplicated columns
+- No accidental creation of multiple tables
+
+---
+
+# 🗄️ Repository Usage
+
+Two Spring Data repositories are created:
+
+- `AuthorShallowRepository`
+- `AuthorDeepRepository`
+
+Calling `findAll()` on each produces different SQL:
+
+| Repository | Loaded Fields | SQL Behavior |
+|-----------|----------------|--------------|
+| **Shallow** | id, age, name, genre | Avatar **not** loaded |
+| **Deep** | All fields including avatar | Avatar **loaded** |
+
+---
+
+# 🧠 Why This Approach Helps
+
+Hibernate supports lazy loading of basic fields, but:
+- It requires **bytecode enhancement**
+- It can cause issues with:
+  - Open Session in View
+  - JSON serialization
+
+Using subentities avoids these problems entirely.
+
+---
+
+# ✅ Conclusion
+
+Splitting the entity into shallow and deep versions provides a clean, reliable way to lazily load heavy attributes like BLOBs. It avoids the complexity of Hibernate bytecode enhancement and keeps SQL queries efficient.

@@ -25,6 +25,12 @@ public class MainApplication {
 
             System.out.println("Persisting several authors ...");
             bookstoreService.createAuthors();
+            
+            System.out.println("Fetching all authors (fetchAuthorsShallow()) ...");
+            bookstoreService.fetchAuthorsShallow();
+            
+            System.out.println("Fetching all authors (fetchAuthorsDeep()) ...");
+            bookstoreService.fetchAuthorsDeep();
         };
     }
 }
