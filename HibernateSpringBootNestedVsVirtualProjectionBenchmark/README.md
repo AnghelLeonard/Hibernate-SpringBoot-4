@@ -2,8 +2,8 @@
 
 # 📘 Summary of Item 28: Efficiently Fetching Spring Projections with *-to-One Associations
 
-This item analyzes **four different ways** to fetch DTO-style data in Spring Data JPA when dealing with a `@ManyToOne` (or generally *-to-one) association—specifically `Book` → `Author`.  
-The goal: fetch **book title + author name + author genre** efficiently.
+This item analyzes **four different ways** to fetch DTO-style data in Spring Data JPA when dealing with a `@ManyToOne` (or generally *-to-one) 
+association—specifically `Book` → `Author`.  The goal is to fetch **book title + author name + author genre** efficiently.
 
 ---
 
