@@ -3,8 +3,9 @@
 # 📘 Summary of Item 29: *Why to Pay Attention to Spring Projections That Include Associated Collections*
 
 ## 🎯 Core Problem
-When using **Spring Data projections** to fetch **parent + associated collections** (e.g., `Author` + `Book`) in JPA/Hibernate, developers often assume projections avoid entity loading and the Persistence Context.  
-This assumption is **wrong** for many projection styles, leading to:
+When using **Spring Data projections** to fetch **parent + associated collections** (e.g., `Author` + `Book`) in JPA/Hibernate, 
+developers often assume projections avoid entity loading and the Persistence Context.  
+This assumption is **wrong** for many projection styles, leading to
 
 - ❌ **N+1 SELECT problems**  
 - ❌ **Unnecessary entity loading**  
