@@ -1,64 +1,59 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+## 📘 Summary of *Item 31: How to Fetch DTO via Constructor Expression*  
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
+This item explains how to fetch partial data from a JPA entity into a custom DTO (Data Transfer Object) using two approaches: **Spring Data Query Builder** and **JPQL Constructor Expressions**.
 
-### **Key Best Practices**
+### 🔹 1. The Goal  
+Retrieve only **name** and **age** of authors who share a given **genre**, without loading the entire `Author` entity.
 
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
+### 🔹 2. DTO-Based Projection  
+A simple DTO (`AuthorDto`) is created with:
+- `final` fields (`name`, `age`)
+- A constructor matching the selected fields
+- Only getters (no setters needed)
 
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
+### 🔹 3. Approach A — Spring Data Query Builder  
+Define a repository method:
 
 ```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
+List<AuthorDto> findByGenre(String genre);
 ```
 
-This prevents inconsistent state in the persistence context.
+Spring Data automatically:
+- Generates SQL selecting only the required columns  
+- Maps results into `AuthorDto` instances
 
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
+**Generated SQL example:**  
+`SELECT name, age FROM author WHERE genre = ?`
 
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
+This is the simplest and most idiomatic approach when Spring Data can derive the query.
 
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### 🔹 4. Approach B — JPQL Constructor Expression  
+If Query Builder is insufficient, you can explicitly use JPQL:
+
+```java
+@Query("SELECT new com.bookstore.dto.AuthorDto(a.name, a.age) FROM Author a")
+List<AuthorDto> fetchAuthors();
+```
+
+JPQL uses the DTO constructor to instantiate objects directly from query results.
+
+### 🔹 5. Approach C — EntityManager  
+For full manual control:
+
+```java
+Query query = entityManager.createQuery(
+    "SELECT new com.bookstore.dto.AuthorDto(a.name, a.age) FROM Author a",
+    AuthorDto.class
+);
+List<AuthorDto> authors = query.getResultList();
+```
+
+### 🔹 6. Key Takeaways  
+- DTO projections improve performance by selecting only needed fields.  
+- Spring Data’s derived queries are easiest but limited.  
+- JPQL constructor expressions offer flexibility and explicit control.  
+- EntityManager provides the lowest-level option when needed.
 
 ---
-
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
-
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
-
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------    
-

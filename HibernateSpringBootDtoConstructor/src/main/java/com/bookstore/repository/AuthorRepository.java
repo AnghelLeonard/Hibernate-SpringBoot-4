@@ -11,5 +11,5 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Transactional(readOnly = true)    
-    List<AuthorDto> findByGenre(String genre);
+    List<AuthorDto> findByGenre(String genre);        
 }

@@ -32,7 +32,7 @@ public class MainApplication {
             for (AuthorDto author : authors) {
                 System.out.println("Author name: " + author.getName()
                         + " | Age: " + author.getAge());
-            }
+            }                      
         };
     }
 }

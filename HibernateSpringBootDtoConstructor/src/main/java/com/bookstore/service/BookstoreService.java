@@ -17,5 +17,5 @@ public class BookstoreService {
     public List<AuthorDto> fetchByGenre() {
 
         return authorRepository.findByGenre("Anthology");
-    }
+    }        
 }
