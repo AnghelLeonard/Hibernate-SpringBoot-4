@@ -29,4 +29,5 @@ The query executes as a **single SELECT** joining the two tables on `genre`.
 
 ### 🔄 Behavior in Transactions
 If an `Author` is updated within the same transaction, Hibernate automatically issues an `UPDATE`.
+
 ---
