@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>java.modern.challenge</groupId>
-    <artifactId>HibernateSpringBootAvoidEntityInDtoViaConstructor</artifactId>
+    <artifactId>HibernateSpringBootEntityInDtoViaConstructor</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootAvoidEntityInDtoViaConstructor</name>
+    <name>HibernateSpringBootEntityInDtoViaConstructor</name>
     <description>Hibernate - Spring Boot 4</description>
 
     <parent>
