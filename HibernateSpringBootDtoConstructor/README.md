@@ -2,7 +2,7 @@
 
 ## 📘 Summary of *Item 31: How to Fetch DTO via Constructor Expression*  
 
-This item explains how to fetch partial data from a JPA entity into a custom DTO (Data Transfer Object) using two approaches: **Spring Data Query Builder** and **JPQL Constructor Expressions**.
+This item explains how to fetch partial data from a JPA entity into a custom DTO (Data Transfer Object) using two approaches **Spring Data Query Builder** and **JPQL Constructor Expressions**.
 
 ### 🔹 1. The Goal  
 Retrieve only **name** and **age** of authors who share a given **genre**, without loading the entire `Author` entity.
