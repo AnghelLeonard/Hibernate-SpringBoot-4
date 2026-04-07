@@ -1,64 +1,106 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# 📘 Summary of Item 33: *How to Fetch DTO via JPA Tuple*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### 🎯 Goal  
+Fetch only selected fields (e.g., `name` and `age`) from the `Author` entity **without creating a DTO class**, using **jakarta.persistence.Tuple**.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+# 🧩 Why Use `Tuple` Instead of `Object[]`?
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+- **Keeps aliases** — if your query uses `AS name`, Tuple preserves `"name"`  
+- **Automatic type casting** — no manual casting needed  
+- **Type‑safe** — `TupleElement` uses generics  
+- **Works everywhere** — JPQL, Criteria API, and native SQL
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+Tuple is one of the **best options for scalar projections** in JPA.
 
------------------------------------------------------------------------------------------------------------------------    
+---
 
+# 🏗️ Example Entity  
+```java
+@Entity
+public class Author implements Serializable {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private int age;
+    private String name;
+    private String genre;
+}
+```
+
+---
+
+# 🗂️ Spring Data Repository Examples
+
+### **JPQL version**
+```java
+@Query("SELECT a.name AS name, a.age AS age FROM Author a")
+List<Tuple> fetchAuthors();
+```
+Generated SQL:
+```
+SELECT a1_0.id, a1_0.name, a1_0.age FROM author a1_0
+```
+
+### **Native SQL version**
+```java
+@Query(value = "SELECT name, age FROM author", nativeQuery = true)
+List<Tuple> fetchAuthors();
+```
+Generated SQL:
+```
+SELECT name, age FROM author
+```
+
+⚠️ Using Spring Data query builder with Tuple will fetch **all** entity attributes, not just selected ones.
+
+---
+
+# 📥 Accessing Tuple Data
+```java
+for (Tuple author : authors) {
+    System.out.println("Author name: " + author.get("name")
+        + " | Age: " + author.get("age"));
+}
+```
+
+Example output:
+```
+Author name: Mark Janel | Age: 23
+Author name: Olivia Goy | Age: 43
+Author name: Quartis Young | Age: 51
+```
+
+You can also check types:
+```java
+author.get("name") instanceof String;   // true
+author.get("age") instanceof Integer;   // true
+```
+
+---
+
+# 🧰 Using EntityManager Directly
+
+### Native SQL
+```java
+Query query = entityManager.createNativeQuery(
+    "SELECT name, age FROM author", Tuple.class);
+List<Tuple> authors = query.getResultList();
+```
+
+### JPQL
+```java
+TypedQuery<Tuple> query = entityManager.createQuery(
+    "SELECT a.name AS name, a.age AS age FROM Author a", Tuple.class);
+List<Tuple> authors = query.getResultList();
+```
+
+### Criteria API
+Use:
+```java
+CriteriaQuery<Tuple> createTupleQuery()
+```
+
+---
