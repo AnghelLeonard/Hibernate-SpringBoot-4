@@ -1,64 +1,72 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+## Summary of Item 34 — *Fetching DTOs with @SqlResultSetMapping and @NamedNativeQuery*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### **Purpose of the Item**
+This item explains how to use **JPA’s @SqlResultSetMapping** together with **@NamedNativeQuery** to fetch
+- Scalar values  
+- DTOs via constructor mapping  
+- Entities via entity mapping  
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## **1. Scalar Mapping (ColumnResult)**
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+**Goal:** Fetch a single column (e.g., `name`) from the `author` table.
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+**Key points:**
+- Use `@SqlResultSetMapping` with `@ColumnResult`.
+- Define a `@NamedNativeQuery` that selects only the needed column.
+- Repository method uses `@Query(nativeQuery = true)` and returns `List<String>`.
 
------------------------------------------------------------------------------------------------------------------------    
+**Example:**  
+Mapping only the `name` column and returning a list of names.
 
+---
+
+## **2. Constructor Mapping (DTO Projection)**
+
+**Goal:** Fetch only selected fields (e.g., `name` and `age`) into a DTO (`AuthorDto`).
+
+**Why:**  
+Native queries **cannot** use JPQL constructor expressions, so `ConstructorResult` is required.
+
+**Key points:**
+- Add `@SqlResultSetMapping` with `@ConstructorResult`.
+- Map each column to constructor parameters.
+- Define a `@NamedNativeQuery` selecting only the required fields.
+- Repository returns `List<AuthorDto>`.
+
+**DTO example:**  
+A simple immutable class with `name` and `age` fields and a matching constructor.
+
+---
+
+## **3. Entity Mapping (EntityResult)**
+
+**Goal:** Fetch full entities (or multiple entities) using native queries.
+
+**Key points:**
+- Use `EntityResult` inside `@SqlResultSetMapping`.
+- Useful when native SQL joins or complex queries are needed.
+- GitHub examples are referenced for full implementations.
+
+---
+
+## **4. Additional Notes**
+
+- The examples follow the convention `{EntityName}.{RepositoryMethodName}` for naming queries, but you can also use `@Query(name="...")`.
+- XML-based mappings (`orm.xml`) are also possible.
+- If you want to bypass `@NamedNativeQuery`, you can use `EntityManager` directly with `SqlResultSetMapping`.
+
+---
+
+## **Core Takeaway**
+**@SqlResultSetMapping + @NamedNativeQuery** gives you full control over how native SQL results are mapped:
+- **ColumnResult** → scalar values  
+- **ConstructorResult** → DTOs  
+- **EntityResult** → entities  
+
+This is essential when working with native SQL in Spring Boot + JPA, especially for performance‑optimized projections.
+
+---
