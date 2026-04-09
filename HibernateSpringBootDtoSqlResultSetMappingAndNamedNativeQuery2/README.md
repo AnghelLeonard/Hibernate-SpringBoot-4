@@ -3,7 +3,7 @@
 ## **Summary of Item 34 — Fetching DTOs with @SqlResultSetMapping and @NamedNativeQuery**
 
 ### **Purpose of the Item**
-This item explains how to use **JPA’s @SqlResultSetMapping** together with **@NamedNativeQuery** to fetch:
+This item explains how to use **JPA’s @SqlResultSetMapping** together with **@NamedNativeQuery** to fetch
 - Scalar values  
 - DTOs via constructor mapping  
 - Entities via entity mapping  
