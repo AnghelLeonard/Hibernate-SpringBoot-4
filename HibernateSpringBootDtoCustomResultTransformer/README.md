@@ -1,6 +1,6 @@
 ---
 
-## **Summary of Item 36 — Fetching DTOs with a Custom Hibernate Transformer**
+## **Summary of Item 36: Fetching DTOs with a Custom Hibernate Transformer**
 
 **Core idea**  
 When you need to fetch complex DTOs involving parent–child relationships (e.g., Author → Books) using a native SQL query, 
