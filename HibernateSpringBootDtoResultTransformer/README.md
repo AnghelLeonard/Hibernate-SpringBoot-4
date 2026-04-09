@@ -1,64 +1,95 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+## Summary of Item 35 – *Fetching DTOs via Hibernate Transformers*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### **Purpose**
+Thi item explains how to use **Hibernate result transformers**—specifically **TupleTransformer**—to map query results directly into **DTOs (Data Transfer Objects)** instead of returning entities. This is useful when you want only a subset of fields (e.g., name + age) and want to avoid exposing full entities.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## **Key Concepts**
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+### **1. Hibernate Result Transformers**
+- Provide a **custom way to transform query results**.
+- Work with both **JPQL** and **native SQL**.
+- Two main functional interfaces:
+  - **TupleTransformer** – transforms each row (tuple)
+  - **ResultListTransformer** – transforms the entire result list
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+---
 
------------------------------------------------------------------------------------------------------------------------    
+## **2. Example Entity**
+The example uses an `Author` entity with fields:
+- `id`
+- `age`
+- `name`
+- `genre`
 
+---
+
+## **3. DTO Approaches**
+
+### **A. DTO with Constructor (No Setters)**
+```java
+public class AuthorDtoNoSetters {
+    private final String name;
+    private final int age;
+}
+```
+
+**Mapping logic:**
+- Use `setTupleTransformer` to manually instantiate the DTO.
+- Query:
+  ```java
+  SELECT a.name as name, a.age as age FROM Author a
+  ```
+
+### **B. DTO with Setters (No Constructor)**
+```java
+public class AuthorDtoWithSetters {
+    private String name;
+    private int age;
+}
+```
+
+**Mapping logic:**
+- Instantiate empty DTO, then call setters inside the transformer.
+
+---
+
+## **4. JPQL + TupleTransformer Usage**
+Both examples follow this pattern:
+
+```java
+entityManager.createQuery("SELECT ...")
+    .unwrap(org.hibernate.query.Query.class)
+    .setTupleTransformer((tuples, aliases) -> {
+        // map tuple to DTO
+    })
+    .getResultList();
+```
+
+---
+
+## **5. Native SQL Support**
+- Same approach works with native queries.
+- Use:
+  ```java
+  createNativeQuery(...)
+      .unwrap(org.hibernate.query.NativeQuery.class)
+  ```
+
+---
+
+## **6. SQL Generated**
+Both DTO-fetching methods produce the same SQL:
+```
+SELECT a1_0.name, a1_0.age FROM author a1_0
+```
+
+---
+
+## **Core Takeaway**
+Hibernate’s **TupleTransformer** allows you to efficiently fetch **partial data** into **custom DTOs**, avoiding full entity loading and giving you complete control over how query results are mapped.
+
+---
