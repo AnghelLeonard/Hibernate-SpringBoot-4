@@ -8,8 +8,6 @@ This item explains how to use **JPA’s @SqlResultSetMapping** together with **@
 - DTOs via constructor mapping  
 - Entities via entity mapping  
 
-It focuses on Spring Boot + Hibernate usage.
-
 ---
 
 ## **1. Scalar Mapping (ColumnResult)**
