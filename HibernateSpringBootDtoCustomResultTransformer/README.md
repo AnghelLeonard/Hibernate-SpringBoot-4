@@ -3,12 +3,13 @@
 ## **Summary of Item 36 — Fetching DTOs with a Custom Hibernate Transformer**
 
 **Core idea:**  
-When you need to fetch complex DTOs involving parent–child relationships (e.g., Author → Books) using a native SQL query, Hibernate’s built‑in transformers are not enough. Instead, you must implement a **custom TupleTransformer + ResultListTransformer** to assemble the DTO graph manually.
+When you need to fetch complex DTOs involving parent–child relationships (e.g., Author → Books) using a native SQL query, 
+Hibernate’s built‑in transformers are not enough. Instead, you must implement a **custom TupleTransformer + ResultListTransformer** to assemble the DTO graph manually.
 
 ---
 
 ### **Problem Context**
-You have two entities:
+You have two entities
 
 - **Author**: id, name, genre, age, books  
 - **Book**: id, title, isbn  
