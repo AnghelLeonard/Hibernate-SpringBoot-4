@@ -4,7 +4,7 @@
 
 **Core idea:**  
 When you need to fetch complex DTOs involving parent–child relationships (e.g., Author → Books) using a native SQL query, 
-Hibernate’s built‑in transformers are not enough. Instead, you must implement a **custom TupleTransformer + ResultListTransformer** to assemble the DTO graph manually.
+Hibernate’s built‑in transformers are not enough. Instead, you must implement a **custom TupleTransformer and ResultListTransformer** to assemble the DTO graph manually.
 
 ---
 
