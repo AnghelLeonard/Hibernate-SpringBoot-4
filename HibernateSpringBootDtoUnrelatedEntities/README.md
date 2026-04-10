@@ -1,64 +1,42 @@
----
+## **Summary of Item 42: How to Fetch DTO from Unrelated Entities**  
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
+### **Core Idea**
+Thi item explains how to fetch a DTO (Spring projection) that combines data from **two unrelated JPA entities**—entities with **no explicit relationship** defined between them—using **Hibernate’s support for explicit joins on unrelated entities** (introduced in Hibernate 5.1).
 
-### **Key Best Practices**
+### **Context**
+- Two tables/entities: **Author** and **Book**  
+- They have **no foreign key relationship**, but they share a common column: **name** (the author’s name)
+- Goal: Retrieve a DTO containing:
+  - Author name  
+  - Book title  
+  - Filtered by a given book price
 
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
+### **Key Technique**
+Hibernate allows **explicit joins** between unrelated entities using SQL-like syntax.
 
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
+### **Example JPQL Query**
+The repository method uses a custom `@Query`:
 
 ```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
+@Query(value = "SELECT a.name AS name, b.title AS title "
+             + "FROM Author a INNER JOIN Book b ON a.name = b.name "
+             + "WHERE b.price = ?1")
+List<BookstoreDto> fetchAuthorNameBookTitleWithPrice(int price);
 ```
 
-This prevents inconsistent state in the persistence context.
+### **Generated SQL**
+```sql
+SELECT a1_0.name, b1_0.title
+FROM author a1_0
+JOIN book b1_0 ON a1_0.name = b1_0.name
+WHERE b1_0.price = ?
+```
 
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### **Takeaway**
+Even without JPA relationships, you can join entities by manually specifying the join condition in JPQL. This is useful when:
+- Legacy schemas lack foreign keys  
+- Entities are intentionally kept independent  
+- You need flexible DTO projections across tables
 
 ---
-
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
-
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
-
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
-
------------------------------------------------------------------------------------------------------------------------    
-
