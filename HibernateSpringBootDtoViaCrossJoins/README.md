@@ -88,7 +88,7 @@ UNION
 Notes:
 - `UNION` removes duplicates.
 - Use `UNION ALL` if duplicates are expected.
-- JPA does not support UNION → must use native SQL.
+- JPA (JPQL) supports `UNION`(`ALL`) so use or go for native SQL.
 
 ---
 
