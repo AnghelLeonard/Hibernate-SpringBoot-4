@@ -1,64 +1,82 @@
+## **Summary of Item 39 — How to Effectively Fetch Parent and Association in One SELECT**
+
+### **Core Problem**
+You have two entities — `Author` and `Book` — in a **bidirectional lazy @OneToMany / @ManyToOne** association.  
+By default:
+- Loading an `Author` does **not** load its `books`
+- Loading a `Book` does **not** load its `author`
+
+This leads to:
+- **Two SELECTs** instead of one  
+- Risk of **LazyInitializationException** if the second SELECT happens outside an active Hibernate session
+
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+## **Goal**
+Perform these operations efficiently:
+1. Fetch an **Author by name**, including their **Books**
+2. Fetch a **Book by ISBN**, including its **Author**
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
+And do it in **one SQL SELECT**, not two.
 
-### **Key Best Practices**
+---
 
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
+## **Why Not Use EAGER Fetching?**
+The text strongly warns:
 
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
+> **DON’T switch associations to EAGER.**
 
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
+Reasons:
+- EAGER cannot be overridden at query time  
+- It often leads to **Cartesian products**, **huge result sets**, and **performance issues**  
+- LAZY is safer and more flexible
 
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
+---
 
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
+## **Correct Solution: Use `JOIN FETCH` at Query Level**
+`JOIN FETCH` is a JPA feature that initializes associations in a **single SELECT** while keeping the entity mapping LAZY.
 
+### **Example Repositories**
+
+#### **Fetch Author + Books**
 ```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
+@Query("SELECT a FROM Author a JOIN FETCH a.books WHERE a.name = ?1")
+Author fetchAuthorWithBooksByName(String name);
 ```
 
-This prevents inconsistent state in the persistence context.
+#### **Fetch Book + Author**
+```java
+@Query("SELECT b FROM Book b JOIN FETCH b.author WHERE b.isbn = ?1")
+Book fetchBookWithAuthorByIsbn(String isbn);
+```
 
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### **Generated SQL**
+Both queries produce a **single JOIN-based SELECT**, loading parent + association together.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## **Performance Considerations**
+### **JOIN FETCH trade-offs**
+- JOINs can produce **Cartesian products**  
+  - Example: 100 authors × 5 books = **500 rows**
+- But LAZY fetching can cause **N+1 queries**  
+  - Example: 100 authors → **100 secondary queries**
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+**Rule of thumb from the text:**
+> It is better to have a large Cartesian product than a large number of database round trips.
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+But:
+- If you can avoid a huge Cartesian product with a few targeted queries, do that instead.
 
------------------------------------------------------------------------------------------------------------------------    
+---
 
+## **Key Takeaways**
+- Keep associations **LAZY** at the entity level  
+- Use **JOIN FETCH** when you need to load associations for modification  
+- Use **JOIN + DTO** when the data is read-only  
+- Avoid EAGER fetching — it cannot be overridden and often harms performance  
+- JOIN FETCH solves both:
+  - LazyInitializationException  
+  - Extra SELECTs  
+
+---
