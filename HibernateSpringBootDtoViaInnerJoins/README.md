@@ -38,7 +38,6 @@ For each JOIN type, the document provides:
 - **Native SQL examples**
 - **Variants depending on which table is considered A or B**
 - **Filtering with WHERE clauses**
-- **GitHub references for full code**
 
 ---
 
@@ -66,7 +65,6 @@ For each JOIN type, the document provides:
 ## **7. CROSS JOIN**
 - No ON/WHERE clause → Cartesian product.
 - Example: combining `Book` and `Format` entities with no relationship.
-- Warns that **implicit joins in JPQL** (e.g., `b.author.name`) generate a **CROSS JOIN + WHERE**, not an INNER JOIN.
 - Recommendation: **always use explicit JOINs** to avoid unwanted CROSS JOINs.
 
 ---
