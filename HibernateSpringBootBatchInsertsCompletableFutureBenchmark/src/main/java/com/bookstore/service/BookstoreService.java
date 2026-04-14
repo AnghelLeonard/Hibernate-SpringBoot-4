@@ -15,13 +15,14 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
+    long pk  = 0;
     public void batchAuthors() {
 
         List<Author> authors = new ArrayList<>();
-
-        for (int i = 0; i < 25000; i++) {
+        
+        for (int i = 0; i < 1000; i++) { // 10000, 25000
             Author author = new Author();
-            author.setId((long) i + 1);
+            author.setId(++pk);           
             author.setName("Name_" + i);
             author.setGenre("Genre_" + i);
             author.setAge(18 + i);

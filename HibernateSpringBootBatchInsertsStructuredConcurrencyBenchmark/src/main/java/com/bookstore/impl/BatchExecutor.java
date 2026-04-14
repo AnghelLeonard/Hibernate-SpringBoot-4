@@ -6,18 +6,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.StructuredTaskScope.Joiner;
 import static java.util.concurrent.StructuredTaskScope.open;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.StopWatch;
 
 @Component
 public class BatchExecutor<T> {
-
-    private static final Logger logger = Logger.getLogger(BatchExecutor.class.getName());
-
+   
     private static final Semaphore dbConn = new Semaphore(10, true); // we can have maximum 10 connections in use
 
     @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
@@ -36,13 +32,7 @@ public class BatchExecutor<T> {
 
         txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-        StopWatch timer = new StopWatch();
-        timer.start();
         executeBatch(entities);
-        timer.stop();
-
-        logger.info(() -> "\nBatch time: " + timer.getTotalTimeMillis()
-                + " ms (" + timer.getTotalTimeSeconds() + " s)");
     }
 
     public <S extends T> void executeBatch(List<S> list) throws InterruptedException {
