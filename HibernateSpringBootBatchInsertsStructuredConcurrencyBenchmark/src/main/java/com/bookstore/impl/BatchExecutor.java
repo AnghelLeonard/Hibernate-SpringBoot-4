@@ -14,7 +14,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component
 public class BatchExecutor<T> {
    
-    private static final Semaphore dbConn = new Semaphore(10, true); // we can have maximum 10 connections in use
+    private static final Semaphore dbConn = new Semaphore(8, true); // we can have maximum 8 connections in use
 
     @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
     private int batchSize;
@@ -43,7 +43,7 @@ public class BatchExecutor<T> {
             while ((pos + batchSize) < list.size()) {
                 int cpos = pos;
                 scope.fork(() -> {
-                    // if (dbConn.getQueueLength() >= 10) {
+                    // if (dbConn.getQueueLength() >= 8) {
                     //    logger.info("Sorry, no connections left ...");
                     // } 
                     try {

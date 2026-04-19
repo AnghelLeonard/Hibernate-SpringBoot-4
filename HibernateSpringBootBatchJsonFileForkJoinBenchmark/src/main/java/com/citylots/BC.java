@@ -55,7 +55,7 @@ public class BC {
     }
 
     @Benchmark
-    public void insert1000Lots1Worker() {
+    public void insertRecords() { // set the number of threads and records from ForkJoinService
         System.out.println("\n\n Insert records:");
         System.out.println("--------------------");
         forkJoinService.forkjoin(lines);

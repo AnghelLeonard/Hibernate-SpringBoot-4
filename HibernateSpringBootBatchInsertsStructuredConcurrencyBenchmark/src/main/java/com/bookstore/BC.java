@@ -45,7 +45,7 @@ public class BC {
     }
 
     @Benchmark
-    public void insertAuthors() {
+    public void insert10000Authors8VT() { // set the benchmark data from BatchExecutor
         System.out.println("\n\n Insert records:");
         System.out.println("--------------------");
         bookstoreService.batchAuthors();

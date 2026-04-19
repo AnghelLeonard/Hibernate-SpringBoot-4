@@ -69,7 +69,7 @@ public class BC {
     }
 
     @Benchmark
-    public void insertEntities() {
+    public void insertEntities() { // set the number of threads and entities from BatchExecutor and BookstoreService
         System.out.println("\n\n Insert entities:");
         System.out.println("---------------------");
         bookstoreService.batchAuthors();

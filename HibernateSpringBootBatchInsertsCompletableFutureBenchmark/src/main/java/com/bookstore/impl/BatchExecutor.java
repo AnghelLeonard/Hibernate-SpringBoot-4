@@ -23,7 +23,7 @@ public class BatchExecutor<T> {
     private final EntityManager entityManager;
     
     public static final ExecutorService executor = Executors.newFixedThreadPool(
-                Runtime.getRuntime().availableProcessors() - 1); // 1, 4, 8, ...
+                Runtime.getRuntime().availableProcessors()); // 1, 4, 8, ...
        
     public BatchExecutor(TransactionTemplate txTemplate, EntityManager entityManager) {
         this.txTemplate = txTemplate;
