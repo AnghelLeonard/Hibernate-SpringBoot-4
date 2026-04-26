@@ -1,0 +1,2 @@
+-- insert authors
+INSERT INTO `author` (`age`, `name`, `genre`, `id`) VALUES (23, "Mark Janel", "Anthology", 1);
