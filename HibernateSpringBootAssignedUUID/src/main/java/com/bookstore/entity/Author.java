@@ -1,6 +1,5 @@
 package com.bookstore.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.io.Serializable;
@@ -11,8 +10,7 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @Column(columnDefinition = "BINARY(16)")
+    @Id    
     private UUID id;
 
     private int age;
