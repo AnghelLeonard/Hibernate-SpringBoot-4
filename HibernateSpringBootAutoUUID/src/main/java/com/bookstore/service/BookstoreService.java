@@ -20,5 +20,7 @@ public class BookstoreService {
         author.setAge(34);
 
         authorRepository.save(author);
+        
+        System.out.println("Generated UUID: " + author.getId());
     }
 }
