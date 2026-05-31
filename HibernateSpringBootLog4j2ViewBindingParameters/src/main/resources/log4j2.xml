@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>   
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+     
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+            
+    <Loggers>
+        <!-- Log triggered SQL statements -->
+        <logger name="org.hibernate.SQL" level="debug">                  
+            <AppenderRef ref="Console" />
+        </logger> 
+    
+        <!-- Log Binding Parameters -->
+        <logger name="org.hibernate.orm.jdbc.bind" level="trace">        
+            <AppenderRef ref="Console" />
+        </logger>    
+    
+        <!-- Log Extracted Parameters -->    
+        <logger name="org.hibernate.orm.jdbc.extract" level="trace">        
+            <AppenderRef ref="Console" />
+        </logger>
+    </Loggers>
+</configuration>
