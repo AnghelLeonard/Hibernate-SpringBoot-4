@@ -22,8 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>26</java.version>
-        <maven.compiler.release>26</maven.compiler.release>
-        <dbcp2.version>2.14.0</dbcp2.version>   
+        <maven.compiler.release>26</maven.compiler.release>        
     </properties>
 
     <dependencies>
@@ -41,8 +40,7 @@
         </dependency>   
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-dbcp2</artifactId>
-            <version>${dbcp2.version}</version>
+            <artifactId>commons-dbcp2</artifactId>            
         </dependency>             
         <dependency>
             <groupId>com.mysql</groupId>
