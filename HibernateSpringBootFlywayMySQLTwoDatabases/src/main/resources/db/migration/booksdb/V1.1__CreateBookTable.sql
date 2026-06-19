@@ -1,0 +1,7 @@
+CREATE TABLE `book` (
+  `id`      BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `isbn`    VARCHAR(255) DEFAULT NULL,
+  `title`   VARCHAR(255) DEFAULT NULL,  
+  `authors` VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
