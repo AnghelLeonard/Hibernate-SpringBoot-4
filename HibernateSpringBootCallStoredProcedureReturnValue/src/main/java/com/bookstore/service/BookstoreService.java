@@ -16,4 +16,9 @@ public class BookstoreService {
         Integer result = authorRepository.countByGenre("Anthology");
         System.out.println("Result: " + result);
     }
+    
+    public void countAuthorsOlderThan50() {
+        Integer result = authorRepository.countByGtAge(50);
+        System.out.println("Result: " + result);
+    }
 }
