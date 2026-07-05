@@ -1,5 +1,8 @@
 package com.bookstore.entity;
 
+import com.bookstore.dto.AuthorDtoC;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.NamedStoredProcedureQueries;
 import jakarta.persistence.NamedStoredProcedureQuery;
 import jakarta.persistence.ParameterMode;
+import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.StoredProcedureParameter;
 import java.io.Serializable;
 
@@ -15,7 +19,7 @@ import java.io.Serializable;
     @NamedStoredProcedureQuery(
             name = "FetchAuthorByGenre",
             procedureName = "FETCH_AUTHOR_BY_GENRE",
-            resultClasses = {Author.class},
+            resultClasses = {Author.class},            
             parameters = {
                 @StoredProcedureParameter(
                         name = "p_genre",
@@ -23,14 +27,25 @@ import java.io.Serializable;
                         mode = ParameterMode.IN)}),
     @NamedStoredProcedureQuery(
             name = "FetchAuthorIdNameByGenre",
-            procedureName = "FETCH_AUTHOR_ID_AND_NAME_BY_GENRE",
-            resultClasses = {Author.class},
+            procedureName = "FETCH_AUTHOR_ID_AND_NAME_BY_GENRE",            
+            resultSetMappings = {"AuthorDtoMapping"},
             parameters = {
                 @StoredProcedureParameter(
                         name = "p_genre",
                         type = String.class,
                         mode = ParameterMode.IN)})
 })
+
+@SqlResultSetMapping(
+        name = "AuthorDtoMapping",
+        classes = @ConstructorResult(
+                targetClass = AuthorDtoC.class,
+                columns = {
+                    @ColumnResult(name = "id"),
+                    @ColumnResult(name = "name")
+                }
+        )
+)
 public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;

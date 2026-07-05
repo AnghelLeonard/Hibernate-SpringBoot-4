@@ -1,6 +1,6 @@
 package com.bookstore.dto;
 
-public interface AuthorDto {
+public interface AuthorDtoI {
     
     public Long getId();
     public String getName();    
