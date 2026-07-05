@@ -1,11 +1,12 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.AuthorDtoC;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.bookstore.dto.AuthorDtoI;
 
 @Service
 public class BookstoreService {
@@ -18,17 +19,29 @@ public class BookstoreService {
 
     @Transactional
     public void fetchAuthorByGenre() {
-        List<AuthorDto> result = authorRepository.fetchAuthorByGenre("Anthology");
+        List<Author> result = authorRepository.fetchAuthorByGenre("Anthology");
         
-        System.out.println("Result: " + result);
-        
-      //  result.get(0).setGenre("cccc");
+        System.out.println("Result: " + result);              
     }
     
     @Transactional
     public void fetchAuthorIdNameByGenre() {
-        Object[] result = authorRepository.fetchAuthorIdNameByGenre("Anthology");
+        List<AuthorDtoI> result = authorRepository.fetchAuthorIdNameByGenre("Anthology");
         
-        System.out.println("Result: " + result);                
+        System.out.println("Result (DTO): " + result);                
+    }
+    
+    @Transactional
+    public void fetchAuthorByGenreNSPQ() {
+        List<Author> result = authorRepository.fetchAuthorByGenreNSPQ("Anthology");
+        
+        System.out.println("Result: " + result);              
+    }
+    
+    @Transactional
+    public void fetchAuthorIdNameByGenreNSPQ() {
+        List<AuthorDtoC> result = authorRepository.fetchAuthorIdNameByGenreNSPQ("Anthology");
+        
+        System.out.println("Result (DTO): " + result);                
     }
 }
