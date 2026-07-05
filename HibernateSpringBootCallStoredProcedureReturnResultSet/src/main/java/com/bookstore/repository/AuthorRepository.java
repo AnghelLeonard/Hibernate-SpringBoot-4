@@ -17,12 +17,12 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Procedure(procedureName = "FETCH_AUTHOR_BY_GENRE")
     List<Author> fetchAuthorByGenre(@Param("p_genre") String genre);          
     
-    @Procedure(procedureName = "FETCH_AUTHOR_ID_AND_NAME_BY_GENRE")
-    List<AuthorDtoI> fetchAuthorIdNameByGenre(@Param("p_genre") String genre);   
+    @Procedure(procedureName = "FETCH_NICKNAME_AND_AGE_BY_GENRE")
+    List<AuthorDtoI> fetchNicknameAndAgeByGenre(@Param("p_genre") String genre);   
 
     @Procedure(name = "FetchAuthorByGenre")
     List<Author> fetchAuthorByGenreNSPQ(@Param("p_genre") String genre);    
     
-    @Procedure(name = "FetchAuthorIdNameByGenre")
-    List<AuthorDtoC> fetchAuthorIdNameByGenreNSPQ(@Param("p_genre") String genre);
+    @Procedure(name = "FetchNicknameAndAgeByGenre")
+    List<AuthorDtoC> fetchNicknameAndAgeByGenreNSPQ(@Param("p_genre") String genre);
 }

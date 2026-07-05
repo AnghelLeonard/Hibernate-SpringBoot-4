@@ -5,25 +5,25 @@ import java.io.Serializable;
 public class AuthorDtoC implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    private final String nickname;
+    private final int age;
 
-    private final Long id;
-    private final String name;
-
-    public AuthorDtoC(Long id, String name) {
-        this.id = id;
-        this.name = name;
+    public AuthorDtoC(String nickname, int age) {
+        this.nickname = nickname;
+        this.age = age;
     }
 
-    public Long getId() {
-        return id;
+    public String getNickname() {
+        return nickname;
     }
 
-    public String getName() {
-        return name;
+    public int getAge() {
+        return age;
     }
 
     @Override
     public String toString() {
-        return "AuthorDtoC{" + "name=" + name + ", id=" + id + '}';
-    }
+        return "AuthorDtoC{" + "nickname=" + nickname + ", age=" + age + '}';
+    }   
 }

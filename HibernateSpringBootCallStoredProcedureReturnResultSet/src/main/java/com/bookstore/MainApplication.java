@@ -23,9 +23,9 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
             bookstoreService.fetchAuthorByGenre();
-            bookstoreService.fetchAuthorIdNameByGenre();  
+            bookstoreService.fetchNicknameAndAgeByGenre();
             bookstoreService.fetchAuthorByGenreNSPQ();
-            bookstoreService.fetchAuthorIdNameByGenreNSPQ();
+            bookstoreService.fetchNicknameAndAgeByGenreNSPQ();
         };
     }
 }

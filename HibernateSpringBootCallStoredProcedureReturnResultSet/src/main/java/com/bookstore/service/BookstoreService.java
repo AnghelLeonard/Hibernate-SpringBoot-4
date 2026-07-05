@@ -25,8 +25,8 @@ public class BookstoreService {
     }
     
     @Transactional
-    public void fetchAuthorIdNameByGenre() {
-        List<AuthorDtoI> result = authorRepository.fetchAuthorIdNameByGenre("Anthology");
+    public void fetchNicknameAndAgeByGenre() {
+        List<AuthorDtoI> result = authorRepository.fetchNicknameAndAgeByGenre("Anthology");
         
         System.out.println("Result (DTO): " + result);                
     }
@@ -39,8 +39,8 @@ public class BookstoreService {
     }
     
     @Transactional
-    public void fetchAuthorIdNameByGenreNSPQ() {
-        List<AuthorDtoC> result = authorRepository.fetchAuthorIdNameByGenreNSPQ("Anthology");
+    public void fetchNicknameAndAgeByGenreNSPQ() {
+        List<AuthorDtoC> result = authorRepository.fetchNicknameAndAgeByGenreNSPQ("Anthology");
         
         System.out.println("Result (DTO): " + result);                
     }

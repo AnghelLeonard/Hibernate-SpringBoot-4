@@ -26,8 +26,8 @@ import java.io.Serializable;
                         type = String.class,
                         mode = ParameterMode.IN)}),
     @NamedStoredProcedureQuery(
-            name = "FetchAuthorIdNameByGenre",
-            procedureName = "FETCH_AUTHOR_ID_AND_NAME_BY_GENRE",            
+            name = "FetchNicknameAndAgeByGenre",
+            procedureName = "FETCH_NICKNAME_AND_AGE_BY_GENRE",            
             resultSetMappings = {"AuthorDtoMapping"},
             parameters = {
                 @StoredProcedureParameter(
@@ -41,8 +41,8 @@ import java.io.Serializable;
         classes = @ConstructorResult(
                 targetClass = AuthorDtoC.class,
                 columns = {
-                    @ColumnResult(name = "id"),
-                    @ColumnResult(name = "name")
+                    @ColumnResult(name = "nickname"),
+                    @ColumnResult(name = "age")
                 }
         )
 )
@@ -57,6 +57,7 @@ public class Author implements Serializable {
     private int age;
     private String name;
     private String genre;
+    private String nickname;
 
     public Long getId() {
         return id;
@@ -90,9 +91,17 @@ public class Author implements Serializable {
         this.age = age;
     }
 
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }        
+
     @Override
     public String toString() {
-        return "Author{" + "id=" + id + ", age=" + age
-                + ", name=" + name + ", genre=" + genre + '}';
-    }
+        return "Author{" + "id=" + id + ", age=" + age + ", name=" + name 
+                + ", genre=" + genre + ", nickname=" + nickname + '}';
+    }   
 }
