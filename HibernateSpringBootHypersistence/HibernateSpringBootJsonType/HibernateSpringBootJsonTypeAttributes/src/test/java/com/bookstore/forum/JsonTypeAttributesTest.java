@@ -3,6 +3,7 @@ package com.bookstore.forum;
 import com.bookstore.forum.config.TestDataSourceConfiguration;
 import com.bookstore.forum.entity.Post;
 import com.bookstore.forum.entity.PostProperties;
+import com.bookstore.forum.repository.PostSummary;
 import com.bookstore.forum.service.ForumService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,6 +110,18 @@ public class JsonTypeAttributesTest {
         reset();
         forumService.update(id, p -> p.getProperties().setFlair("hot"));
         assertUpdateCount(1);
+    }
+
+    @Test
+    public void dtoProjectionReadsJsonAttributeViaJsonExtract() {
+        Post post = new Post("Is Hibernate Spring Boot 4 worth reading?");
+        post.setRawPayload("{\"source\": \"web\", \"spam_score\": 0.05}");
+        Long id = forumService.save(post).getId();
+
+        PostSummary summary = forumService.findSummary(id);
+
+        assertEquals("Is Hibernate Spring Boot 4 worth reading?", summary.getTitle());
+        assertEquals("web", summary.getSource());
     }
 
     private PostProperties pinnedProperties() {

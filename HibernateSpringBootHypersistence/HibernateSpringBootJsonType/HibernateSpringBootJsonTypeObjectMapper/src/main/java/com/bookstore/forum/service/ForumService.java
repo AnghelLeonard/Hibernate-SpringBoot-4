@@ -2,11 +2,8 @@ package com.bookstore.forum.service;
 
 import com.bookstore.forum.entity.Post;
 import com.bookstore.forum.repository.PostRepository;
-import com.bookstore.forum.repository.PostSummary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.function.Consumer;
 
 @Service
 public class ForumService {
@@ -27,22 +24,8 @@ public class ForumService {
         return postRepository.findById(id).orElseThrow();
     }
 
-    @Transactional(readOnly = true)
-    public PostSummary findSummary(Long id) {
-        return postRepository.findSummaryById(id);
-    }
-
     @Transactional
-    public void update(Long id, Consumer<Post> change) {
-        change.accept(postRepository.findById(id).orElseThrow());
-    }
-
-    /**
-     * Loads the post and changes nothing, to observe whether a JSON attribute
-     * alone makes the entity dirty when the transaction commits.
-     */
-    @Transactional
-    public void touch(Long id) {
-        postRepository.findById(id).orElseThrow();
+    public void deleteAll() {
+        postRepository.deleteAllInBatch();
     }
 }

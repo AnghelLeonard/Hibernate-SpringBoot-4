@@ -1,7 +1,10 @@
 package com.bookstore.forum.entity;
 
+import com.bookstore.forum.converter.TsidAttributeConverter;
+import io.hypersistence.tsid.TSID;
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -34,6 +37,11 @@ public class PostDetails {
     @Column(name = "external_id", length = 13)
     private String externalId;
 
+    @Tsid
+    @Convert(converter = TsidAttributeConverter.class)
+    @Column(name = "public_id")
+    private TSID publicId;
+
     public PostDetails() {
     }
 
@@ -63,5 +71,9 @@ public class PostDetails {
 
     public String getExternalId() {
         return externalId;
+    }
+
+    public TSID getPublicId() {
+        return publicId;
     }
 }

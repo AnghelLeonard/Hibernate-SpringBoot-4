@@ -2,6 +2,7 @@ package com.bookstore.forum;
 
 import com.bookstore.forum.config.TestDataSourceConfiguration;
 import com.bookstore.forum.entity.Post;
+import com.bookstore.forum.entity.PostDetails;
 import com.bookstore.forum.service.ForumService;
 import io.hypersistence.tsid.TSID;
 import org.junit.jupiter.api.Test;
@@ -42,5 +43,25 @@ public class ApplicationTest {
         long postCountBeforeDelete = forumService.countPosts();
         forumService.deletePost(post.getId());
         assertEquals(postCountBeforeDelete - 1, forumService.countPosts());
+    }
+
+    @Test
+    public void tsidGeneratesLongStringAndTsidTypedColumns() {
+        Post post = forumService.newPost(
+            "TSID supports Long, String and TSID attributes",
+            List.of("tsid")
+        );
+
+        PostDetails details = forumService.findDetails(post.getId());
+
+        // Long identifier
+        assertNotNull(post.getId());
+        // String @Tsid column
+        assertNotNull(details.getExternalId());
+        assertTrue(TSID.isValid(details.getExternalId()));
+        // TSID-typed @Tsid column (mapped to bigint via the AttributeConverter)
+        TSID publicId = details.getPublicId();
+        assertNotNull(publicId);
+        assertTrue(TSID.isValid(publicId.toString()));
     }
 }

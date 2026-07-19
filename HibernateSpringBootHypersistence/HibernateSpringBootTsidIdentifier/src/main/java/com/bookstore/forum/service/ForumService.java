@@ -54,6 +54,11 @@ public class ForumService {
         return postRepository.findByIdWithComments(id);
     }
 
+    @Transactional(readOnly = true)
+    public PostDetails findDetails(Long postId) {
+        return postRepository.findDetails(postId);
+    }
+
     @Transactional
     public void deletePost(Long id) {
         postRepository.deleteById(id);
