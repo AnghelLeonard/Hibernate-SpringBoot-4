@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>HibernateSpringBootJsonType</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>HibernateSpringBootJsonType</name>
-    <description>Hibernate - Spring Boot 4 - JsonType vs Hibernate-native JSON</description>
+    <description>Hibernate - Spring Boot 4 - JSON mapping: Hypersistence JsonType vs Hibernate-native JSON</description>
 
     <parent>
         <groupId>java.modern.challenge</groupId>
@@ -15,42 +15,10 @@
         <version>1.0</version>
     </parent>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-73</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>tools.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>java.modern.challenge</groupId>
-            <artifactId>HibernateSpringBootHypersistenceCore</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <modules>
+        <module>HibernateSpringBootJsonTypeAttributes</module>
+        <module>HibernateSpringBootNativeJsonAttributes</module>
+        <module>HibernateSpringBootJsonTypePortability</module>
+        <module>HibernateSpringBootNativeJsonPortability</module>
+    </modules>
 </project>
