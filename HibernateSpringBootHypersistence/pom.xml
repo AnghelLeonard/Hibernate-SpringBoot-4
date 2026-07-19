@@ -25,6 +25,7 @@
         <module>HibernateSpringBootArrayTypes</module>
         <module>HibernateSpringBootPostgreSQLTypes</module>
         <module>HibernateSpringBootYearMonthTypes</module>
+        <module>HibernateSpringBootBaseJpaRepository</module>
     </modules>
 
     <properties>
