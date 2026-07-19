@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -38,23 +39,23 @@ public interface AuthorRepository extends PagingAndSortingRepository<Author, Lon
     Author fetchByNameAndAgeNative(String name, int age);
 
     // causes exception: InvalidJpaQueryMethodException: Cannot use native queries with dynamic sorting
-    // @Query(nativeQuery = true)
+    // @NativeQuery
     // List<Author> fetchViaSortNative(Sort sort);
     
     // causes exception: InvalidJpaQueryMethodException: Cannot use native queries with dynamic sorting
-    // @Query(nativeQuery = true)
+    // @NativeQuery
     // List<Author> fetchViaSortWhereNative(int age, Sort sort);
     
     // without this explicit 'countQuery' Spring will trigger a 'SELECT * FROM author'
     @Query(countQuery = "SELECT COUNT(*) FROM author", nativeQuery = true)
     Page<Author> fetchPageSortNative(Pageable pageable);
 
-    @Query(nativeQuery = true)
+    @NativeQuery
     Page<Author> fetchPageSortWhereNative(int age, Pageable pageable);
 
-    @Query(nativeQuery = true)
+    @NativeQuery
     Slice<Author> fetchSliceSortNative(Pageable pageable);
 
-    @Query(nativeQuery = true)
+    @NativeQuery
     Slice<Author> fetchSliceSortWhereNative(int age, Pageable pageable);
 }
