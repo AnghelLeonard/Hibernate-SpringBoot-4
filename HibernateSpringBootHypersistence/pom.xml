@@ -27,6 +27,7 @@
         <module>HibernateSpringBootYearMonthTypes</module>
         <module>HibernateSpringBootBaseJpaRepository</module>
         <module>HibernateSpringBootRetry</module>
+        <module>HibernateSpringBootQueryUtilities</module>
     </modules>
 
     <properties>
