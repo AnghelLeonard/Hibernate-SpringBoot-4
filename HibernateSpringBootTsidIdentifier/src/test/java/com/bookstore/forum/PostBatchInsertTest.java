@@ -85,7 +85,7 @@ public class PostBatchInsertTest {
     @Test
     public void aggregatePersistAssignsTsidValuesOnAllLevels() {
         Post post = forumService.newPost(
-            "Is High-Performance Java Persistence worth reading?",
+            "Is Hibernate Spring Boot 4 worth reading?",
             List.of("hibernate", "jpa")
         );
 

@@ -27,7 +27,7 @@ public class ApplicationTest {
     @Test
     public void forumWorkflow() {
         Post post = forumService.newPost(
-            "Is High-Performance Java Persistence worth reading?",
+            "Is Hibernate Spring Boot 4 worth reading?",
             List.of("hibernate", "jpa")
         );
 
@@ -35,7 +35,7 @@ public class ApplicationTest {
         assertTrue(TSID.isValid(TSID.from(post.getId()).toString()));
 
         List<Post> posts = forumService.findByTitle(
-            "Is High-Performance Java Persistence worth reading?"
+            "Is Hibernate Spring Boot 4 worth reading?"
         );
         assertEquals(1, posts.size());
 

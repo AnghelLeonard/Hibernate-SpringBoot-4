@@ -27,7 +27,7 @@ public class MainApplication {
     public ApplicationRunner init(ForumService forumService) {
         return args -> {
             Post post = forumService.newPost(
-                "Is High-Performance Java Persistence worth reading?",
+                "Is Hibernate Spring Boot 4 worth reading?",
                 List.of("hibernate", "jpa")
             );
 

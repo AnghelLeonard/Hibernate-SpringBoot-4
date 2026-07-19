@@ -17,7 +17,7 @@ import java.sql.SQLException;
  * only if that's not reachable, falls back to a reusable Testcontainers instance.
  * Both conventional local credential pairs are probed, so the tests run
  * unchanged whether the local server was set up for this book (root/root)
- * or for High-Performance Java Persistence (mysql/admin).
+ * or for Hibernate Spring Boot 4 (mysql/admin).
  */
 public class MySQLDataSourceProvider extends AbstractContainerDataSourceProvider {
 
