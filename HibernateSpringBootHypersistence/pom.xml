@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>java.modern.challenge</groupId>
+    <artifactId>HibernateSpringBootHypersistence</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <name>HibernateSpringBootHypersistence</name>
+    <description>Hibernate - Spring Boot 4 - Hypersistence Utils and Hypersistence Optimizer</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.0</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <modules>
+        <module>core</module>
+        <module>HibernateSpringBootTsidIdentifier</module>
+        <module>HibernateSpringBootJsonType</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>26</java.version>
+        <maven.compiler.release>26</maven.compiler.release>
+        <!-- hypersistence-utils-hibernate-73 targets Hibernate 7.3+ and Jackson 3,
+             so upgrade the Boot-managed Hibernate version (Boot 4.0.0 ships 7.1) -->
+        <hibernate.version>7.3.6.Final</hibernate.version>
+        <hypersistence-utils.version>3.15.4</hypersistence-utils.version>
+        <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
+        <datasource-proxy.version>1.11.0</datasource-proxy.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>java.modern.challenge</groupId>
+                <artifactId>HibernateSpringBootHypersistenceCore</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.hypersistence</groupId>
+                <artifactId>hypersistence-utils-hibernate-73</artifactId>
+                <version>${hypersistence-utils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.hypersistence</groupId>
+                <artifactId>hypersistence-tsid</artifactId>
+                <version>${hypersistence-tsid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.ttddyy</groupId>
+                <artifactId>datasource-proxy</artifactId>
+                <version>${datasource-proxy.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>26</version>
+                        </jdk>
+                    </toolchains>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
