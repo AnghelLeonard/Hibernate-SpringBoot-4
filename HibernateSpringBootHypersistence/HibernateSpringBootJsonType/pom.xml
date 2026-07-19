@@ -23,5 +23,6 @@
         <module>HibernateSpringBootJsonTypePolymorphism</module>
         <module>HibernateSpringBootNativeJsonPolymorphism</module>
         <module>HibernateSpringBootJsonTypeObjectMapper</module>
+        <module>HibernateSpringBootNativeJsonFormatMapper</module>
     </modules>
 </project>
