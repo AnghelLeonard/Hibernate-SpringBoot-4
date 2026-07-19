@@ -23,6 +23,8 @@
         <module>HibernateSpringBootTsidIdentifier</module>
         <module>HibernateSpringBootJsonType</module>
         <module>HibernateSpringBootArrayTypes</module>
+        <module>HibernateSpringBootPostgreSQLTypes</module>
+        <module>HibernateSpringBootYearMonthTypes</module>
     </modules>
 
     <properties>
