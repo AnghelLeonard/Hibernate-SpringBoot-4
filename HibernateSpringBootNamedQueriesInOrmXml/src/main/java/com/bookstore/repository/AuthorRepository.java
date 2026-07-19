@@ -5,7 +5,7 @@ import com.bookstore.entity.Author;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,29 +32,29 @@ public interface AuthorRepository extends PagingAndSortingRepository<Author, Lon
     
     Slice<Author> fetchSliceSortWhere(int age, Pageable pageable);
     
-    @Query(nativeQuery = true)
+    @NativeQuery
     List<Author> fetchAllNative();
     
-    @Query(nativeQuery = true)
+    @NativeQuery
     Author fetchByNameAndAgeNative(String name, int age);
     
     // causes exception
-    // @Query(nativeQuery = true)
+    // @NativeQuery
     // List<Author> fetchViaSortNative(Sort sort);
 
     // causes exception
-    // @Query(nativeQuery = true)
+    // @NativeQuery
     // List<Author> fetchViaSortWhereNative(int age, Sort sort);
     
-    @Query(nativeQuery = true)
+    @NativeQuery
     Page<Author> fetchPageSortNative(Pageable pageable);
     
-    @Query(nativeQuery = true)
+    @NativeQuery
     Page<Author> fetchPageSortWhereNative(int age, Pageable pageable);
     
-    @Query(nativeQuery = true)
+    @NativeQuery
     Slice<Author> fetchSliceSortNative(Pageable pageable);
     
-    @Query(nativeQuery = true)
+    @NativeQuery
     Slice<Author> fetchSliceSortWhereNative(int age, Pageable pageable);
 }
