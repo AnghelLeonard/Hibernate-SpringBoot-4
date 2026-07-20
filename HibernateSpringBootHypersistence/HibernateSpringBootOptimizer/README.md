@@ -45,6 +45,9 @@ Keep it in sync with `<hypersistence-optimizer.version>`.
 | Module | Item | What it shows |
 | --- | --- | --- |
 | `HibernateSpringBootOptimizerKickoff` | O1 | A deliberately suboptimal model, and the 14 issues the startup scan reports. |
+| `HibernateSpringBootOptimizerMappingFixes` | O2 | The same model with every issue fixed — the scan reports nothing. |
+| `HibernateSpringBootOptimizerRuntimeEvents` | O3 | A clean mapping that application code still misuses: N+1, unordered pagination, long sessions. |
+| `HibernateSpringBootOptimizerEventFilters` | O4 | Event handlers, a narrow filter for one accepted trade-off, and the test that gates the build. |
 
 All of them run against **PostgreSQL** (`bookstoredb`, `postgres`/`root`). MySQL would add
 four `TableGeneratorEvent`s, because MySQL has no sequences and `@GeneratedValue` falls back

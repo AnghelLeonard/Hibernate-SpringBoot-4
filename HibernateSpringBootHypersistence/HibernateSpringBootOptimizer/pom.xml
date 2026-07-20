@@ -52,6 +52,9 @@
             </activation>
             <modules>
                 <module>HibernateSpringBootOptimizerKickoff</module>
+                <module>HibernateSpringBootOptimizerMappingFixes</module>
+                <module>HibernateSpringBootOptimizerRuntimeEvents</module>
+                <module>HibernateSpringBootOptimizerEventFilters</module>
             </modules>
         </profile>
         <profile>
@@ -63,6 +66,9 @@
             </activation>
             <modules>
                 <module>HibernateSpringBootOptimizerKickoff</module>
+                <module>HibernateSpringBootOptimizerMappingFixes</module>
+                <module>HibernateSpringBootOptimizerRuntimeEvents</module>
+                <module>HibernateSpringBootOptimizerEventFilters</module>
             </modules>
         </profile>
     </profiles>
