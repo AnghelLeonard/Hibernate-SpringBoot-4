@@ -52,6 +52,7 @@ class OptimizerEventFiltersTest {
     /**
      * Nine lines, no setup, and it guards every mapping in the module.
      */
+    // tag::ci-test[]
     @Test
     public void theMappingsAreClean() {
         List<Event> events = listEventHandler.getEvents();
@@ -62,6 +63,7 @@ class OptimizerEventFiltersTest {
                     + event.getClass().getSimpleName() + " — " + event.getDescription())
                 .reduce("", (a, b) -> a + b + "\n"));
     }
+    // end::ci-test[]
 
     /**
      * A filter that suppresses nothing is a filter you will forget to remove.
@@ -69,6 +71,7 @@ class OptimizerEventFiltersTest {
      * proves the accepted trade-off is real, and that exactly one issue is being
      * waived — not a category of them.
      */
+    // tag::waiver-test[]
     @Test
     public void exactlyOneIssueIsBeingWaived() {
         List<Event> unfiltered =
@@ -83,4 +86,5 @@ class OptimizerEventFiltersTest {
         assertEquals(Post.class, ((EntityAttributeMappingEvent) waived).getEntityClass());
         assertEquals("status", ((EntityAttributeMappingEvent) waived).getEntityAttribute());
     }
+    // end::waiver-test[]
 }

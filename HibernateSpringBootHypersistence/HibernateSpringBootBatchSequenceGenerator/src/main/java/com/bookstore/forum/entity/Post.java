@@ -29,10 +29,12 @@ import jakarta.persistence.Table;
 @Table(name = "batch_seq_post")
 public class Post {
 
+    // tag::oltp-sequence[]
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "post_sequence")
     @SequenceGenerator(name = "post_sequence", sequenceName = "batch_seq_post_seq", allocationSize = 1)
     private Long id;
+    // end::oltp-sequence[]
 
     private String title;
 

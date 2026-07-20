@@ -78,6 +78,7 @@ class BatchSequenceGeneratorTest {
         assertConsecutive(ids);
     }
 
+    // tag::batch-import[]
     @Test
     public void batchImportCostsOneSequenceCallForTheWholeFetchSize() {
         SQLStatementCountValidator.reset();
@@ -95,6 +96,7 @@ class BatchSequenceGeneratorTest {
 
         assertConsecutive(ids);
     }
+    // end::batch-import[]
 
     /**
      * The interoperability payoff: because {@code batch_seq_post_seq} is still a
@@ -102,6 +104,7 @@ class BatchSequenceGeneratorTest {
      * Hibernate can interleave its own {@code nextval} calls with the
      * application's and the identifiers stay dense.
      */
+    // tag::interop[]
     @Test
     public void theSameSequenceServesHibernateAndPlainDatabaseScripts() {
         long fromHibernate = forumService.createPost("Written by the application").getId();
@@ -115,6 +118,7 @@ class BatchSequenceGeneratorTest {
 
         assertEquals(3, forumService.findAllPostsOrderedById().size());
     }
+    // end::interop[]
 
     /**
      * The same fact, read straight off the catalog: the shared sequence is
@@ -122,11 +126,13 @@ class BatchSequenceGeneratorTest {
      * {@code INCREMENT BY 50} (a Hibernate-only sequence — any other client that
      * calls {@code nextval} takes one identifier and burns forty-nine).
      */
+    // tag::increments[]
     @Test
     public void onlyThePooledOptimizerRedefinesTheSequenceIncrement() {
         assertEquals(1L, incrementOf("batch_seq_post_seq"));
         assertEquals(50L, incrementOf("pooled_post_seq"));
     }
+    // end::increments[]
 
     /**
      * The pooled block is cached per {@code SessionFactory}, so a second

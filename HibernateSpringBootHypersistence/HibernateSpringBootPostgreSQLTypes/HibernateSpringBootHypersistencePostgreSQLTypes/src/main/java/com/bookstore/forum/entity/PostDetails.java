@@ -46,6 +46,7 @@ import java.util.Map;
 @Table(name = "post_details")
 public class PostDetails {
 
+    // tag::mapsid[]
     @Id
     private Long id;
 
@@ -53,11 +54,13 @@ public class PostDetails {
     @MapsId
     @JoinColumn(name = "id")
     private Post post;
+    // end::mapsid[]
 
     /**
      * Publication window as a PostgreSQL {@code tsrange}. Ranges have no native
      * Hibernate mapping; {@link PostgreSQLRangeType} is required.
      */
+    // tag::pg-types[]
     @Type(PostgreSQLRangeType.class)
     @Column(name = "publication_period", columnDefinition = "tsrange")
     private Range<LocalDateTime> publicationPeriod;
@@ -77,6 +80,7 @@ public class PostDetails {
     @Type(io.hypersistence.utils.hibernate.type.basic.PostgreSQLHStoreType.class)
     @Column(name = "attributes", columnDefinition = "hstore")
     private Map<String, String> attributes = new HashMap<>();
+    // end::pg-types[]
 
     public PostDetails() {
     }

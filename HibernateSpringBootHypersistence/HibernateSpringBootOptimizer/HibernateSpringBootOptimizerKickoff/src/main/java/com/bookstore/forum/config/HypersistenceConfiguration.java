@@ -17,8 +17,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HypersistenceConfiguration {
 
+    // tag::bean[]
     @Bean
     public HypersistenceOptimizer hypersistenceOptimizer(EntityManagerFactory entityManagerFactory) {
         return new HypersistenceOptimizer(new JpaConfig(entityManagerFactory));
     }
+    // end::bean[]
 }

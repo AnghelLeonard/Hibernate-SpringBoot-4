@@ -50,6 +50,7 @@ class OptimizerKickoffTest {
      * tuning can undo, because the fetch plan and the table layout are fixed at
      * boot time.
      */
+    // tag::mapping-events[]
     @Test
     public void reportsTheMappingIssues() {
         logEvents();
@@ -65,6 +66,7 @@ class OptimizerKickoffTest {
         // Post has addComment(...) but no matching remove method.
         assertEventTriggered(1, BidirectionalSynchronizationEvent.class);
     }
+    // end::mapping-events[]
 
     /**
      * What the configuration costs. These have nothing to do with the entities —

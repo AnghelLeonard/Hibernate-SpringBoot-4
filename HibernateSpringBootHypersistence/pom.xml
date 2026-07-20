@@ -32,6 +32,9 @@
         <!-- Chapter A. Builds as an empty pom unless the commercial
              hypersistence-optimizer artifact is in the local repository. -->
         <module>HibernateSpringBootOptimizer</module>
+        <!-- The chapters themselves. Renders at `package`, so `mvn test` is
+             unaffected; its listings are included from the modules above. -->
+        <module>HibernateSpringBootHypersistenceChapters</module>
     </modules>
 
     <properties>

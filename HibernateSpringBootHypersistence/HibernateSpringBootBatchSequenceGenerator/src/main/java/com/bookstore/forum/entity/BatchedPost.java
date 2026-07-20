@@ -36,9 +36,11 @@ import jakarta.persistence.Table;
 @Table(name = "batch_seq_post")
 public class BatchedPost {
 
+    // tag::batch-sequence[]
     @Id
     @BatchSequence(name = "batch_seq_post_seq", fetchSize = 10)
     private Long id;
+    // end::batch-sequence[]
 
     private String title;
 

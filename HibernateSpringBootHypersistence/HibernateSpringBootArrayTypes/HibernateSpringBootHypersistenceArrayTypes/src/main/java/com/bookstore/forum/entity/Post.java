@@ -57,6 +57,7 @@ public class Post {
     @Column(name = "editor_ids", columnDefinition = "uuid[]")
     private UUID[] editorIds;
 
+    // tag::enum-array[]
     @Type(
         value = EnumArrayType.class,
         parameters = @Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "post_status")
@@ -67,6 +68,7 @@ public class Post {
     @Type(MultiDimensionalArrayType.class)
     @Column(name = "rating_matrix", columnDefinition = "integer[][]")
     private Integer[][] ratingMatrix;
+    // end::enum-array[]
 
     public Post() {
     }

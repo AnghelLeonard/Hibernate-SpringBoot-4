@@ -37,10 +37,12 @@ public class PostDetails {
     @Column(name = "created_by")
     private String createdBy;
 
+    // tag::mapsid[]
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
     private Post post;
+    // end::mapsid[]
 
     public PostDetails() {
     }

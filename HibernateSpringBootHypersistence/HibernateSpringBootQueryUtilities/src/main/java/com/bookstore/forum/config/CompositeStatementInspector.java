@@ -25,6 +25,7 @@ import java.util.List;
  */
 public class CompositeStatementInspector implements StatementInspector {
 
+    // tag::composite[]
     private final List<StatementInspector> inspectors = List.of(
         new QueryStackTraceLogger("com.bookstore.forum"),
         new JfrQueryLogger()
@@ -38,4 +39,5 @@ public class CompositeStatementInspector implements StatementInspector {
         // Neither delegate rewrites the SQL, so signal "unchanged".
         return null;
     }
+    // end::composite[]
 }

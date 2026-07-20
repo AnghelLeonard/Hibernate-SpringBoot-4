@@ -90,6 +90,7 @@ class OptimizerRuntimeEventsTest {
      * ({@code NPlusOneQueryEntityFetchingEvent} — "Post was fetched 5 times in
      * this Session"). Replacing the loop with a {@code join fetch} silences both.
      */
+    // tag::n-plus-one-test[]
     @Test
     public void theNPlusOneQueryHidingInApplicationCodeIsReported() {
         forumService.findCommentAuthorsOneByOne();
@@ -103,6 +104,7 @@ class OptimizerRuntimeEventsTest {
         assertEventTriggered(0, SecondaryQueryEntityFetchingEvent.class);
         assertEventTriggered(0, NPlusOneQueryEntityFetchingEvent.class);
     }
+    // end::n-plus-one-test[]
 
     private void assertEventTriggered(int expectedCount, Class<? extends Event> eventClass) {
         long count = hypersistenceOptimizer.getEvents().stream()

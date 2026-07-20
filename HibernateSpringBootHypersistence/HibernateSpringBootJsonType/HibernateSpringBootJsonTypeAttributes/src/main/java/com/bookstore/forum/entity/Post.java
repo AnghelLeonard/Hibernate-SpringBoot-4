@@ -31,6 +31,7 @@ public class Post {
 
     private String title;
 
+    // tag::json-columns[]
     @Type(JsonType.class)
     @Column(name = "properties", columnDefinition = "json")
     private PostProperties properties;
@@ -42,6 +43,7 @@ public class Post {
     @Type(JsonType.class)
     @Column(name = "attributes", columnDefinition = "json")
     private Map<String, String> attributes = new LinkedHashMap<>();
+    // end::json-columns[]
 
     @Type(JsonType.class)
     @Column(name = "raw_payload", columnDefinition = "json")

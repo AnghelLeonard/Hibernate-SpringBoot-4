@@ -37,6 +37,7 @@ public class RetryableForumService {
         this.postService = postService;
     }
 
+    // tag::retry[]
     @Retry(times = 5, on = {
         LockTimeoutException.class,
         PessimisticLockException.class,
@@ -50,4 +51,5 @@ public class RetryableForumService {
         attempts.incrementAndGet();
         postService.incrementLikes(id, delta);
     }
+    // end::retry[]
 }

@@ -40,6 +40,7 @@ public class HypersistenceConfiguration {
      * {@code Post.status} is an eager {@code @ManyToOne} to a five-row lookup
      * table. Reviewed, justified, and accepted — see {@link Post#getStatus()}.
      */
+    // tag::filter[]
     private static final EventFilter ACCEPTED_TRADE_OFFS = event ->
         !(event instanceof EagerFetchingEvent eagerFetching
             && isAttribute(eagerFetching, Post.class, "status"));
@@ -48,6 +49,7 @@ public class HypersistenceConfiguration {
         return entityClass.equals(event.getEntityClass())
             && attribute.equals(event.getEntityAttribute());
     }
+    // end::filter[]
 
     /**
      * Exposed as a bean so the CI test can read the events straight from the
@@ -58,6 +60,7 @@ public class HypersistenceConfiguration {
         return new ListEventHandler();
     }
 
+    // tag::handlers[]
     @Bean
     public HypersistenceOptimizer hypersistenceOptimizer(EntityManagerFactory entityManagerFactory,
                                                          ListEventHandler listEventHandler) {
@@ -68,4 +71,5 @@ public class HypersistenceConfiguration {
                     List.of(listEventHandler, new LogEventHandler())))
         );
     }
+    // end::handlers[]
 }

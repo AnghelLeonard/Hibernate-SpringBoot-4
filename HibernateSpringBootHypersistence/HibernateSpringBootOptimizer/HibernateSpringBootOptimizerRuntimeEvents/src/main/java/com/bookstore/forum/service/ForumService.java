@@ -95,12 +95,14 @@ public class ForumService {
      * that static analysis can never catch, because it lives in the loop below,
      * not in an annotation.
      */
+    // tag::n-plus-one[]
     @Transactional(readOnly = true)
     public List<String> findCommentAuthorsOneByOne() {
         return findComments().stream()
             .map(comment -> comment.getPost().getTitle())
             .toList();
     }
+    // end::n-plus-one[]
 
     /**
      * The same information, in one query.

@@ -72,6 +72,7 @@ class OptimizerMappingFixesTest {
      * The money shot: no events at all. Drop this assertion into your build and
      * any future mapping regression fails it.
      */
+    // tag::clean-scan[]
     @Test
     public void reportsNoIssuesAtAll() {
         List<Event> events = hypersistenceOptimizer.getEvents();
@@ -81,6 +82,7 @@ class OptimizerMappingFixesTest {
                 .map(event -> event.getClass().getSimpleName() + " — " + event.getDescription())
                 .toList());
     }
+    // end::clean-scan[]
 
     /**
      * A clean scan is worth nothing if the model stopped working, so the fixed
