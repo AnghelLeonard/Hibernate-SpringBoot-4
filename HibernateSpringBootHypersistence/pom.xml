@@ -22,6 +22,12 @@
         <module>core</module>
         <module>HibernateSpringBootTsidIdentifier</module>
         <module>HibernateSpringBootJsonType</module>
+        <module>HibernateSpringBootArrayTypes</module>
+        <module>HibernateSpringBootPostgreSQLTypes</module>
+        <module>HibernateSpringBootYearMonthTypes</module>
+        <module>HibernateSpringBootBaseJpaRepository</module>
+        <module>HibernateSpringBootRetry</module>
+        <module>HibernateSpringBootQueryUtilities</module>
     </modules>
 
     <properties>

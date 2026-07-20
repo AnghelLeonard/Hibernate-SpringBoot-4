@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>HibernateSpringBootRetry</artifactId>
+    <packaging>jar</packaging>
+
+    <name>HibernateSpringBootRetry</name>
+    <description>Hibernate - Spring Boot 4 - Hypersistence Utils @Retry: retry only recoverable failures (lock-acquisition timeout), never optimistic locking</description>
+
+    <parent>
+        <groupId>java.modern.challenge</groupId>
+        <artifactId>HibernateSpringBootHypersistence</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-73</artifactId>
+        </dependency>
+        <!-- Spring AOP arrives transitively via the starter; aspectjweaver is
+             needed for @Aspect/@EnableAspectJAutoProxy (Boot 4 dropped
+             spring-boot-starter-aop, but the BOM still manages aspectjweaver). -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>java.modern.challenge</groupId>
+            <artifactId>HibernateSpringBootHypersistenceCore</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
