@@ -29,6 +29,9 @@
         <module>HibernateSpringBootRetry</module>
         <module>HibernateSpringBootQueryUtilities</module>
         <module>HibernateSpringBootBatchSequenceGenerator</module>
+        <!-- Chapter A. Builds as an empty pom unless the commercial
+             hypersistence-optimizer artifact is in the local repository. -->
+        <module>HibernateSpringBootOptimizer</module>
     </modules>
 
     <properties>
