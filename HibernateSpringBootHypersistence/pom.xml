@@ -28,6 +28,7 @@
         <module>HibernateSpringBootBaseJpaRepository</module>
         <module>HibernateSpringBootRetry</module>
         <module>HibernateSpringBootQueryUtilities</module>
+        <module>HibernateSpringBootBatchSequenceGenerator</module>
     </modules>
 
     <properties>
