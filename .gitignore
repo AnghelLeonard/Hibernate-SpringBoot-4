@@ -10,3 +10,6 @@ nb-configuration.xml
 CLAUDE.md
 Vlad_*_Plan.md
 .idea/
+
+# Rendered book output
+HibernateSpringBootHypersistence/HibernateSpringBootHypersistenceChapters/target/

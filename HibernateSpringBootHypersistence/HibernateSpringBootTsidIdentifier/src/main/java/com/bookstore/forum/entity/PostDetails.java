@@ -33,6 +33,7 @@ public class PostDetails {
     @Column(name = "created_by")
     private String createdBy;
 
+    // tag::tsid-attribute-types[]
     @Tsid
     @Column(name = "external_id", length = 13)
     private String externalId;
@@ -41,6 +42,7 @@ public class PostDetails {
     @Convert(converter = TsidAttributeConverter.class)
     @Column(name = "public_id")
     private TSID publicId;
+    // end::tsid-attribute-types[]
 
     public PostDetails() {
     }

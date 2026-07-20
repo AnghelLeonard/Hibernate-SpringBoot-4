@@ -38,6 +38,7 @@ public class PostDetails {
 
     private String title;
 
+    // tag::yearmonth-fields[]
     @Type(YearMonthIntegerType.class)
     @Column(name = "published_on", columnDefinition = "mediumint")
     private YearMonth publishedOn;
@@ -45,6 +46,7 @@ public class PostDetails {
     @Type(YearMonthDateType.class)
     @Column(name = "archived_on", columnDefinition = "date")
     private YearMonth archivedOn;
+    // end::yearmonth-fields[]
 
     public PostDetails() {
     }

@@ -1,0 +1,5 @@
+# Shell scripts must keep LF endings even when checked out on Windows, otherwise
+# bash chokes on the CR ("$'\r': command not found"). Batch files want CRLF.
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf

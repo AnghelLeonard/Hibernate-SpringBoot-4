@@ -83,6 +83,7 @@ class BaseJpaRepositoryTest {
         return detached;
     }
 
+    // tag::standard-save[]
     @Test
     public void standardSaveOnDetachedEntityTriggersSelectThenUpdate() {
         Long id = persistPost("Original title");
@@ -100,7 +101,9 @@ class BaseJpaRepositoryTest {
             SQLStatementCountValidator.assertUpdateCount(1);
         });
     }
+    // end::standard-save[]
 
+    // tag::base-update[]
     @Test
     public void baseUpdateOnDetachedEntityTriggersUpdateWithoutSelect() {
         Long id = persistPost("Original title");
@@ -117,6 +120,7 @@ class BaseJpaRepositoryTest {
             SQLStatementCountValidator.assertUpdateCount(1);
         });
     }
+    // end::base-update[]
 
     @Test
     public void persistAllIssuesASingleBatchedInsert() {

@@ -63,6 +63,7 @@ class QueryUtilitiesTest {
         forumService.createPostWithComments(TITLE, "Great read", "Very useful");
     }
 
+    // tag::sql-extractor[]
     @Test
     public void sqlExtractorRendersTheGeneratedJoin() {
         String sql = transactionTemplate.execute(status -> SQLExtractor.from(
@@ -75,6 +76,7 @@ class QueryUtilitiesTest {
         assertTrue(sql.contains("query_util_post_comment"), () -> "Expected the comment table in: " + sql);
         assertTrue(sql.contains("query_util_post "), () -> "Expected the joined post table in: " + sql);
     }
+    // end::sql-extractor[]
 
     @Test
     public void queryStackTraceLoggerLogsTheOriginatingApplicationFrame() {

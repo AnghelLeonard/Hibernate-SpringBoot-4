@@ -53,6 +53,7 @@ public class PostBatchInsertTest {
         jdbcTemplate.update("delete from post");
     }
 
+    // tag::batching[]
     @Test
     public void clientSideTsidGenerationKeepsJdbcBatchingWorking() {
         reset();
@@ -66,6 +67,7 @@ public class PostBatchInsertTest {
             assertTrue(posts.get(i - 1).getId() < posts.get(i).getId());
         }
     }
+    // end::batching[]
 
     @Test
     public void tsidIdentifierEncodesTheCreationTime() {

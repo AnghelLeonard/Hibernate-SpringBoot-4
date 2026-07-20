@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>HibernateSpringBootOptimizer</artifactId>
+    <packaging>pom</packaging>
+
+    <name>HibernateSpringBootOptimizer</name>
+    <description>Hibernate - Spring Boot 4 - Hypersistence Optimizer chapter. Its modules are only built when the commercial hypersistence-optimizer artifact is installed in the local Maven repository.</description>
+
+    <parent>
+        <groupId>java.modern.challenge</groupId>
+        <artifactId>HibernateSpringBootHypersistence</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <!--
+      Hypersistence Optimizer is a COMMERCIAL product: it is not on Maven Central,
+      so a reader who has not bought (or trialled) it cannot resolve the artifact.
+      This aggregator therefore declares NO modules by default — it builds as an
+      empty pom and the reactor stays green for everyone.
+
+      The child modules are contributed by profiles that activate only when the
+      jar is actually present in the local repository. Maven's file-based
+      activation cannot read ${settings.localRepository}, and it interpolates only
+      a handful of expressions, hence the two variants below:
+
+        * default local repository  -> ${user.home}/.m2/repository (most readers)
+        * relocated local repository -> point MAVEN_LOCAL_REPOSITORY at it, e.g.
+                                        MAVEN_LOCAL_REPOSITORY=d:/.m2/repository
+
+      Both may activate at once; Maven merges the module lists as a set, so the
+      modules are built exactly once. Either can also be forced explicitly with
+      `mvn -P hypersistence-optimizer-in-default-repo ...`.
+
+      NOTE: the version below is duplicated inside the activation paths on
+      purpose — profile activation is evaluated before POM properties exist, so
+      ${hypersistence-optimizer.version} cannot be used there. Keep them in sync.
+    -->
+    <properties>
+        <hypersistence-optimizer.version>2.13.1</hypersistence-optimizer.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>hypersistence-optimizer-in-default-repo</id>
+            <activation>
+                <file>
+                    <exists>${user.home}/.m2/repository/io/hypersistence/hypersistence-optimizer/2.13.1/hypersistence-optimizer-2.13.1-jakarta.jar</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>HibernateSpringBootOptimizerKickoff</module>
+                <module>HibernateSpringBootOptimizerMappingFixes</module>
+                <module>HibernateSpringBootOptimizerRuntimeEvents</module>
+                <module>HibernateSpringBootOptimizerEventFilters</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>hypersistence-optimizer-in-relocated-repo</id>
+            <activation>
+                <file>
+                    <exists>${env.MAVEN_LOCAL_REPOSITORY}/io/hypersistence/hypersistence-optimizer/2.13.1/hypersistence-optimizer-2.13.1-jakarta.jar</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>HibernateSpringBootOptimizerKickoff</module>
+                <module>HibernateSpringBootOptimizerMappingFixes</module>
+                <module>HibernateSpringBootOptimizerRuntimeEvents</module>
+                <module>HibernateSpringBootOptimizerEventFilters</module>
+            </modules>
+        </profile>
+    </profiles>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.hypersistence</groupId>
+                <artifactId>hypersistence-optimizer</artifactId>
+                <version>${hypersistence-optimizer.version}</version>
+                <classifier>jakarta</classifier>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

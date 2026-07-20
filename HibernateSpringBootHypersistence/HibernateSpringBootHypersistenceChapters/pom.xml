@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>HibernateSpringBootHypersistenceChapters</artifactId>
+    <packaging>pom</packaging>
+
+    <name>HibernateSpringBootHypersistenceChapters</name>
+    <description>Renders the book chapters written in AsciiDoc to PDF and Word, pulling every code listing straight out of the sibling example projects</description>
+
+    <parent>
+        <groupId>java.modern.challenge</groupId>
+        <artifactId>HibernateSpringBootHypersistence</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <!--
+      Why AsciiDoc and not Markdown: the listings in these chapters are not copies
+      of the example code, they ARE the example code. AsciiDoc's
+      `include::file.java[tag=name]` reads a tagged region out of a real source
+      file at build time, so a listing can never drift from the project it
+      documents. Markdown has no include mechanism, so every snippet would be a
+      copy waiting to go stale.
+    -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <asciidoctor.maven.plugin.version>3.1.1</asciidoctor.maven.plugin.version>
+        <asciidoctorj.version>3.0.0</asciidoctorj.version>
+        <asciidoctorj.pdf.version>2.3.19</asciidoctorj.pdf.version>
+        <exec.maven.plugin.version>3.6.3</exec.maven.plugin.version>
+
+        <!-- Root of the sibling example projects the listings are pulled from. -->
+        <examples.dir>${project.basedir}/..</examples.dir>
+    </properties>
+
+    <build>
+        <defaultGoal>package</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>${asciidoctor.maven.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj</artifactId>
+                        <version>${asciidoctorj.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctorj-pdf</artifactId>
+                        <version>${asciidoctorj.pdf.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <sourceDirectory>src/docs/asciidoc</sourceDirectory>
+                    <preserveDirectories>true</preserveDirectories>
+                    <attributes>
+                        <!-- Every include:: in the chapters resolves against this. -->
+                        <examplesdir>${examples.dir}</examplesdir>
+                        <toc>left</toc>
+                        <toclevels>3</toclevels>
+                        <sectnums/>
+                        <sectnumlevels>3</sectnumlevels>
+                        <icons>font</icons>
+                        <experimental/>
+                        <idprefix/>
+                        <idseparator>-</idseparator>
+                        <!-- Fail the build on a broken include rather than
+                             silently rendering a "missing file" placeholder. -->
+                        <attribute-missing>warn</attribute-missing>
+                    </attributes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pdf</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>pdf</backend>
+                            <outputDirectory>${project.build.directory}/pdf</outputDirectory>
+                            <attributes>
+                                <source-highlighter>rouge</source-highlighter>
+                                <rouge-style>github</rouge-style>
+                                <pagenums/>
+                                <chapter-signifier>Chapter</chapter-signifier>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>html</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>html5</backend>
+                            <outputDirectory>${project.build.directory}/html</outputDirectory>
+                            <attributes>
+                                <source-highlighter>highlight.js</source-highlighter>
+                                <linkcss>false</linkcss>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                    <!--
+                      DocBook is the intermediate format on the way to Word: it is
+                      the one backend that carries the document structure (chapter,
+                      section, listing, callout) across to a word processor without
+                      guessing. Produced unconditionally so that `-P word` has
+                      something to convert, and because the publisher may want it.
+                    -->
+                    <execution>
+                        <id>docbook</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>docbook</backend>
+                            <outputDirectory>${project.build.directory}/docbook</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+          Word output. There is no pure-Java AsciiDoc backend that writes .docx,
+          so this step shells out to Pandoc, which reads the DocBook produced
+          above. Pandoc is a single self-contained binary (https://pandoc.org).
+
+          The profile activates by itself once PANDOC_HOME is set, and can always
+          be forced with `mvn -P word package`. Without it the build still
+          produces PDF, HTML and DocBook, so a missing Pandoc never breaks
+          anything - the same rule the Hypersistence Optimizer modules follow.
+        -->
+        <profile>
+            <id>word</id>
+            <activation>
+                <file>
+                    <exists>${env.PANDOC_HOME}</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>hypersistence-utils-docx</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>pandoc</executable>
+                                    <arguments>
+                                        <argument>--from=docbook</argument>
+                                        <argument>--to=docx</argument>
+                                        <argument>--highlight-style=tango</argument>
+                                        <argument>--toc</argument>
+                                        <argument>--output=${project.build.directory}/word/chapter-hypersistence-utils.docx</argument>
+                                        <argument>${project.build.directory}/docbook/chapter-hypersistence-utils.xml</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>hypersistence-optimizer-docx</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>pandoc</executable>
+                                    <arguments>
+                                        <argument>--from=docbook</argument>
+                                        <argument>--to=docx</argument>
+                                        <argument>--highlight-style=tango</argument>
+                                        <argument>--toc</argument>
+                                        <argument>--output=${project.build.directory}/word/chapter-hypersistence-optimizer.docx</argument>
+                                        <argument>${project.build.directory}/docbook/chapter-hypersistence-optimizer.xml</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

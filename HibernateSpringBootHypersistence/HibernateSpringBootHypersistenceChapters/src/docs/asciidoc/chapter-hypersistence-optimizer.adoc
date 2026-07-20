@@ -1,0 +1,303 @@
+= Enforcing Best Practices with Hypersistence Optimizer
+Vlad Mihalcea
+:source-language: java
+:sourcedir: {examplesdir}
+
+This book has spent hundreds of pages teaching you which mappings are fast and
+which are slow. That knowledge has one problem: it lives in your head, and your
+head is not in the build.
+
+Somebody joins the team and adds an eager `@ManyToOne` because the IDE
+autocompleted it. Somebody paginates a query and forgets the `ORDER BY`.
+Somebody leaves `ddl-auto=create` in a profile that reaches staging. Every one of
+those is a best practice you already know, quietly violated in a commit nobody
+reviewed closely enough.
+
+https://vladmihalcea.com/hypersistence-optimizer/[Hypersistence Optimizer] scans
+your `EntityManagerFactory` and reports each violation as an `Event` object.
+Because it is an object and not a log line, you can assert on it — and a mapping
+regression can fail a build the same way a broken unit test does.
+
+[NOTE]
+====
+Hypersistence Optimizer is a commercial product and is not published to Maven
+Central, so the projects in this chapter are **not built by default**. They are
+contributed by Maven profiles that activate only when the artifact is present in
+your local repository; without it the rest of the repository still builds
+cleanly. See `HibernateSpringBootOptimizer/README.md` for the details.
+
+Use the `jakarta`-classified artifact — the default one targets
+`javax.persistence`.
+====
+
+== The whole integration
+
+One bean:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerKickoff/src/main/java/com/bookstore/forum/config/HypersistenceConfiguration.java[tag=bean]
+----
+
+Constructing it scans every mapping and the entire Hibernate configuration
+behind the `EntityManagerFactory`. The results are available from
+`getEvents()`, and each `Event` carries a priority (`BLOCKER`, `CRITICAL`,
+`MAJOR`), a description of what is wrong and why, and a link to the
+documentation for that rule.
+
+== The "before" model
+
+The first example project maps the forum the way a hurried developer would.
+Nothing in it is exotic; every mistake in it is one you have seen in production
+code.
+
+.The child side of a one-to-one, mapped badly
+[source,java]
+----
+@Entity
+@Table(name = "kickoff_post_details")
+public class PostDetails {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToOne
+    private Post post;
+}
+----
+
+Two defects in six lines. The details row carries a surrogate key instead of
+sharing the post's identifier, which costs an extra column, an extra sequence
+and a unique index. And `@OneToOne` defaults to `EAGER`, so loading the details
+always loads the post.
+
+Booting the application reports **fourteen** issues. The test pins them, because
+a number in a book is worth nothing if nobody checks it:
+
+.Six mapping issues
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerKickoff/src/test/java/com/bookstore/forum/OptimizerKickoffTest.java[tag=mapping-events]
+----
+
+The other eight have nothing to do with the entities at all — they come from the
+Hibernate configuration:
+
+[cols="1,3", options="header"]
+|===
+| Event | What it costs you
+
+| `SchemaGenerationEvent` (BLOCKER)
+| `ddl-auto=create`. Hibernate owns your schema, so no migration is versioned
+  and no database-specific DDL is possible.
+
+| `JdbcBatchSizeEvent`
+| No `hibernate.jdbc.batch_size`, so every insert is its own network roundtrip.
+
+| `JdbcBatchToBulkInsertEvent`
+| On PostgreSQL, `reWriteBatchedInserts` is off, so a batch is not collapsed
+  into a multi-value `INSERT`.
+
+| `ConsoleStatementLoggingEvent`
+| `show-sql=true` prints through `System.out` instead of a logger you can filter.
+
+| `SkipAutoCommitCheckEvent`
+| Hibernate does not know the pool already disabled autocommit, so it checks on
+  every connection acquisition.
+
+| `QueryPaginationCollectionFetchingEvent`
+| Nothing prevents paginating a join-fetched collection, which silently
+  paginates in memory.
+
+| `QueryInClauseParameterPaddingEvent`
+| Every distinct `IN` clause size compiles its own query plan.
+
+| `DefaultQueryPlanCacheMaxSizeEvent`
+| The default 2048-entry plan cache is rarely enough for a real application.
+|===
+
+Fourteen findings, from four entities and a nine-line properties file, without
+running a single line of application code.
+
+[TIP]
+====
+On MySQL the same model reports four `TableGeneratorEvent`s as well, because
+MySQL has no sequences and `@GeneratedValue` falls back to a table generator.
+The Optimizer's advice there is `IDENTITY` — which disables JDBC batch inserts,
+so it is advice this book declines. The examples run on PostgreSQL, where
+`@GeneratedValue` resolves to a sequence and the question does not arise.
+====
+
+== Fixing them, one event at a time
+
+The second project is the same forum with every issue addressed. The mapping
+fixes are the ones this book has argued for all along:
+
+.Sharing the identifier instead of inventing one
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerMappingFixes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=mapsid]
+----
+
+* `LAZY` on both associations — `EagerFetchingEvent` gone, twice.
+* `@MapsId` with a bare `@Id Long id` — `OneToOneWithoutMapsIdEvent` gone, and
+  the surrogate key with it.
+* `optional = false` on the parent side of the `@OneToOne` — `OneToOneParentSideEvent`
+  gone. Only when Hibernate knows the row must exist can it proxy the
+  association instead of querying to find out whether to store `null`.
+* `Set<Tag>` instead of `List<Tag>` — `ManyToManyListEvent` gone. Removing one
+  tag now deletes one join-table row instead of deleting them all and
+  re-inserting the survivors.
+* `addPostComment` / `removePostComment` — `BidirectionalSynchronizationEvent`
+  gone.
+
+[WARNING]
+====
+That last one is name-driven, and the name is derived from the **entity type**,
+not the field. With a `List<PostComment> comments`, the Optimizer looks for
+`addPostComment(...)` and `removePostComment(...)`. A perfectly reasonable
+`addComment(...)` does not satisfy it.
+====
+
+Reaching *zero* takes the configuration too — the eight settings from the table
+above, of which one deserves a note:
+
+[source,properties]
+----
+spring.datasource.hikari.auto-commit=false
+spring.jpa.properties.hibernate.connection.provider_disables_autocommit=true
+----
+
+Both halves are required. The Hibernate property is a promise about the pool; if
+you make the promise without configuring the pool, every statement commits
+immediately and your transactions are fiction.
+
+And then the payoff:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerMappingFixes/src/test/java/com/bookstore/forum/OptimizerMappingFixesTest.java[tag=clean-scan]
+----
+
+Fourteen to nothing.
+
+== What a clean mapping still gets wrong
+
+A perfect mapping does not make a fast application. The next project reuses the
+fixed model — so the startup scan is silent — and then misuses it from
+application code, which is where the Optimizer's *runtime* scanner earns its
+licence fee.
+
+.The mapping is right; the loop is wrong
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerRuntimeEvents/src/main/java/com/bookstore/forum/service/ForumService.java[tag=n-plus-one]
+----
+
+`PostComment.post` is `LAZY`, exactly as the previous section made it. No
+annotation is wrong. But touching the post of every comment initializes one
+proxy per row, and that N+1 lives in a `stream()` call that no static analysis
+will ever flag.
+
+The Optimizer catches it twice — once per lazily resolved parent, and once as a
+summary:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerRuntimeEvents/src/test/java/com/bookstore/forum/OptimizerRuntimeEventsTest.java[tag=n-plus-one-test]
+----
+
+Ten comments spanning five posts produce five `SecondaryQueryEntityFetchingEvent`s
+("this row was loaded by a query of its own") and one
+`NPlusOneQueryEntityFetchingEvent` ("`Post` was fetched 5 times in this
+Session"). Replacing the loop with a `join fetch` silences both — the second half
+of that test asserts exactly that.
+
+Two more runtime events are worth provoking:
+
+`PaginationWithoutOrderByEvent`:: `setFirstResult` and `setMaxResults` without an
+`ORDER BY`. SQL guarantees no ordering, so page 2 may overlap page 1 or skip rows
+entirely. The bug appears under load and never reproduces locally.
+
+`SessionTimeoutEvent`:: A session that outlives its work. Set
+`hypersistence.session.timeout_millis` to whatever "too long" means for your
+workload, and any transaction holding its connection longer says so.
++
+[CAUTION]
+====
+Set that threshold too low and ordinary read-only transactions start reporting
+themselves. The example uses 100 ms deliberately, and at 25 ms the noise drowned
+the signal.
+====
+
+== Making it stick
+
+The last project is the one you would actually copy into a real code base. It
+has two ingredients.
+
+**Event handlers.** The `ListEventHandler` keeps events so a test can assert on
+them; the `LogEventHandler` prints them for whoever reads the startup log. A
+`ChainEventHandler` runs both:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerEventFilters/src/main/java/com/bookstore/forum/config/HypersistenceConfiguration.java[tag=handlers]
+----
+
+**A filter for the exceptions you have genuinely decided to make.** No real code
+base is perfect, and pretending otherwise gets the whole tool switched off. This
+project keeps one eager `@ManyToOne` on purpose — a five-row `PostStatus` lookup
+table that every reader of a post needs anyway, where the join is cheaper than
+the second query laziness would cost:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerEventFilters/src/main/java/com/bookstore/forum/config/HypersistenceConfiguration.java[tag=filter]
+----
+
+Read that filter carefully, because the shape of it is the lesson. It names an
+**entity and an attribute**, not an event type. Suppressing `EagerFetchingEvent`
+wholesale would also hide the next eager association somebody adds by accident —
+the one you actually wanted to catch. A waiver should be as narrow as the
+decision behind it.
+
+With those two in place, the test that gates the build is nine lines:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerEventFilters/src/test/java/com/bookstore/forum/OptimizerEventFiltersTest.java[tag=ci-test]
+----
+
+No fixture, no measurement, no threshold to tune. It fails the day somebody adds
+an eager association, drops a `@MapsId`, or turns `ddl-auto` back on.
+
+One more test keeps the filter honest:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerEventFilters/src/test/java/com/bookstore/forum/OptimizerEventFiltersTest.java[tag=waiver-test]
+----
+
+It scans the same `EntityManagerFactory` *without* the filter and asserts that
+exactly one issue is being waived, of exactly the expected kind. A filter that
+suppresses nothing is a filter you will forget to remove; a filter that
+suppresses a category is a filter that hides regressions.
+
+== Summary
+
+* One bean — `new HypersistenceOptimizer(new JpaConfig(entityManagerFactory))` —
+  scans every mapping and the whole Hibernate configuration at startup.
+* Events are objects, not log lines, so `assertTrue(events.isEmpty())` turns
+  everything this book teaches into a build gate.
+* The scanner has three parts: mappings, configuration, and runtime. The runtime
+  part catches the N+1 that lives in your code rather than in your annotations —
+  the one no mapping review can find.
+* Filter the trade-offs you have consciously accepted, and filter them by entity
+  and attribute so the next accidental violation still fails the build.
+* Prove your filters suppress something, or they will outlive the reason they
+  were written.
+
+The previous chapter showed you the tools that let Hibernate speak your
+database's language. This one shows you the tool that makes sure the rest of the
+book's advice survives contact with a growing team.

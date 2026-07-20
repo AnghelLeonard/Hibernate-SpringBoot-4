@@ -18,7 +18,9 @@ import java.util.List;
  * <p>Derived query methods still work exactly as before.</p>
  */
 @Repository
+// tag::repository[]
 public interface PostRepository extends BaseJpaRepository<Post, Long> {
 
     List<Post> findByTitle(String title);
 }
+// end::repository[]

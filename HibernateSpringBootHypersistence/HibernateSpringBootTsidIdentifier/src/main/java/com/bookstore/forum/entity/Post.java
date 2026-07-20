@@ -21,9 +21,11 @@ import java.util.Set;
 @Table(name = "post")
 public class Post {
 
+    // tag::tsid[]
     @Id
     @Tsid
     private Long id;
+    // end::tsid[]
 
     private String title;
 
