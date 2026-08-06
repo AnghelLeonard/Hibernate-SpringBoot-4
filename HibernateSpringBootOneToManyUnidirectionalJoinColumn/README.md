@@ -49,7 +49,4 @@ Unidirectional `@OneToMany` is **less efficient for reading, writing, and deleti
 
 **Rule of thumb:**  
 👉 *Avoid unidirectional `@OneToMany` unless you have a very specific reason.*
-
----
-
 ---
