@@ -50,7 +50,7 @@ SELECT b FROM Book b WHERE b.author.id = :id
 
 ### Performance:
 - Only **one SELECT**  
-- Returned list is **not managed** as a collection, but each Book is managed individually  
+- Returned list is **not managed** as a collection
 - Updates to books trigger normal Hibernate dirty checking
 
 ---
