@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of **Item 6: Why and When to Avoid Removing Child Entities with `CascadeType.REMOVE` and `orphanRemoval=true`**
+# 📘 Summary of Item 6: *Why and When to Avoid Removing Child Entities with `CascadeType.REMOVE` and `orphanRemoval=true`*
 
 ## 🎯 **Core Idea**
 Item 6 explains that although `CascadeType.REMOVE` and `orphanRemoval=true` make it *convenient* to delete child entities automatically, they can become **highly inefficient** when many child records are involved. The item shows why this happens and how to use more efficient bulk deletion strategies instead.
