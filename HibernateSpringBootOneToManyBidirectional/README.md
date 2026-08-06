@@ -56,7 +56,5 @@ A well‑designed bidirectional `@OneToMany` association:
 - minimizes SQL operations,
 - keeps the domain model consistent,
 - and performs significantly better than a unidirectional `@OneToMany`.
------------------------------------------------------------------------------------------------------------------------
-
 -----------------------------------------------------------------------------------------------------------------------    
 
