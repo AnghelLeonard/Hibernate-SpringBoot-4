@@ -85,17 +85,7 @@ This avoids confusion and makes native queries easier.
 
 ---
 
-## 🧪 10. Example Implementation  
-The chapter provides full Author and Book entity examples showing:
-- `@ManyToMany` with `@JoinTable`
-- Helper methods
-- Proper equals/hashCode
-- Lazy fetching
-- Clean toString()
-
----
-
-## 🛠️ 11. Alternative: Replace @ManyToMany with Two @OneToMany  
+## 🛠️ 10. Alternative: Replace @ManyToMany with Two @OneToMany  
 Mapping the join table as an entity gives:
 - More flexibility  
 - Ability to store extra attributes (e.g., contribution role, order)  
