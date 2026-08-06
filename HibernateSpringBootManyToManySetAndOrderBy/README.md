@@ -2,65 +2,88 @@
 
 # 📘 Summary of Item 5: *Why Set Is Better than List in @ManyToMany*
 
-## 🎯 Core Idea  
-Hibernate internally treats a `@ManyToMany` as **two unidirectional @OneToMany associations**.  
-Because of this, using a **List** causes Hibernate to delete and reinsert *all* join-table rows whenever an element is removed or reordered.  
-Using a **Set** avoids this and results in **far fewer SQL statements**.
-
-![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootManyToManyBidirectionalListVsSet/manytomany%20use%20always%20set%20not%20list.png)
 ---
 
-# 🔍 Why List Performs Poorly
-
-When using `List<Book>` and removing one book:
-
-- Hibernate **deletes all rows** in the join table for that parent.
-- Then it **reinserts all remaining rows** to match the in-memory order.
-- This happens because List implies **positional order**, and Hibernate must preserve it.
-
-### Example SQL (List):
-```
-DELETE FROM author_book_list WHERE author_id = ?
-INSERT INTO author_book_list (author_id, book_id) VALUES (?, ?)
-INSERT INTO author_book_list (author_id, book_id) VALUES (?, ?)
-...
-```
-
-👉 **More books = more reinserts = worse performance.**
+## 🔍 Core Idea
+In Hibernate, using **Set** instead of **List** for `@ManyToMany` associations avoids unnecessary DELETE+INSERT operations and results in cleaner, more efficient SQL. When ordering is needed, `@OrderBy` (or `@OrderColumn`) can be used, and Hibernate will preserve the order via `LinkedHashSet`.
 
 ---
 
-# 🌟 Why Set Performs Better
-
-When using `Set<Book>`:
-
-- Removing an element triggers **only one DELETE** in the join table.
-- No reinserts.
-- No reordering logic.
-
-### Example SQL (Set):
-```
-DELETE FROM author_book_set
-WHERE author_id = ? AND book_id = ?
-```
-
-👉 **Always a single DELETE. Extremely efficient.**
+## 🧩 Why Hibernate Behaves This Way
+Hibernate internally treats a `@ManyToMany` as **two unidirectional @OneToMany associations**, each backed by foreign keys in the junction table.  
+Because of this, when using a **List**, Hibernate must rebuild the entire junction table row set to reflect the in-memory order.
 
 ---
 
-# 📌 Key Takeaways
+## 📉 Using List → Inefficient SQL
+Example: Removing a book from an author’s list.
 
-### ✔ Always use `Set` for @ManyToMany  
-- Avoids unnecessary DELETE + INSERT cycles  
-- Avoids reordering overhead  
-- Produces minimal SQL  
-- Much better scalability  
+Operation:
+```java
+alicia.removeBook(oneDay);
+```
 
-### ✔ When order matters  
-You can still use `Set` and apply:
+Hibernate generates:
+- `DELETE FROM author_book_list WHERE author_id = ?`
+- Then **reinserts all remaining entries** to preserve the List order.
 
-- `@OrderBy` → orders results via SQL (`ORDER BY`)  
-- `@OrderColumn` → stores order in a dedicated column (less common for ManyToMany)
+This means:
+- More SQL statements  
+- Longer transactions  
+- Unnecessary churn in the junction table
 
-Hibernate will internally use a `LinkedHashSet` to preserve the order returned by the query.
+---
+
+## 📈 Using Set → Efficient SQL
+Switching to `Set<Book>` and `Set<Author>`:
+
+Hibernate generates **one single DELETE**:
+```
+DELETE FROM author_book_set WHERE author_id = ? AND book_id = ?
+```
+
+No reinserts. No reordering.  
+**Much faster and cleaner.**
+
+---
+
+## 🗂 Ordering Results with Set
+Since `HashSet` is unordered, JPA provides two mechanisms:
+
+### 1. `@OrderBy`
+- Adds `ORDER BY` to the SQL query
+- Hibernate preserves order using `LinkedHashSet`
+- Works with `@OneToMany`, `@ManyToMany`, and `@ElementCollection`
+
+Example:
+```java
+@ManyToMany(mappedBy = "books")
+@OrderBy("name DESC")
+private Set<Author> authors = new HashSet<>();
+```
+
+Result:
+- SQL includes `ORDER BY name DESC`
+- Returned `Set` is ordered accordingly
+
+### 2. `@OrderColumn`
+- Stores ordering in an extra column in the junction table
+- Permanent ordering
+
+---
+
+## 🧠 Consistency Tip
+`@OrderBy` + `HashSet` preserves order **only for loaded entities**.  
+If you need consistent ordering **even in transient state**, use:
+
+```java
+private Set<Author> authors = new LinkedHashSet<>();
+```
+
+---
+
+## ✅ Final Recommendation
+**Always use `Set` for `@ManyToMany` associations.**  
+Use `List` only when ordering is intrinsic and you truly need index-based semantics.
+
 ---
