@@ -87,8 +87,3 @@ private Set<Author> authors = new LinkedHashSet<>();
 Use `List` only when ordering is intrinsic and you truly need index-based semantics.
 
 ---
-
-If you want, I can also produce:
-- A diagram showing how Hibernate handles the junction table  
-- A cheat sheet comparing `List` vs `Set` in JPA  
-- A refactoring guide for switching List → Set in existing code
