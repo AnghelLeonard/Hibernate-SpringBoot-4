@@ -24,7 +24,7 @@ When deleting a parent with many children:
 - It then issues **one DELETE per child**, plus one for the parent.
 - More children → more DELETE statements → slower performance.
 
-Example from the text: deleting an author with 3 books triggers **4 DELETE statements**.  
+Example: deleting an author with 3 books triggers **4 DELETE statements**.  
 
 ---
 
