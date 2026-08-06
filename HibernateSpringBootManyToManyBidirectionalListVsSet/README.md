@@ -1,66 +1,112 @@
 ---
 
-# 📘 Summary of Item 5: *Why Set Is Better than List in @ManyToMany*
+# 📘 Summary of Item 4: *How to Effectively Shape the @ManyToMany Association*
 
-## 🎯 Core Idea  
-Hibernate internally treats a `@ManyToMany` as **two unidirectional @OneToMany associations**.  
-Because of this, using a **List** causes Hibernate to delete and reinsert *all* join-table rows whenever an element is removed or reordered.  
-Using a **Set** avoids this and results in **far fewer SQL statements**.
-
-![](https://github.com/AnghelLeonard/Hibernate-SpringBoot-4/blob/main/HibernateSpringBootManyToManyBidirectionalListVsSet/manytomany%20use%20always%20set%20not%20list.png)
----
-
-# 🔍 Why List Performs Poorly
-
-When using `List<Book>` and removing one book:
-
-- Hibernate **deletes all rows** in the join table for that parent.
-- Then it **reinserts all remaining rows** to match the in-memory order.
-- This happens because List implies **positional order**, and Hibernate must preserve it.
-
-### Example SQL (List):
-```
-DELETE FROM author_book_list WHERE author_id = ?
-INSERT INTO author_book_list (author_id, book_id) VALUES (?, ?)
-INSERT INTO author_book_list (author_id, book_id) VALUES (?, ?)
-...
-```
-
-👉 **More books = more reinserts = worse performance.**
+Item 4 explains how to correctly design and optimize a **bidirectional @ManyToMany** relationship in JPA/Hibernate using the classic **Author–Book** example (authors write multiple books; books can have multiple authors).
 
 ---
 
-# 🌟 Why Set Performs Better
-
-When using `Set<Book>`:
-
-- Removing an element triggers **only one DELETE** in the join table.
-- No reinserts.
-- No reordering logic.
-
-### Example SQL (Set):
-```
-DELETE FROM author_book_set
-WHERE author_id = ? AND book_id = ?
-```
-
-👉 **Always a single DELETE. Extremely efficient.**
+## 🔍 1. Understanding the @ManyToMany Structure  
+- A **junction table** (join table) stores the relationship.  
+- Both sides are **parents**—neither holds a foreign key directly.  
+- The join table acts as the **child-side**.
 
 ---
 
-# 📌 Key Takeaways
+## 🧭 2. Choose the Owner Side  
+Only **one side** should be the owner; the other must use `mappedBy`.
 
-### ✔ Always use `Set` for @ManyToMany  
-- Avoids unnecessary DELETE + INSERT cycles  
-- Avoids reordering overhead  
-- Produces minimal SQL  
-- Much better scalability  
+Example:  
+- **Author** is the owner  
+- **Book** uses `mappedBy = "books"`
 
-### ✔ When order matters  
-You can still use `Set` and apply:
+This ensures updates propagate correctly and avoids duplicate join table entries.
 
-- `@OrderBy` → orders results via SQL (`ORDER BY`)  
-- `@OrderColumn` → stores order in a dedicated column (less common for ManyToMany)
+---
 
-Hibernate will internally use a `LinkedHashSet` to preserve the order returned by the query.
+## 🧺 3. Always Use `Set`, Not `List`  
+- `Set` avoids expensive delete‑and‑reinsert cycles in the join table.  
+- `List` forces Hibernate to reorder entries, causing multiple DELETE/INSERT operations.  
+- `Set` allows Hibernate to generate a **single DELETE** for removing an association.
+
+This is a major performance recommendation.
+
+---
+
+## 🔄 4. Keep Both Sides in Sync  
+Use helper methods to maintain consistency:
+
+```java
+public void addBook(Book book) {
+    this.books.add(book);
+    book.getAuthors().add(this);
+}
+```
+
+This prevents mismatched state between the two sides.
+
+---
+
+## 🚫 5. Avoid `CascadeType.ALL` and `CascadeType.REMOVE`  
+- Removing an Author should **not** delete Books, because Books may belong to other Authors.  
+- Recommended:  
+  ```java
+  cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+  ```
+
+---
+
+## 🧱 6. Explicitly Configure the Join Table  
+Use `@JoinTable` to define:
+- Table name  
+- Join column names  
+- Inverse join column names  
+
+This avoids confusion and makes native queries easier.
+
+---
+
+## 💤 7. Keep Fetch Type Lazy  
+- `@ManyToMany` defaults to LAZY—keep it that way.  
+- Avoid `FetchType.EAGER`, which can cause massive performance issues.
+
+---
+
+## 🧩 8. Override `equals()` and `hashCode()`  
+- Must be overridden on **both sides**.  
+- Use the entity ID (with null checks).  
+- Ensures consistent behavior across persistence operations.
+
+---
+
+## 🧵 9. Override `toString()` Carefully  
+- Include only basic fields.  
+- Never include collections—this triggers extra SQL or LazyInitializationException.
+
+---
+
+## 🛠️ 10. Alternative: Replace @ManyToMany with Two @OneToMany  
+Mapping the join table as an entity gives:
+- More flexibility  
+- Ability to store extra attributes (e.g., contribution role, order)  
+- Better control over operations  
+
+The chapter links to an article explaining this approach.
+
+---
+
+# ⭐ Final Takeaways
+
+### ✔ Best Practices for @ManyToMany  
+- Use **Set**, not List  
+- Define **owner** and **mappedBy** correctly  
+- Avoid cascading deletes  
+- Keep fetch type **LAZY**  
+- Use helper methods to sync both sides  
+- Override equals/hashCode on both entities  
+- Configure join table explicitly  
+
+### ✔ When to Avoid @ManyToMany  
+If you need extra attributes or fine‑grained control, map the join table as an entity instead.
+
 ---
