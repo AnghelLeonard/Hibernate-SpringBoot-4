@@ -34,7 +34,6 @@ public class ForumService {
     public Post createPost(String title) {
         Post post = new Post(title);
         entityManager.persist(post);
-        entityManager.flush();
         return post;
     }
 
@@ -46,7 +45,6 @@ public class ForumService {
     public List<BatchedPost> importPosts(List<String> titles) {
         List<BatchedPost> posts = titles.stream().map(BatchedPost::new).toList();
         posts.forEach(entityManager::persist);
-        entityManager.flush();
         return posts;
     }
 
@@ -54,7 +52,6 @@ public class ForumService {
     public PooledPost createPooledPost(String title) {
         PooledPost post = new PooledPost(title);
         entityManager.persist(post);
-        entityManager.flush();
         return post;
     }
 
