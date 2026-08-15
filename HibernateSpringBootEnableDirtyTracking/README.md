@@ -1,6 +1,6 @@
 ---
 
-# 📝 Summary of *Item 18: Why and How to Activate Dirty Tracking*
+# 📝 Summary of Item 18: *Why and How to Activate Dirty Tracking*
 
 Hibernate 5 introduced **Dirty Tracking** as a more efficient alternative to the older **Dirty Checking** mechanism. Instead of using Java Reflection to inspect every property of every managed entity—which becomes slow when many entities are involved—Dirty Tracking allows each entity to **track its own attribute changes**.
 
