@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 20: The Best Way to Publish Domain Events from Aggregate Roots*
+# 📘 Summary of Item 20: *The Best Way to Publish Domain Events from Aggregate Roots*
 
 ## 🎯 **Core Idea**
 The item explains how **Spring Data** supports publishing **domain events** directly from **aggregate roots** in a Domain-Driven Design (DDD) application. It shows best practices, pitfalls, and performance considerations when handling these events—especially when they involve long-running tasks or database writes.
