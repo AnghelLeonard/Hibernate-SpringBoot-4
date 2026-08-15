@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 19: How to Map a Boolean to a Yes/No*
+# 📘 Summary of Item 19: *How to Map a Boolean to a Yes/No*
 
 ## 🎯 Core Problem  
 A legacy database contains an `author` table where the `best_selling` column is stored as a `VARCHAR(3)` with values `"Yes"` or `"No"`.  
