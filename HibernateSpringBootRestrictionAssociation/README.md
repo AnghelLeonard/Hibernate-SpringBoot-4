@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 10: How to Filter Associations via a Hibernate-Specific @SQLRestriction Annotation*
+# 📘 Summary of Item 10: *How to Filter Associations via a Hibernate-Specific @SQLRestriction Annotation*
 
 ## 🎯 Core Idea
 Hibernate’s older filtering annotations like `@Where` and `@WhereJoinTable` are deprecated. The recommended modern replacement is `@SQLRestriction` (and `@SQLJoinTableRestriction` for join tables). These annotations let you append fixed SQL `WHERE` clauses to association queries.
