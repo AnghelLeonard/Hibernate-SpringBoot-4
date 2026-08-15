@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 14: How to Populate a Child-Side Parent Association via a Hibernate Proxy*
+# 📘 Summary of Item 14: *How to Populate a Child-Side Parent Association via a Hibernate Proxy*
 
 ## 🎯 Core Idea
 The item explains how to efficiently associate a child entity with its parent in JPA/Hibernate by using **Hibernate-specific proxies** instead of fully loading the parent entity from the database. This improves performance by avoiding unnecessary `SELECT` queries.
