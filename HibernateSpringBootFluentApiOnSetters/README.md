@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary: *How to Adopt a Fluent API Style in Entities*
+# 📘 Summary of Item 13: *How to Adopt a Fluent API Style in Entities*
 
 ## 🎯 Purpose  
 The item explains how to implement a **fluent API style** in JPA/Hibernate entity classes (Author and Book) to make object creation and configuration more readable and expressive.
