@@ -19,7 +19,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Query("SELECT a.genre FROM Author a WHERE a.name=?1")
     Optional<String> fetchGenreByName(String name);
     
-    @Query(value="SELECT a.genre FROM author a WHERE a.name=?1", nativeQuery=true)
+    @NativeQuery(value="SELECT a.genre FROM author a WHERE a.name=?1")
     Optional<String> fetchGenreByNameNative(String name);
      */
 }
