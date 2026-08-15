@@ -1,6 +1,6 @@
 ---
 
-# 📘 **Summary of Item 7 — How to Fetch Associations via JPA Entity Graphs**
+# 📘 Summary of Item 7 — *How to Fetch Associations via JPA Entity Graphs*
 
 Item 7 explains how **JPA Entity Graphs** provide a powerful, flexible, and efficient way to control which associations are fetched when loading entities. They help you avoid common performance pitfalls like the **N+1 query problem**, and they give you fine‑grained control without modifying your domain model.
 
