@@ -8,6 +8,11 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class MainApplication {
+    
+    // This application ends uop with the following exception:
+    // jakarta.validation.ConstraintViolationException: Validation failed for 
+    // classes [com.bookstore.entity.Review] during persist time for groups 
+    // [jakarta.validation.groups.Default, ]
 
     private final BookstoreService bookstoreService;
 

@@ -1,5 +1,4 @@
 -- Recreate database
-USE `bookstoredb` ^;
 DROP TRIGGER IF EXISTS `Just_One_Of_Many` ^;
 DROP DATABASE IF EXISTS `bookstoredb` ^; 
 CREATE DATABASE `bookstoredb` ^;
@@ -9,21 +8,21 @@ USE `bookstoredb` ^;
 CREATE TABLE `article` (
   `id`     BIGINT        NOT NULL AUTO_INCREMENT,  
   `title`  VARCHAR(255)  DEFAULT NULL,
-  CONSTRAINT `article_pk` PRIMARY KEY (id)
+  CONSTRAINT `article_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ^;
 
 -- Table `magazine`
 CREATE TABLE `magazine` (
   `id`     BIGINT        NOT NULL AUTO_INCREMENT,  
   `title`  VARCHAR(255)  DEFAULT NULL,
-  CONSTRAINT `magazine_pk` PRIMARY KEY (id)
+  CONSTRAINT `magazine_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ^;
 
 -- Table `book`
 CREATE TABLE `book` (
   `id`     BIGINT        NOT NULL AUTO_INCREMENT,  
   `title`  VARCHAR(255)  DEFAULT NULL,
-  CONSTRAINT `book_pk` PRIMARY KEY (id)
+  CONSTRAINT `book_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ^;
 
 -- Table `review`
@@ -33,7 +32,7 @@ CREATE TABLE `review` (
   `book_id`     BIGINT,
   `article_id`  BIGINT,
   `magazine_id` BIGINT,
-  CONSTRAINT `book_pk` PRIMARY KEY (id),
+  CONSTRAINT `book_pk` PRIMARY KEY (`id`),
   CONSTRAINT `book_review_fk` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`),
   CONSTRAINT `article_review_fk` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`),
   CONSTRAINT `magazine_review_fk` FOREIGN KEY (`magazine_id`) REFERENCES `magazine` (`id`)

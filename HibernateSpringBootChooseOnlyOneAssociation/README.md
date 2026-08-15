@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 12: How to Validate that Only One Association Is Non‑Null*
+# 📘 Summary of Item 12: *How to Validate that Only One Association Is Non‑Null*
 
 ### 🎯 **Purpose**
 The document explains how to enforce a rule in a JPA/Hibernate application so that a `Review` entity can be linked 
