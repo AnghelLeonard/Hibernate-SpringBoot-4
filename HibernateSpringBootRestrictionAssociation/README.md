@@ -11,8 +11,8 @@ However, they are **always applied**, **cannot be disabled**, and **cannot accep
 
 ## 🧩 When to Use `@SQLRestriction`
 Use it **only when**:
-- `JOIN FETCH WHERE` (Item 39) is not suitable, and
-- `@NamedEntityGraph` (Items 7 & 8) doesn’t fit your use case.
+- `JOIN FETCH WHERE` is not suitable, and
+- `@NamedEntityGraph` doesn’t fit your use case.
 
 It can also be useful for **soft delete** implementations.
 
