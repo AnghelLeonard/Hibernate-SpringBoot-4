@@ -82,13 +82,13 @@ public class NativeJsonAttributesTest {
 
     @Test
     public void nativeIssuesAPhantomUpdateForAnUnchangedPojo() {
+        // tag::phantom-update[]
         Post post = new Post("Is Hibernate Spring Boot 4 worth reading?");
         post.setProperties(pinnedProperties());
         Long id = forumService.save(post).getId();
 
         // A read-only touch still flushes an UPDATE: the native mapping cannot
-        // tell that the JSON content is unchanged. The JsonType module proves
-        // the same scenario issues zero UPDATEs.
+        // tell that the JSON content is unchanged.
         reset();
         forumService.touch(id);
         assertUpdateCount(1);
@@ -97,6 +97,7 @@ public class NativeJsonAttributesTest {
         reset();
         forumService.update(id, p -> p.setProperties(pinnedProperties()));
         assertUpdateCount(1);
+        // end::phantom-update[]
     }
 
     private PostProperties pinnedProperties() {

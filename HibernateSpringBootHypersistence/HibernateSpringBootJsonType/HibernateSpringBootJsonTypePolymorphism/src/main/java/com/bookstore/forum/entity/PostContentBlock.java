@@ -28,6 +28,7 @@ import java.io.Serializable;
  * the annotations still live in {@code com.fasterxml.jackson.annotation} (only
  * databind moved to {@code tools.jackson.databind}).</p>
  */
+// tag::discriminator[]
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.EXISTING_PROPERTY,
@@ -44,3 +45,4 @@ public abstract sealed class PostContentBlock
 
     public abstract String getType();
 }
+// end::discriminator[]

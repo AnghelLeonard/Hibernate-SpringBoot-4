@@ -117,7 +117,7 @@ To use a TSID as an entity identifier, you have to use the `@Tsid` annotation, a
 .Applying a TSID to an identifier
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/Post.java[tag=tsid]
+include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/Post.java[tag=tsid,indent=0]
 ----
 
 The identifier value is generated at flush time, before the `INSERT` reaches the database,
@@ -126,7 +126,7 @@ and that is the property that matters most:
 .Client-side generation keeps batching alive
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/test/java/com/bookstore/forum/PostBatchInsertTest.java[tag=batching]
+include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/test/java/com/bookstore/forum/PostBatchInsertTest.java[tag=batching,indent=0]
 ----
 
 When running the above test case, Hibernate will generate the following statement:
@@ -136,10 +136,10 @@ When running the above test case, Hibernate will generate the following statemen
 Type:Prepared, Batch:True, QuerySize:1, BatchSize:30,
 Query:["insert into post (title,id) values (?,?)"],
 Params:[
-(Post nr. 1,877183623477788849),(Post nr. 2,877183623553286332),
-(Post nr. 3,877183623553286333),(Post nr. 4,877183623557480501),
-...
-(Post nr. 29,877183623574257779),(Post nr. 30,877183623574257780)
+  (Post nr. 1,877183623477788849),(Post nr. 2,877183623553286332),
+  (Post nr. 3,877183623553286333),(Post nr. 4,877183623557480501),
+  ...
+  (Post nr. 29,877183623574257779),(Post nr. 30,877183623574257780)
 ]
 ----
 
@@ -154,7 +154,7 @@ which can be used as public-facing identifiers that you'd exchange with a client
 .A TSID as a public identifier and as a typed column
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=tsid-attribute-types]
+include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=tsid-attribute-types,indent=0]
 ----
 
 === Sequences that stay usable by everyone
@@ -177,12 +177,12 @@ using a recursive CTE (`generate_series` on PostgreSQL) to draw N values in one 
 .Two mappings of one table, sharing one sequence
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/Post.java[tag=oltp-sequence]
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/Post.java[tag=oltp-sequence,indent=0]
 ----
 
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/BatchedPost.java[tag=batch-sequence]
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/BatchedPost.java[tag=batch-sequence,indent=0]
 ----
 
 Both the `Post` and the `BatchedPost` entities fetch the identifier values from the `batch_seq_post_seq` sequence, but the OLTP `Post` mapping takes one value at a time,
@@ -190,7 +190,7 @@ while the `BatchedPost` entity fetches ten per roundtrip:
 
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=batch-import]
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=batch-import,indent=0]
 ----
 
 When executing the above test case, Hibernate generates the following SQL statements:
@@ -217,28 +217,22 @@ a script that knows nothing about Hibernate can still interleave with the applic
 
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=interop]
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=interop,indent=0]
 ----
 
 When running the above code example, we get the following SQL statements:
 
 [source,sql]
 ----
-Type:Prepared, Batch:False, QuerySize:1, BatchSize:0,
 Query:["select nextval('batch_seq_post_seq')"], Params:[()]
-Type:Prepared, Batch:True, QuerySize:1, BatchSize:1,
 Query:["insert into batch_seq_post (title,id) values (?,?)"],
 Params:[(Written by the application,1)]
 
-Type:Prepared, Batch:False, QuerySize:1, BatchSize:0,
 Query:["select nextval('batch_seq_post_seq')"], Params:[()]
-Type:Prepared, Batch:False, QuerySize:1, BatchSize:0,
 Query:["insert into batch_seq_post (id, title) values (?, ?)"],
 Params:[(2,Written by an ETL job)]
 
-Type:Prepared, Batch:False, QuerySize:1, BatchSize:0,
 Query:["select nextval('batch_seq_post_seq')"], Params:[()]
-Type:Prepared, Batch:True, QuerySize:1, BatchSize:1,
 Query:["insert into batch_seq_post (title,id) values (?,?)"],
 Params:[(Written by the application again,3)]
 ----
@@ -249,7 +243,7 @@ while `batch_seq_post_seq`, shared by both `Post` and `BatchedPost`, keeps an in
 
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=increments]
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=increments,indent=0]
 ----
 
 [NOTE]
@@ -258,4 +252,463 @@ include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com
 The unused values that were fetched by a given transaction will be lost if the
 transaction rolls back.
 ====
+
+== Hibernate Types
+
+This is the gap the Hypersistence Utils library is best known for.
+Hibernate 7 maps the SQL-standard types and, increasingly, the common vendor extensions (e.g., JSON, arrays, inet).
+However, some databases, such as PostgreSQL, have a great variety of column types that are left for you to map via
+the Hibernate custom type API, and Hypersistence Utils aims to help you with this task, by providing additional
+Hibernate Types for ranges, intervals, monetary amounts, or key/value maps.
+
+Even for the types that Hibernate has added support for in recent versions, such as JSON and arrays, Hypersistence Utils
+can provide some additional features. For example, the generic `JsonType` can work with PostgreSQL, Oracle, SQL Server, or MySQL,
+without you having to change the entity mapping. And the `MultiDimensionalArrayType` can handle nested arrays, which may be convenient
+for some applications.
+
+Nevertheless, where Hibernate 7 or 6 has since caught up, we are going to mention it,
+because the honest advice is that you no longer need the library for some of the types that have been
+traditionally offered by Hypersistence Utils.
+
+=== JSON columns, portably
+
+It's common to assume that the SQL standard defines only columns that strictly adhere to the relational model.
+However, while most column types are based on the relational model, the SQL standard takes into consideration
+application needs, and, from time to time, adds support for non-relational models.
+
+For example, SQL:2003 added support for the XML data type since XML was very popular around that time.
+And because JSON has become a very common data representation, SQL:2016 added support for storing JSON objects in
+`VARCHAR`, `CLOB`, or `BLOB` column types, which was further improved in SQL:2023 via native JSON types.
+
+Some relational databases had been supporting JSON types even before 2016.
+PostgreSQL was one of the first relational databases to support JSON, adding support for a `json` column in 9.2 (2012)
+for storing JSON objects in a text-based storage, and a `jsonb` column in 9.4 (2014) that can store JSON objects
+in a binary format. MySQL added the `json` column type in 2015 with the 5.7.8 release.
+
+Having so many options to store JSON objects, the `JsonType` aims to remove this burden from the Java developer,
+and allows you to map a POJO, a `String`, a `JsonNode`, a `Map`, or a `List` to the aforementioned database-specific JSON storage types.
+
+.`JsonType` mapping example
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-columns,indent=0]
+----
+
+The reason we're using the `columnDefinition = "json"` on the columns annotated with `JsonType` is because
+this Hibernate Type maps to the JDBC `Types.OTHER`, which Hibernate cannot turn into a column type on its own,
+so the schema generator does not know what DDL type to emit for the column unless we tell it.
+If you leave the `columnDefinition` out, the schema generation fails with the following exception:
+
+[source,text]
+----
+Unable to determine SQL type name for column 'attributes' of table 'post'
+because there is no type mapping for org.hibernate.type.SqlTypes code: 1111 (OTHER)
+----
+
+This is a limitation of Hibernate's `hbm2ddl` schema generation only, and it's not as bad as it looks.
+The `hbm2ddl` tool is a prototyping aid, not something you should run in production,
+where the schema is versioned and migrated by a dedicated tool like Flyway or Liquibase.
+And once the schema is created before the application bootstraps, `JsonType` no longer needs the `columnDefinition`,
+because, at runtime, it already knows how to read and write the JSON column for the underlying database.
+
+To prove that, the following entity maps its JSON attributes with `JsonType` and no `columnDefinition` at all:
+
+.A `JsonType` mapping without any `columnDefinition`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePortability/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-no-columndef,indent=0]
+----
+
+The schema is created up front by a migration script that runs before Hibernate bootstraps,
+which is exactly what Flyway would do for you in production:
+
+.The migration script that creates the JSON schema on PostgreSQL
+[source,sql]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePortability/src/main/resources/schema-postgresql.sql[tag=schema-postgresql,indent=0]
+----
+
+Based on the underlying relational database, `JsonType` binds the JSON attribute to the column type that best fits the database's native JSON support:
+
+.The JSON column type that `JsonType` binds for each database
+[cols="1,2", options="header"]
+|===
+| Database | Column type
+
+| MySQL | `json`, bound as text
+| PostgreSQL | `jsonb`, bound as a binary object
+| SQL Server | `nvarchar(max)`, bound as text
+| Oracle | native `json`, bound as bytesfootnote:[This is what Oracle 21c and newer use. Below 21c, `JsonType` binds JSON as text, where a `clob` column fits.]
+|===
+
+Hibernate 7 has native JSON support of its own, through `@JdbcTypeCode(SqlTypes.JSON)`,
+and, most often, you are better off preferring it.
+It is dialect-aware, it needs no `columnDefinition`, and it works on all four major databases (PostgreSQL, Oracle, SQL Server, and MySQL).
+The book code repository carries both variants side by side so you can compare them.
+The same five columns, mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`, look like this:
+
+.Native Hibernate JSON mapping example
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-columns,indent=0]
+----
+
+Unlike `JsonType`, the native mapping does not need a `columnDefinition`,
+because the dialect already knows which column type to use for a JSON attribute.
+Therefore, the schema that Hibernate generates picks the right storage type for each database:
+
+.Default JSON column type generated by `@JdbcTypeCode(SqlTypes.JSON)`
+[cols="1,2", options="header"]
+|===
+| Database | Generated column type
+
+| MySQL | `json`
+| PostgreSQL | `jsonb`
+| SQL Server | `nvarchar(max)`
+| Oracle | `blob` with an `is json` check constraintfootnote:[On Oracle 21c and newer, the native `json` column type is used instead.]
+|===
+
+On Hibernate 7, the native JSON mapping and the Hypersistence Utils `JsonType` overlap significantly, but they are not interchangeable.
+The following table sums up how they compare:
+
+.`@Type(JsonType.class)` versus native `@JdbcTypeCode(SqlTypes.JSON)`
+[cols="1,2,2", options="header"]
+|===
+| | `@Type(JsonType.class)` | `@JdbcTypeCode(SqlTypes.JSON)`
+
+| Java attribute types | POJO, `JsonNode`, `Map`, `String`, `List` | POJO, `JsonNode`, `Map`, `String`, `List`
+| `hbm2ddl` schema generation | needs a `columnDefinition` | works on its own, dialect-aware
+| Schema from a migration tool | no `columnDefinition` needed | no `columnDefinition` needed
+| Dirty checking | content-based, skips no-op `UPDATE` statements | identity-based, issues phantom `UPDATE` statements
+| Hibernate version | 5 and newer | 6 and newer
+|===
+
+If you let Hibernate generate the schema for a plain document column, the native mapping is the simpler choice.
+The one behavior that still sets `JsonType` apart is how the two mappings handle dirty checking.
+
+`JsonType` compares the *parsed* JSON content when deciding whether the entity attribute has changed,
+so loading an entity and leaving its JSON attribute untouched,
+or updating the attribute with the same content, does not trigger an `UPDATE`:
+
+.`JsonType` skips the UPDATE when the JSON content is unchanged
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/test/java/com/bookstore/forum/JsonTypeAttributesTest.java[tag=dirty-checking,indent=0]
+----
+
+Running the three scenarios above, `JsonType` loads the row each time, but only the genuine content change triggers an `UPDATE`:
+
+.The SQL statements `JsonType` executes
+[source,sql]
+----
+-- touch(id): the row is loaded, and the transaction commits unchanged
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(877435976001019965)]
+-- no UPDATE is flushed
+
+-- update(..., p.setProperties(pinnedProperties())): a new instance, but equal content
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(877435976001019965)]
+-- still no UPDATE
+
+-- update(..., p.getProperties().setFlair("hot")): a real content change
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(877435976001019965)]
+
+Query:["
+update post set
+  attributes=?,
+  metadata=?,
+  properties=?,
+  raw_payload=?,
+  tags=?,
+  title=?
+where id=?"],
+Params:[(
+  {},
+  NULL(VARCHAR),
+  {"flair":"hot","attachments":["table-of-contents.pdf"],"pinned":true},
+  NULL(VARCHAR),
+  [],
+  Is Hibernate Spring Boot 4 worth reading?,
+  877435976001019965
+)]
+----
+
+The Hibernate-native JSON mapping compares object identity instead of content,
+so a mutable POJO without an `equals` method will trigger an `UPDATE` on every flush,
+even when nothing actually changed:
+
+.The native mapping issues a phantom UPDATE for an unchanged POJO
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonAttributes/src/test/java/com/bookstore/forum/NativeJsonAttributesTest.java[tag=phantom-update,indent=0]
+----
+
+The very same two scenarios now flush an `UPDATE` each, even though the JSON content never changes:
+
+.The SQL statements the native mapping executes
+[source,sql]
+----
+-- touch(id): the row is loaded, and the transaction commits unchanged
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(1)]
+-- ...yet the native mapping still flushes an UPDATE with the unchanged JSON
+Query:["
+update post set
+  attributes=cast(? as json),
+  metadata=cast(? as json),
+  properties=cast(? as json),
+  raw_payload=cast(? as json),
+  tags=cast(? as json),
+  title=?
+where id=?"],
+Params:[(
+  {},
+  NULL(VARCHAR),
+  {"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},
+  NULL(VARCHAR),
+  [],
+  Is Hibernate Spring Boot 4 worth reading?,
+  1
+)]
+
+-- update(..., p.setProperties(pinnedProperties())): a new instance, but equal content
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(1)]
+-- ...and the UPDATE fires again, with the very same JSON content
+Query:["
+update post set
+  attributes=cast(? as json),
+  metadata=cast(? as json),
+  properties=cast(? as json),
+  raw_payload=cast(? as json),
+  tags=cast(? as json),
+  title=?
+where id=?"],
+Params:[(
+  {},
+  NULL(VARCHAR),
+  {"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},
+  NULL(VARCHAR),
+  [],
+  Is Hibernate Spring Boot 4 worth reading?,
+  1
+)]
+----
+
+The reason for these unwanted `UPDATE` statements lies in how Hibernate dirty-checks a mutable attribute.
+When the entity is loaded, Hibernate takes a snapshot of its state and keeps it in the persistence context,
+and for a mutable attribute like a JSON column, that snapshot is a *deep copy* of the loaded value.
+So the managed entity and its snapshot end up holding two different `PostProperties` instances.
+
+At flush time, the dirty-checking mechanism compares the entity's current value against that snapshot,
+and since `PostProperties` does not override `equals`, the comparison falls back to object identity.
+The two instances are never identity-equal, so Hibernate concludes the attribute has changed and issues an `UPDATE`,
+even when the serialized JSON is byte-for-byte the same.
+This is why the `touch` method triggers an `UPDATE` even though it doesn't change the entity.
+The entity JSON attribute is a different object instance from the loaded value the moment the entity finishes loading.
+
+On the other hand, `JsonType` can omit these unnecessary `UPDATE` statements, because it compares the *JSON content* rather than object identity,
+so the two instances are seen as equal and no `UPDATE` is flushed.
+If you prefer the native mapping, you are better off overriding the `equals` and `hashCode` method of the POJO class wrapping the JSON content.
+This way, the dirty checking mechanism will detect that the object content has not changed and not trigger the extra `UPDATE` statements.
+
+==== How to provide a custom `ObjectMapper`
+
+Both mappings serialize through Jackson, and both let you replace the default mapper with one of your own.
+`JsonType` takes an `ObjectMapperSupplier`, wired in through a Hypersistence Utils property,
+while the native feature takes a Hibernate `FormatMapper`, wired in through a Hibernate property:
+
+[source,properties]
+----
+# Hypersistence Utils
+spring.jpa.properties.hypersistence.utils.jackson.object.mapper=\
+  com.bookstore.forum.config.CustomObjectMapperSupplier
+
+# Native Hibernate
+spring.jpa.properties.hibernate.type.json_format_mapper=\
+  com.bookstore.forum.config.CustomJsonFormatMapper
+----
+
+To see how a custom mapper can change the JSON object prior to persisting it into the database,
+we are going to create a custom mapper that renames the field names from `camelCase` to `snake_case`
+and omits all JSON attributes that contain `null` values.
+Both examples store the same POJO payload, which has a couple of camelCase fields
+and two `java.time` timestamps, one of which is left `null`:
+
+.The JSON payload POJO
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeObjectMapper/src/main/java/com/bookstore/forum/entity/PostProperties.java[tag=fields,indent=0]
+----
+
+The `snake_case` strategy renames `flairLabel` to `flair_label`,
+and `NON_NULL` inclusion drops the `editedOn` JSON attribute from the stored document when it contains a `null` value.
+Both examples build the same `Post`, set the payload above, and save it,
+so the only thing that differs is which mapping serializes it.
+
+Before we look at each side, note what we did *not* have to configure.
+On Jackson 3, `java.time` values serialize to ISO-8601 strings out of the box,
+so an `OffsetDateTime` no longer needs the `JavaTimeModule` and the `WRITE_DATES_AS_TIMESTAMPS` tweak that Jackson 2 required.
+Reading is lenient by default, too.
+A JSON document that carries an extra key that your POJO does not map is accepted rather than rejected,
+which is exactly what you want for a column whose shape evolves over time.
+The mapper therefore configures only the two things that actually differ from the Jackson 3 defaults.
+
+===== JsonType
+
+On the `JsonType` side, the supplier builds the mapper:
+
+.Custom `ObjectMapper` for `JsonType`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeObjectMapper/src/main/java/com/bookstore/forum/config/CustomObjectMapperSupplier.java[tag=mapper,indent=0]
+----
+
+The test builds the `Post`, sets the camelCase payload, and saves it:
+
+.Saving a `Post` whose JSON is serialized by the custom `ObjectMapper`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeObjectMapper/src/test/java/com/bookstore/forum/JsonTypeObjectMapperTest.java[tag=save,indent=0]
+----
+
+When the transaction flushes, the custom mapper serializes the POJO,
+and Hibernate sends the following `INSERT`, whose bind parameter carries the transformed JSON:
+
+.The SQL statement JsonType executes
+[source,sql]
+----
+Query:["
+insert into object_mapper_post (properties,title,id)
+values (
+  ?,
+  ?,
+  ?
+)"],
+Params:[(
+  {"flair_label":"must-read","pinned_by_moderator":true,"created_on":"2026-08-18T09:45:00Z"},
+  Custom ObjectMapper for JsonType,
+  1
+)]
+----
+
+The stored JSON uses `snake_case` keys, an ISO-8601 `created_on` timestamp, and no `edited_on` attribute at all.
+
+===== Hibernate native
+
+The Hibernate native solution uses the very same mapper and hands it to Hibernate's `Jackson3JsonFormatMapper`,
+delegating the remaining `FormatMapper` methods to that instance:
+
+.Custom `FormatMapper` for the native mapping
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonFormatMapper/src/main/java/com/bookstore/forum/config/CustomJsonFormatMapper.java[tag=mapper,indent=0]
+----
+
+The test is identical to the previous `JsonType` example, except that the JPA entity mapping
+uses the native `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`:
+
+.Saving a `Post` whose JSON is serialized by the custom `FormatMapper`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonFormatMapper/src/test/java/com/bookstore/forum/NativeJsonFormatMapperTest.java[tag=save,indent=0]
+----
+
+While the bind parameter values are identical to the previous `JsonType` example,
+the native mapping wraps the JSON bind parameter in a `cast(? as json)` expression:
+
+.The SQL statement the native mapping executes
+[source,sql]
+----
+Query:["
+insert into format_mapper_post (properties,title,id)
+values (cast(? as json),?,?)"],
+Params:[(
+  {"flair_label":"must-read","pinned_by_moderator":true,"created_on":"2026-08-18T09:45:00Z"},
+  Custom FormatMapper for native JSON,
+  1
+)]
+----
+
+Nevertheless, both mappings produce identical JSON objects, in spite of the additional `cast(? as json)`.
+
+==== Polymorphic JSON structures
+
+Let's assume that we have a variety of content blocks (e.g., text, image, code snippets) that the user
+can add to a given post.
+Because we are going to save the content blocks in a JSON object, we need a Jackson discriminator
+to identify the type of each block when reading it back from the database.
+For this reason, we are going to use the `@JsonTypeInfo` annotation on the base class of the content blocks,
+as illustrated by the following mapping:
+
+.The discriminator has to be a real bean property
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/main/java/com/bookstore/forum/entity/PostContentBlock.java[tag=discriminator,indent=0]
+----
+
+Since the discriminator is exposed as a genuine bean property,
+we need the `As.EXISTING_PROPERTY` option to tell Jackson to use the `type` property rather than adding a new one.
+
+Both the native `@JdbcTypeCode(SqlTypes.JSON)` and `JsonType` mappings can handle polymorphic JSON structures.
+The following example uses the PostgreSQL-specific `JsonBinaryType`, which stores the content blocks in a `jsonb` column.
+
+The test builds a `Post` whose body mixes all three block types, and saves it:
+
+.Persisting a polymorphic list of content blocks
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/test/java/com/bookstore/forum/JsonTypePolymorphismTest.java[tag=persist,indent=0]
+----
+
+The whole list is serialized into a single `jsonb` column,
+and each element carries the `type` discriminator (`text`, `code`, `image`) that lets it be revived later:
+
+.The SQL statement that persists the polymorphic JSON
+[source,sql]
+----
+Query:["
+insert into polymorphic_post (body,title,id)
+values (?,?,?)"],
+Params:[(
+  [
+    {"markdown":"Intro paragraph","type":"text"},
+    {"language":"java","source":"var x = 1;","type":"code"},
+    {"url":"https://example.com/a.png","alt":"a diagram","type":"image"}
+  ],
+  Mapping polymorphic JSON,
+  1
+)]
+----
+
+When we read the `Post` back, Jackson uses the `type` discriminator to reconstruct each element as its concrete subtype
+(e.g., `TextBlock`, `CodeBlock`, and `ImageBlock`), so the list comes back exactly as it was prior to being persisted:
+
+.Fetching the post and asserting each block's concrete type
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/test/java/com/bookstore/forum/JsonTypePolymorphismTest.java[tag=fetch,indent=0]
+----
 

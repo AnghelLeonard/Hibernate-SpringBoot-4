@@ -18,8 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The identical round-trip assertions run against every database. The concrete
- * subclasses only pick the target database and gate on its availability, which
- * is the whole point: the JsonType entity mapping does not change per database.
+ * subclasses only pick the target database, its {@code spring.sql.init} platform
+ * and gate on its availability, which is the whole point: the JsonType entity
+ * mapping has no {@code columnDefinition} and does not change per database. The
+ * schema is created before the context bootstraps by the matching
+ * {@code schema-${platform}.sql} script, standing in for a production migration
+ * tool such as Flyway, so Hibernate never generates the DDL itself.
  */
 @SpringBootTest
 @Import(TestDataSourceConfiguration.class)
