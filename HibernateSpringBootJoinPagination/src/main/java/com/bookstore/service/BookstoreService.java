@@ -1,6 +1,8 @@
 package com.bookstore.service;
 
+import com.bookstore.dto.Answer;
 import com.bookstore.dto.AuthorBookDto;
+import com.bookstore.dto.PageWithJsonView;
 import com.bookstore.repository.AuthorRepository;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -20,12 +22,13 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
     
-    public Page<AuthorBookDto> fetchPageOfAuthorsWithBooksDtoByGenre(int page, int size) {
+    public Page<Answer> fetchPageOfAuthorsWithBooksDtoByGenre(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
-        Page<AuthorBookDto> pageOfAuthors = authorRepository.fetchPageOfDto("Anthology", pageable);
+        Page<Answer> pageOfAuthors = authorRepository.fetchPageOfDto("Anthology", pageable);
+         PageWithJsonView<Answer> myPage = new PageWithJsonView(pageOfAuthors);
 
-        return pageOfAuthors;
+        return myPage;
     }
 
     public Slice<AuthorBookDto> fetchSliceOfAuthorsWithBooksDtoByGenre(int page, int size) {
@@ -52,7 +55,7 @@ public class BookstoreService {
                 = authorRepository.fetchListOfDtoNative("Anthology", pageable);
         Page<AuthorBookDto> pageOfAuthors
                 = new PageImpl(listOfAuthors, pageable,
-                        listOfAuthors.isEmpty() ? 0 : listOfAuthors.get(0).getTotal());
+                        listOfAuthors.isEmpty() ? 0 : 0);//listOfAuthors.get(0).getTotal());
 
         return pageOfAuthors;
     }

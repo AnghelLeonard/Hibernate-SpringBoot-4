@@ -7,5 +7,5 @@ public interface AuthorBookDto {
     public String getTitle(); // of book
     public String getIsbn();  // of book
    
-    public Long getTotal();
+    public Long getTotalPages();
 }

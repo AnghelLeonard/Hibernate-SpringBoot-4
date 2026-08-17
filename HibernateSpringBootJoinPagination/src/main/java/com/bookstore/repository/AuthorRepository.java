@@ -1,5 +1,6 @@
 package com.bookstore.repository;
 
+import com.bookstore.dto.Answer;
 import com.bookstore.dto.AuthorBookDto;
 import com.bookstore.entity.Author;
 import java.util.List;
@@ -20,7 +21,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
                    FROM Author a 
                    LEFT JOIN a.books b WHERE a.genre = ?1
                    """)
-    Page<AuthorBookDto> fetchPageOfDto(String genre, Pageable pageable);
+    Page<Answer> fetchPageOfDto(String genre, Pageable pageable);
 
     @Query(value = """
                    SELECT a.name AS name, a.age AS age, b.title AS title, b.isbn AS isbn
