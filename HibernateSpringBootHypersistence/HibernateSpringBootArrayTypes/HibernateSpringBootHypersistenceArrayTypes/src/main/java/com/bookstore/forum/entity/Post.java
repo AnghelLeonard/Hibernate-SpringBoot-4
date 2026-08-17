@@ -12,6 +12,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
@@ -25,10 +27,12 @@ import java.util.UUID;
  * array types. These give explicit control over the SQL array element type and,
  * critically, cover cases the Hibernate-native array mapping does not: native
  * PostgreSQL enum arrays ({@code post_status[]}) and multidimensional arrays
- * ({@code integer[][]}).
+ * ({@code float8[][]}, e.g. an embedding tensor).
  */
 @Entity
 @Table(name = "hypersistence_array_post")
+@DynamicInsert
+@DynamicUpdate
 public class Post {
 
     @Id
@@ -64,11 +68,13 @@ public class Post {
     )
     @Column(name = "status_history", columnDefinition = "post_status[]")
     private PostStatus[] statusHistory;
-
-    @Type(MultiDimensionalArrayType.class)
-    @Column(name = "rating_matrix", columnDefinition = "integer[][]")
-    private Integer[][] ratingMatrix;
     // end::enum-array[]
+
+    // tag::multidim-array[]
+    @Type(MultiDimensionalArrayType.class)
+    @Column(name = "embedding_matrix", columnDefinition = "float8[][]")
+    private double[][] embeddingMatrix;
+    // end::multidim-array[]
 
     public Post() {
     }
@@ -137,11 +143,11 @@ public class Post {
         this.statusHistory = statusHistory;
     }
 
-    public Integer[][] getRatingMatrix() {
-        return ratingMatrix;
+    public double[][] getEmbeddingMatrix() {
+        return embeddingMatrix;
     }
 
-    public void setRatingMatrix(Integer[][] ratingMatrix) {
-        this.ratingMatrix = ratingMatrix;
+    public void setEmbeddingMatrix(double[][] embeddingMatrix) {
+        this.embeddingMatrix = embeddingMatrix;
     }
 }

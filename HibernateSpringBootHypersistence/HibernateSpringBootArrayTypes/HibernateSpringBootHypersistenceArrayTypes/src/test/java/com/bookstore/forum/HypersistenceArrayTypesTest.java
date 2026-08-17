@@ -52,7 +52,7 @@ class HypersistenceArrayTypesTest {
         post.setPublicationDates(new LocalDate[]{LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)});
         post.setEditorIds(new UUID[]{EDITOR_1, EDITOR_2});
         post.setStatusHistory(new PostStatus[]{PostStatus.DRAFT, PostStatus.PUBLISHED, PostStatus.ARCHIVED});
-        post.setRatingMatrix(new Integer[][]{{5, 4}, {3, 5}, {2, 1}});
+        post.setEmbeddingMatrix(new double[][]{{0.12, 0.90, 0.31}, {0.44, 0.05, 0.87}});
 
         Post loaded = forumService.findById(forumService.save(post).getId());
 
@@ -66,7 +66,40 @@ class HypersistenceArrayTypesTest {
         assertArrayEquals(new PostStatus[]{PostStatus.DRAFT, PostStatus.PUBLISHED, PostStatus.ARCHIVED},
             loaded.getStatusHistory());
         // multidimensional array (assertArrayEquals compares nested arrays deeply)
-        assertArrayEquals(new Integer[][]{{5, 4}, {3, 5}, {2, 1}}, loaded.getRatingMatrix());
+        assertArrayEquals(new double[][]{{0.12, 0.90, 0.31}, {0.44, 0.05, 0.87}}, loaded.getEmbeddingMatrix());
+    }
+
+    @Test
+    public void enumArrayRoundTrips() {
+        // tag::enum-roundtrip[]
+        Post post = new Post("A post that moved through every status");
+        post.setStatusHistory(new PostStatus[]{
+            PostStatus.DRAFT, PostStatus.PUBLISHED, PostStatus.ARCHIVED});
+
+        Post loaded = forumService.findById(forumService.save(post).getId());
+
+        assertArrayEquals(
+            new PostStatus[]{PostStatus.DRAFT, PostStatus.PUBLISHED, PostStatus.ARCHIVED},
+            loaded.getStatusHistory());
+        // end::enum-roundtrip[]
+    }
+
+    @Test
+    public void multidimensionalTensorRoundTrips() {
+        // tag::tensor-roundtrip[]
+        // Two content chunks, each embedded as a 3-dimensional vector.
+        double[][] embeddings = {
+            {0.12, 0.90, 0.31},
+            {0.44, 0.05, 0.87}
+        };
+
+        Post post = new Post("Best books to learn Spring Boot?");
+        post.setEmbeddingMatrix(embeddings);
+
+        Post loaded = forumService.findById(forumService.save(post).getId());
+
+        assertArrayEquals(embeddings, loaded.getEmbeddingMatrix());
+        // end::tensor-roundtrip[]
     }
 
     @Test

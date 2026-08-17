@@ -5,6 +5,8 @@ import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 
 import java.util.LinkedHashMap;
@@ -24,6 +26,8 @@ import java.util.Map;
  */
 @Entity
 @Table(name = "portable_post")
+@DynamicInsert
+@DynamicUpdate
 public class Post {
 
     @Id

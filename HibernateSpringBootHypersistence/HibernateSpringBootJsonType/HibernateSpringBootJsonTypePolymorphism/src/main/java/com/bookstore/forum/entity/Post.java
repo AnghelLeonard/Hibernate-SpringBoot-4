@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ import java.util.List;
  */
 @Entity
 @Table(name = "polymorphic_post")
+@DynamicInsert
+@DynamicUpdate
 public class Post {
 
     @Id

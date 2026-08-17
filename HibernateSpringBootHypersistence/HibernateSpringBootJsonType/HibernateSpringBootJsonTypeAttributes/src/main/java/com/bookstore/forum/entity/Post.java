@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Type;
 import tools.jackson.databind.JsonNode;
 
@@ -21,8 +23,12 @@ import java.util.Map;
  * and a {@link List}. This is the flexibility the Hibernate-native
  * {@code @JdbcTypeCode(SqlTypes.JSON)} mapping cannot match on its own.
  */
+// tag::dynamic[]
 @Entity
 @Table(name = "post")
+@DynamicInsert
+@DynamicUpdate
+// end::dynamic[]
 public class Post {
 
     @Id

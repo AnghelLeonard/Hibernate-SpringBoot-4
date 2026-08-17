@@ -45,6 +45,7 @@ class NativeArrayTypesTest {
 
     @Test
     public void nativeArrayTypesRoundTrip() {
+        // tag::persist[]
         Post post = new Post("Mapping PostgreSQL arrays natively");
         post.setKeywords(new String[]{"hibernate", "arrays"});
         post.setTopics(List.of("mapping", "types"));
@@ -52,7 +53,11 @@ class NativeArrayTypesTest {
         post.setPublicationDates(new LocalDate[]{LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)});
         post.setEditorIds(new UUID[]{EDITOR_1, EDITOR_2});
 
-        Post loaded = forumService.findById(forumService.save(post).getId());
+        Long id = forumService.save(post).getId();
+        // end::persist[]
+
+        // tag::fetch[]
+        Post loaded = forumService.findById(id);
 
         assertArrayEquals(new String[]{"hibernate", "arrays"}, loaded.getKeywords());
         assertEquals(List.of("mapping", "types"), loaded.getTopics());
@@ -60,6 +65,7 @@ class NativeArrayTypesTest {
         assertArrayEquals(new LocalDate[]{LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)},
             loaded.getPublicationDates());
         assertArrayEquals(new UUID[]{EDITOR_1, EDITOR_2}, loaded.getEditorIds());
+        // end::fetch[]
     }
 
     @Test

@@ -294,6 +294,19 @@ and allows you to map a POJO, a `String`, a `JsonNode`, a `Map`, or a `List` to 
 include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-columns,indent=0]
 ----
 
+Every JSON entity in this section also carries `@DynamicInsert` and `@DynamicUpdate` at the class level:
+
+.The JSON entities use dynamic insert and update
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=dynamic,indent=0]
+----
+
+`@DynamicInsert` limits each `INSERT` to the columns we actually populate,
+while `@DynamicUpdate` keeps a column out of the `UPDATE` unless its value changed.
+This is especially relevant for JSON columns since a document can be large, and we do not want to re-send it on every flush when only another column changed.
+Because of these two annotations, the SQL statements captured throughout this section list only the columns that are actually written.
+
 The reason we're using the `columnDefinition = "json"` on the columns annotated with `JsonType` is because
 this Hibernate Type maps to the JDBC `Types.OTHER`, which Hibernate cannot turn into a column type on its own,
 so the schema generator does not know what DDL type to emit for the column unless we tell it.
@@ -379,7 +392,7 @@ The following table sums up how they compare:
 | Java attribute types | POJO, `JsonNode`, `Map`, `String`, `List` | POJO, `JsonNode`, `Map`, `String`, `List`
 | `hbm2ddl` schema generation | needs a `columnDefinition` | works on its own, dialect-aware
 | Schema from a migration tool | no `columnDefinition` needed | no `columnDefinition` needed
-| Dirty checking | content-based, skips no-op `UPDATE` statements | identity-based, issues phantom `UPDATE` statements
+| Dirty checking | content-based, skips no-op `UPDATE` statements | identity-based, issues redundant `UPDATE` statements
 | Hibernate version | 5 and newer | 6 and newer
 |===
 
@@ -427,22 +440,9 @@ from post p1_0
 where p1_0.id=?"],
 Params:[(877435976001019965)]
 
-Query:["
-update post set
-  attributes=?,
-  metadata=?,
-  properties=?,
-  raw_payload=?,
-  tags=?,
-  title=?
-where id=?"],
+Query:["update post set properties=? where id=?"],
 Params:[(
-  {},
-  NULL(VARCHAR),
   {"flair":"hot","attachments":["table-of-contents.pdf"],"pinned":true},
-  NULL(VARCHAR),
-  [],
-  Is Hibernate Spring Boot 4 worth reading?,
   877435976001019965
 )]
 ----
@@ -451,10 +451,10 @@ The Hibernate-native JSON mapping compares object identity instead of content,
 so a mutable POJO without an `equals` method will trigger an `UPDATE` on every flush,
 even when nothing actually changed:
 
-.The native mapping issues a phantom UPDATE for an unchanged POJO
+.The native mapping issues a redundant UPDATE for an unchanged POJO
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonAttributes/src/test/java/com/bookstore/forum/NativeJsonAttributesTest.java[tag=phantom-update,indent=0]
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonAttributes/src/test/java/com/bookstore/forum/NativeJsonAttributesTest.java[tag=redundant-update,indent=0]
 ----
 
 The very same two scenarios now flush an `UPDATE` each, even though the JSON content never changes:
@@ -469,25 +469,9 @@ select p1_0.id,p1_0.attributes,p1_0.metadata,
 from post p1_0
 where p1_0.id=?"],
 Params:[(1)]
--- ...yet the native mapping still flushes an UPDATE with the unchanged JSON
-Query:["
-update post set
-  attributes=cast(? as json),
-  metadata=cast(? as json),
-  properties=cast(? as json),
-  raw_payload=cast(? as json),
-  tags=cast(? as json),
-  title=?
-where id=?"],
-Params:[(
-  {},
-  NULL(VARCHAR),
-  {"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},
-  NULL(VARCHAR),
-  [],
-  Is Hibernate Spring Boot 4 worth reading?,
-  1
-)]
+-- ...yet the native mapping still flushes an UPDATE for the unchanged properties
+Query:["update post set properties=cast(? as json) where id=?"],
+Params:[({"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},1)]
 
 -- update(..., p.setProperties(pinnedProperties())): a new instance, but equal content
 Query:["
@@ -496,25 +480,9 @@ select p1_0.id,p1_0.attributes,p1_0.metadata,
 from post p1_0
 where p1_0.id=?"],
 Params:[(1)]
--- ...and the UPDATE fires again, with the very same JSON content
-Query:["
-update post set
-  attributes=cast(? as json),
-  metadata=cast(? as json),
-  properties=cast(? as json),
-  raw_payload=cast(? as json),
-  tags=cast(? as json),
-  title=?
-where id=?"],
-Params:[(
-  {},
-  NULL(VARCHAR),
-  {"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},
-  NULL(VARCHAR),
-  [],
-  Is Hibernate Spring Boot 4 worth reading?,
-  1
-)]
+-- ...and the UPDATE fires again, for the very same properties content
+Query:["update post set properties=cast(? as json) where id=?"],
+Params:[({"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},1)]
 ----
 
 The reason for these unwanted `UPDATE` statements lies in how Hibernate dirty-checks a mutable attribute.
@@ -528,6 +496,10 @@ The two instances are never identity-equal, so Hibernate concludes the attribute
 even when the serialized JSON is byte-for-byte the same.
 This is why the `touch` method triggers an `UPDATE` even though it doesn't change the entity.
 The entity JSON attribute is a different object instance from the loaded value the moment the entity finishes loading.
+
+Thanks to `@DynamicUpdate`, the redundant `UPDATE` is narrowed to the `properties` column alone,
+which is the one JSON attribute mapped to a POJO that lacks an `equals`;
+a column backed by a `Map`, `List`, `String` or `JsonNode` has value-based equality, so it would be spared even if it were populated.
 
 On the other hand, `JsonType` can omit these unnecessary `UPDATE` statements, because it compares the *JSON content* rather than object identity,
 so the two instances are seen as equal and no `UPDATE` is flushed.
@@ -602,11 +574,7 @@ and Hibernate sends the following `INSERT`, whose bind parameter carries the tra
 ----
 Query:["
 insert into object_mapper_post (properties,title,id)
-values (
-  ?,
-  ?,
-  ?
-)"],
+values (?,?,?)"],
 Params:[(
   {"flair_label":"must-read","pinned_by_moderator":true,"created_on":"2026-08-18T09:45:00Z"},
   Custom ObjectMapper for JsonType,
@@ -710,5 +678,168 @@ When we read the `Post` back, Jackson uses the `type` discriminator to reconstru
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/test/java/com/bookstore/forum/JsonTypePolymorphismTest.java[tag=fetch,indent=0]
+----
+
+=== Array columns
+
+Unlike other relational databases that added support for array column types later,
+the array support in PostgreSQL goes back to its very inception in 1986, as illustrated by Michael Stonebraker and Lawrence A. Rowe's
+paper, https://www.researchgate.net/publication/2790621_The_design_of_POSTGRES[The Design of POSTGRES].
+So, right from the start, PostgreSQL provided support for variable-length multi-dimensional arrays.
+
+Just like PostgreSQL, Hypersistence Utils also offered support for PostgreSQL arrays from the very beginning in 2017,
+and with time, the library added support for `String[]`, `int[]` or other numerical arrays, `List<String>`, `LocalDate[]`, `UUID[]`,
+enum arrays and even multidimensional arrays.
+
+On the other hand, Hibernate added support for arrays in version 6.0, which was released in 2022.
+Just like with JSON, the native array types of Hibernate provide better integration with the `hbm2ddl` schema generation tool,
+and they are preferred over the Hypersistence Utils array types for many common use cases.
+
+==== Native Hibernate arrays
+
+Hibernate 7 maps the common single-dimension array and collection types natively, with no annotation and no `columnDefinition`.
+Declare the attributes as plain Java arrays or a `List`, and the dialect picks the SQL array type for you:
+
+.Single-dimension arrays mapped natively
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=mapping,indent=0]
+----
+
+On PostgreSQL, these map to a `varchar(255) array` for the `String[]` and the `List<String>`,
+an `integer array` for the `Integer[]`, a `date array` for the `LocalDate[]`, and a `uuid array` for the `UUID[]`.
+The test persists a `Post` carrying all five attributes:
+
+.Persisting a Post with natively-mapped arrays
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArrayTypes/src/test/java/com/bookstore/forum/NativeArrayTypesTest.java[tag=persist,indent=0]
+----
+
+Hibernate binds each attribute as a SQL array literal in a single `INSERT`:
+
+.The SQL statement the native array mapping executes
+[source,sql]
+----
+Query:["
+insert into native_array_post
+  (editor_ids,keywords,publication_dates,scores,title,topics,id)
+values (?,?,?,?,?,?,?)"],
+Params:[(
+  {"c65a3bcb-8b36-46d4-bddb-ae96ad016eb1","72e95717-5294-4c15-aa64-a3631cf9a800"},
+  {"hibernate","arrays"},
+  {"2026-01-01","2026-02-01"},
+  {"5","4","5"},
+  Mapping PostgreSQL arrays natively,
+  {"mapping","types"},
+  1
+)]
+----
+
+Fetching the `Post` back rebuilds each Java array from the associated SQL array columns:
+
+.Fetching the Post and asserting the arrays
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArrayTypes/src/test/java/com/bookstore/forum/NativeArrayTypesTest.java[tag=fetch,indent=0]
+----
+
+However, not all array types are supported natively by Hibernate 7, and the Hypersistence Utils library still provides additional support for
+non-trivial mappings, such as enum and multidimensional arrays.
+
+==== Enum arrays
+
+Mapped natively, a `PostStatus[]` would fall back to an *ordinal* `smallint array`:
+the database stores `0, 1, 2` instead of `DRAFT, PUBLISHED, ARCHIVED`,
+which has several disadvantages:
+
+* the integer ordinals are less readable than the enum names;
+* adding a new enum value in the middle of the current enumeration shifts the ordinals, breaking the integer arrays stored previously;
+* inserting a `smallint` value that has no associated Java enum is valid for a `smallint array`, but it will fail at runtime when loading the array column value.
+
+For these reasons, Hypersistence Utils provides an `EnumArrayType` that can bind a `PostStatus[]` attribute
+to a native PostgreSQL `post_status[]` enum array,
+so the values are stored as their names and the column carries the database enum type:
+
+.Mapping a Java enum array to a native `post_status[]`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=enum-array,indent=0]
+----
+
+[NOTE]
+====
+The PostgreSQL enum type has to exist before Hibernate generates the table.
+Put `CREATE TYPE post_status AS ENUM (...)` in `schema.sql` and leave `spring.jpa.defer-datasource-initialization` at its default of `false`,
+so that the schema initialization script runs *before* the `EntityManagerFactory` is bootstrapped.
+====
+
+The test stores a post that contains all status values, and reads the same enum constants back:
+
+.Round-tripping a native enum array
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/test/java/com/bookstore/forum/HypersistenceArrayTypesTest.java[tag=enum-roundtrip,indent=0]
+----
+
+Because the `Post` entity is annotated with `@DynamicInsert`, the statement lists only the columns we actually set,
+rather than all nine, so the `status_history` array stands out, bound as a native enum literal and not as an ordinal `smallint[]`:
+
+.The SQL statement the enum array mapping executes
+[source,sql]
+----
+Query:["
+insert into hypersistence_array_post (status_history,title,topics,id)
+values (?,?,?,?)"],
+Params:[(
+  {"DRAFT","PUBLISHED","ARCHIVED"},
+  A post that moved through every status,
+  {},
+  5
+)]
+----
+
+==== Multidimensional arrays
+
+The native array mapping doesn't work with nested arrays.
+If the entity contains an `Integer[][]` entity attribute, when the `EntityManagerFactory` bootstraps,
+we are going to get a _"Nested arrays (with the exception of byte[][]) are not supported"_ failure message.
+
+Yet a multidimensional numeric array is a natural fit for AI workloads.
+For example, we could persist a small tensor of embedding vectors next to a document,
+ready to feed a RAG pipeline or an MCP server without a round-trip to a separate vector store.
+
+The `MultiDimensionalArrayType` from Hypersistence Utils addresses this mapping requirement,
+allowing us to map a `double[][]` array to a PostgreSQL `float8[][]` column type.
+A dense tensor has a value in every cell, so we use the primitive `double[][]` rather than the boxed `Double[][]`, which would allow `null` elements we never need:
+
+.Mapping an embedding tensor as a `float8[][]`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=multidim-array,indent=0]
+----
+
+The test saves an embedding tensor and reads it back from the database:
+
+.Round-tripping an embedding tensor
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/test/java/com/bookstore/forum/HypersistenceArrayTypesTest.java[tag=tensor-roundtrip,indent=0]
+----
+
+The nested Java array containing the tensor is bound as a nested SQL array by the `MultiDimensionalArrayType`:
+
+.The SQL statement the multidimensional array mapping executes
+[source,sql]
+----
+Query:["
+insert into hypersistence_array_post (embedding_matrix,title,topics,id)
+values (?,?,?,?)"],
+Params:[(
+  {{"0.12","0.9","0.31"},{"0.44","0.05","0.87"}},
+  Best books to learn Spring Boot?,
+  {},
+  3
+)]
 ----
 

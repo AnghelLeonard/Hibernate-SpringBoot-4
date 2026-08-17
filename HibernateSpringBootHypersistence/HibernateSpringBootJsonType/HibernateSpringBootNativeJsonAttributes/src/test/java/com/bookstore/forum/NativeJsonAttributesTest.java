@@ -81,8 +81,8 @@ public class NativeJsonAttributesTest {
     }
 
     @Test
-    public void nativeIssuesAPhantomUpdateForAnUnchangedPojo() {
-        // tag::phantom-update[]
+    public void nativeIssuesARedundantUpdateForAnUnchangedPojo() {
+        // tag::redundant-update[]
         Post post = new Post("Is Hibernate Spring Boot 4 worth reading?");
         post.setProperties(pinnedProperties());
         Long id = forumService.save(post).getId();
@@ -97,7 +97,7 @@ public class NativeJsonAttributesTest {
         reset();
         forumService.update(id, p -> p.setProperties(pinnedProperties()));
         assertUpdateCount(1);
-        // end::phantom-update[]
+        // end::redundant-update[]
     }
 
     private PostProperties pinnedProperties() {

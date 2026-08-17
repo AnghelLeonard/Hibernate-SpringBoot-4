@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,6 +39,8 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "native_array_post")
+@DynamicInsert
+@DynamicUpdate
 public class Post {
 
     @Id
@@ -45,6 +49,7 @@ public class Post {
 
     private String title;
 
+    // tag::mapping[]
     private String[] keywords;
 
     private List<String> topics = new ArrayList<>();
@@ -54,6 +59,7 @@ public class Post {
     private LocalDate[] publicationDates;
 
     private UUID[] editorIds;
+    // end::mapping[]
 
     public Post() {
     }
