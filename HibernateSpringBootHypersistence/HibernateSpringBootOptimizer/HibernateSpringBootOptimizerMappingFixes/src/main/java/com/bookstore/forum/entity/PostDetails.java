@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
  *       to {@code EAGER}; declared {@code LAZY} here.</li>
  * </ul>
  */
+// tag::mapsid[]
 @Entity
 @Table(name = "fixed_post_details")
 public class PostDetails {
@@ -31,6 +32,7 @@ public class PostDetails {
     @Id
     private Long id;
 
+    // end::mapsid[]
     @Column(name = "created_on")
     private LocalDateTime createdOn = LocalDateTime.now();
 
@@ -74,4 +76,6 @@ public class PostDetails {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+    // tag::mapsid[]
 }
+// end::mapsid[]

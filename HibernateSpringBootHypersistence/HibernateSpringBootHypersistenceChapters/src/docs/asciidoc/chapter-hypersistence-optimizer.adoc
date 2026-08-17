@@ -1,0 +1,154 @@
+= Enforcing Best Practices with Hypersistence Optimizer
+Vlad Mihalcea
+:source-language: java
+:sourcedir: {examplesdir}
+
+In this chapter, we are going to see how Hypersistence Optimizer turns the performance best practices
+from this book into checks that run inside your build.
+
+This book has spent hundreds of pages explaining which mappings are fast and which are slow,
+but all this knowledge is only useful if it survives the next commit.
+While having someone review your pull requests is a great idea,
+it is not a guarantee that every regression will be caught, especially when so many layers are being abstracted away by Spring Boot.
+
+So, a much better practice is to automate the checks, which ensure that your mappings and configurations are not only correct,
+but also allow your application to perform as required by the Service Level Agreements (SLAs) of your business.
+
+For instance, what if someone joins the team and adds a `@ManyToOne` annotation using the default `FetchType.EAGER`
+because the IDE autocompleted it?
+Or, what if someone leaves the https://stackoverflow.com/questions/30549489/what-is-this-spring-jpa-open-in-view-true-property-in-spring-boot[Open Session in View (OSIV)] mode enabled, which is a common source of N+1 problems?
+Even if you know all these rules, that is not sufficient, since not everyone on the team may be aware of them,
+and even if they are, they may forget to apply them, especially when there is a rush to deliver a new feature.
+
+https://vladmihalcea.com/hypersistence-optimizer/[Hypersistence Optimizer] addresses this problem by scanning
+your `EntityManagerFactory` and reporting each performance-related violation as an `Event` object.
+Because it is an object and not just a log line, you can assert on it programmatically.
+Therefore, a mapping regression can fail a build the same way a broken unit test does.
+
+The scanner inspects three things, and we are going to take them one at a time:
+
+* the **JPA entity mappings**,
+* the **Hibernate configuration**, and
+* the **runtime** behavior that no annotation review can catch, such as long-running queries or transactions.
+
+In the end, we are going to turn all three into a quality gate that enforces the best practices from this book
+in your build, so that you can be sure that your application will perform as expected.
+
+[NOTE]
+====
+Hypersistence Optimizer is a commercial product and is not published to Maven Central,
+so the projects in this chapter are **not built by default**.
+They are contributed by Maven profiles that activate only when the artifact is present in your local repository.
+
+If you don't have the library in your Maven repository, the rest of the test project builds normally.
+If you do have the tool, just make sure that you are using the `jakarta`-classified artifact
+because Spring Boot 4 uses Jakarta Persistence.
+
+See `HibernateSpringBootOptimizer/README.md` for the details about how to build the testing module.
+====
+
+== Adding the Optimizer
+
+Enabling the Optimizer is as easy as declaring just one bean:
+
+.Registering the Hypersistence Optimizer bean
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerKickoff/src/main/java/com/bookstore/forum/config/HypersistenceConfiguration.java[tag=bean,indent=0]
+----
+
+When this bean is constructed at runtime, it scans every JPA and Hibernate mapping,
+as well as the entire Hibernate configuration that bootstraps the `EntityManagerFactory`.
+
+The results are available through the `getEvents()` method, and each `Event` carries a priority (`BLOCKER`, `CRITICAL`, or `MAJOR`),
+a description of what is wrong and why, and a link to the documentation that provides more details about the associated performance rule.
+
+The rest of this chapter walks the same forum through the three kinds of events that the scan produces.
+
+== Mapping issues
+
+The first thing the Optimizer inspects is your entity mappings.
+Almost everything this book has taught about associations and identifiers shows up here,
+reported as an `Event` the moment you get the mapping wrong.
+
+=== The forum, mapped badly
+
+The first example project we are going to analyze is `HibernateSpringBootOptimizerKickoff`,
+which you can find in the `HibernateSpringBootOptimizer` module of the book code repository.
+
+Let's consider that we have the following `PostDetails` entity mapping in our code base,
+which is not very different from many examples you are going to stumble upon in articles or on Stack Overflow:
+
+.The child side of a one-to-one, mapped badly
+[source,java]
+----
+@Entity
+@Table(name = "kickoff_post_details")
+public class PostDetails {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToOne
+    private Post post;
+}
+----
+
+At first glance, nothing in this mapping seems exotic or out of place.
+However, there are two defects in these few lines of code.
+First, the `PostDetails` row carries its own surrogate key instead of sharing the identifier
+with the parent `Post` entity,
+which costs an extra column, an extra sequence, and a unique index.
+Second, `@OneToOne` defaults to the `EAGER` fetching strategy,
+so loading the details entity will always load the associated post, whether or not we actually need it.
+
+When you boot the application, the Optimizer reports **fourteen** issues in total,
+of which six come from the entity mappings,
+as illustrated by the following `OptimizerKickoffTest`:
+
+.The six mapping issues reported by the scan
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerKickoff/src/test/java/com/bookstore/forum/OptimizerKickoffTest.java[tag=mapping-events,indent=0]
+----
+
+The other eight issues come from the configuration, and we are going to look at them in the next section.
+
+[TIP]
+====
+The examples run on PostgreSQL, where `@GeneratedValue` resolves to a sequence generator.
+
+On MySQL, the same model reports four `TableGeneratorEvent`s as well,
+because MySQL has no sequences, so `@GeneratedValue` has to fall back to a table generator.
+
+The Optimizer recommends `IDENTITY` in that case, although `IDENTITY` disables JDBC batch inserts.
+However, there is a way to enable batch inserts with `IDENTITY` on MySQL, but it requires a
+very complex mapping that is beyond the scope of this chapter.
+You can find a working example in this https://github.com/vladmihalcea/high-performance-java-persistence/blob/0f8f5a4361fb8323b6151010324811ea6408a0e0/core/src/test/java/com/vladmihalcea/hpjp/hibernate/batch/identity/stateless/MySQLIdentityStatelessSessionTest.java#L17[GitHub repository].
+====
+
+=== The mappings this book has argued for
+
+In the second project, `HibernateSpringBootOptimizerMappingFixes`, we will have all the previous mapping issues fixed,
+as illustrated by the following `PostDetails` entity:
+
+.Sharing the identifier instead of inventing a new one
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerMappingFixes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=mapsid,indent=0]
+----
+
+Each change clears a specific event:
+
+* `FetchType.LAZY` on both associations clears the `EagerFetchingEvent`, once for each association.
+* `@MapsId` on top of a bare `@Id Long id` clears the `OneToOneWithoutMapsIdEvent`,
+  and the surrogate key goes away with it.
+* `optional = false` on the parent side of the `@OneToOne` clears the `OneToOneParentSideEvent`.
+  Only when Hibernate knows that the row must exist can it proxy the association,
+  instead of running a query to find out whether it should store a `null`.
+* `Set<Tag>` instead of `List<Tag>` clears the `ManyToManyListEvent`.
+  Removing one tag now deletes a single join-table row,
+  rather than deleting all of them and re-inserting the ones that survived.
+* Adding the `addPostComment` and `removePostComment` methods clears the `BidirectionalSynchronizationEvent`.
+
