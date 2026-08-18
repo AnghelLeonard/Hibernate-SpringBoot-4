@@ -24,7 +24,7 @@ import java.util.Map;
  * Utils supplies:
  *
  * <ul>
- *   <li>{@link Range} over a {@code tsrange} column ({@code publicationPeriod})
+ *   <li>{@link Range} over a {@code tsrange} column ({@code availabilityPeriod})
  *       via {@link PostgreSQLRangeType} &mdash; a window with inclusive/exclusive
  *       bounds and open-ended {@code infinity}. Hibernate ships no range type.</li>
  *   <li>A {@link Duration} mapped to a full PostgreSQL {@code interval}
@@ -57,13 +57,13 @@ public class PostDetails {
     // end::mapsid[]
 
     /**
-     * Publication window as a PostgreSQL {@code tsrange}. Ranges have no native
+     * Availability window as a PostgreSQL {@code tsrange}. Ranges have no native
      * Hibernate mapping; {@link PostgreSQLRangeType} is required.
      */
     // tag::pg-types[]
     @Type(PostgreSQLRangeType.class)
-    @Column(name = "publication_period", columnDefinition = "tsrange")
-    private Range<LocalDateTime> publicationPeriod;
+    @Column(name = "availability_period", columnDefinition = "tsrange")
+    private Range<LocalDateTime> availabilityPeriod;
 
     /**
      * Read-time budget as a full PostgreSQL {@code interval} via Hypersistence
@@ -101,12 +101,12 @@ public class PostDetails {
         this.post = post;
     }
 
-    public Range<LocalDateTime> getPublicationPeriod() {
-        return publicationPeriod;
+    public Range<LocalDateTime> getAvailabilityPeriod() {
+        return availabilityPeriod;
     }
 
-    public void setPublicationPeriod(Range<LocalDateTime> publicationPeriod) {
-        this.publicationPeriod = publicationPeriod;
+    public void setAvailabilityPeriod(Range<LocalDateTime> availabilityPeriod) {
+        this.availabilityPeriod = availabilityPeriod;
     }
 
     public Duration getReadTimeBudget() {

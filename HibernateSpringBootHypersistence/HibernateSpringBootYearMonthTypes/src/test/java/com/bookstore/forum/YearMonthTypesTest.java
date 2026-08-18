@@ -46,11 +46,13 @@ public class YearMonthTypesTest {
 
     @Test
     public void integerAndDateMappingsRoundTripTheSameYearMonth() {
+        // tag::persist[]
         PostDetails details = new PostDetails("Mapping YearMonth on MySQL");
         details.setPublishedOn(YearMonth.of(2026, 7));
         details.setArchivedOn(YearMonth.of(2026, 12));
 
         Long id = forumService.save(details).getId();
+        // end::persist[]
 
         // The integer mapping stores a compact numeric (202607), the date mapping
         // stores the first day of the month (2026-12-01) — verified at the raw
@@ -62,9 +64,11 @@ public class YearMonthTypesTest {
         assertEquals(202607, publishedOnColumn);
         assertEquals("2026-12-01", archivedOnColumn);
 
+        // tag::fetch[]
         PostDetails loaded = forumService.findById(id);
         assertEquals(YearMonth.of(2026, 7), loaded.getPublishedOn());
         assertEquals(YearMonth.of(2026, 12), loaded.getArchivedOn());
+        // end::fetch[]
     }
 
     @Test

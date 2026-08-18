@@ -12,12 +12,12 @@ import java.util.List;
 public interface PostDetailsRepository extends JpaRepository<PostDetails, Long> {
 
     /**
-     * Finds every thread whose publication {@code tsrange} contains the given
+     * Finds every thread whose availability {@code tsrange} contains the given
      * timestamp, using the PostgreSQL range containment operator {@code @>}.
      */
     @Query(value = """
         SELECT * FROM post_details p
-        WHERE p.publication_period @> CAST(:moment AS timestamp)
+        WHERE p.availability_period @> CAST(:moment AS timestamp)
         """, nativeQuery = true)
     List<PostDetails> findPublishedAt(@Param("moment") String moment);
 

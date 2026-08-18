@@ -50,33 +50,39 @@ class PostgreSQLTypesTest {
 
     @Test
     public void rangeIntervalAndHstoreRoundTrip() {
+        // tag::persist[]
         PostDetails details = new PostDetails(new Post("PostgreSQL types"));
-        details.setPublicationPeriod(Range.closed(
+        details.setAvailabilityPeriod(Range.closed(
             LocalDateTime.of(2026, 1, 1, 0, 0, 0),
             LocalDateTime.of(2026, 12, 31, 0, 0, 0)));
         details.setReadTimeBudget(Duration.ofMinutes(8).plusSeconds(30));
         details.setAttributes(Map.of("difficulty", "advanced", "language", "en"));
 
-        PostDetails loaded = forumService.findDetails(forumService.savePostWithDetails(details).getId());
+        Long id = forumService.savePostWithDetails(details).getId();
+        // end::persist[]
 
-        assertEquals(LocalDateTime.of(2026, 1, 1, 0, 0, 0), loaded.getPublicationPeriod().lower());
-        assertEquals(LocalDateTime.of(2026, 12, 31, 0, 0, 0), loaded.getPublicationPeriod().upper());
+        // tag::fetch[]
+        PostDetails loaded = forumService.findDetails(id);
+
+        assertEquals(LocalDateTime.of(2026, 1, 1, 0, 0, 0), loaded.getAvailabilityPeriod().lower());
+        assertEquals(LocalDateTime.of(2026, 12, 31, 0, 0, 0), loaded.getAvailabilityPeriod().upper());
         assertEquals(Duration.ofMinutes(8).plusSeconds(30), loaded.getReadTimeBudget());
         assertEquals("advanced", loaded.getAttributes().get("difficulty"));
         assertEquals("en", loaded.getAttributes().get("language"));
+        // end::fetch[]
     }
 
     @Test
     public void rangeContainmentAndHstoreExistQueries() {
         PostDetails inWindow = new PostDetails(new Post("Active in June 2026"));
-        inWindow.setPublicationPeriod(Range.closed(
+        inWindow.setAvailabilityPeriod(Range.closed(
             LocalDateTime.of(2026, 1, 1, 0, 0, 0),
             LocalDateTime.of(2026, 12, 31, 0, 0, 0)));
         inWindow.setAttributes(Map.of("difficulty", "advanced"));
         Long inWindowId = forumService.savePostWithDetails(inWindow).getId();
 
         PostDetails outOfWindow = new PostDetails(new Post("Active in 2025 only"));
-        outOfWindow.setPublicationPeriod(Range.closed(
+        outOfWindow.setAvailabilityPeriod(Range.closed(
             LocalDateTime.of(2025, 1, 1, 0, 0, 0),
             LocalDateTime.of(2025, 12, 31, 0, 0, 0)));
         outOfWindow.setAttributes(Map.of("language", "en"));

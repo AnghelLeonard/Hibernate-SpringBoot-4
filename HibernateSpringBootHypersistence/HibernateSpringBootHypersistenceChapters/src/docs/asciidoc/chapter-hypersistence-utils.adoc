@@ -80,17 +80,17 @@ and, based on where the identifier generation takes place, we can have:
 
 * Application-generated identifiers, such as `UUID`.
 * Database-generated identifiers, such as `IDENTITY` or `SEQUENCE`,
-  which are covered by the SQL Standard and supported by many relational database systems.
+which are covered by the SQL Standard and supported by many relational database systems.
 
 For both categories of identifier generators,
 the Hypersistence Utils library provides alternatives that can be more efficient and more flexible than the standard solutions supported by Hibernate:
 
 * A client-generated, time-sorted identifier,
-  inspired by the https://en.wikipedia.org/wiki/Snowflake_ID[Snowflake identifier] that https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake[Twitter] used to overcome the fact that Cassandra didn't have a sequential identifier generator.
+inspired by the https://en.wikipedia.org/wiki/Snowflake_ID[Snowflake identifier] that https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake[Twitter] used to overcome the fact that Cassandra didn't have a sequential identifier generator.
 * A bulk-fetch sequence identifier generator that,
-  unlike the Hibernate `pooled` and `pooled-lo` identifier generators,
-  can use a database sequence that has an increment size of one,
-  leaving no gaps when the sequence is used by other clients, such as ETL jobs or database triggers.
+unlike the Hibernate `pooled` and `pooled-lo` identifier generators,
+can use a database sequence that has an increment size of one,
+leaving no gaps when the sequence is used by other clients, such as ETL jobs or database triggers.
 
 === Identifiers that sort themselves: `@Tsid`
 
@@ -172,7 +172,7 @@ that calls `nextval` on the same database sequence will take one identifier and 
 because the pooling optimizer lives in the application, not in the database.
 
 `BatchSequenceGenerator` addresses this shortcoming by *fetching* the actual sequence values from the database
-using a recursive CTE (`generate_series` on PostgreSQL) to draw N values in one statement:
+using a recursive CTE, or `generate_series` on PostgreSQL, to draw N values in one statement:
 
 .Two mappings of one table, sharing one sequence
 [source,java]
@@ -842,4 +842,182 @@ Params:[(
   3
 )]
 ----
+
+=== Database-specific types
+
+Apart from JSON and arrays, PostgreSQL has a great variety of types you can use,
+such as ranges, intervals, `hstore`, `inet`, `citext`, for which JPA has no built-in support.
+
+For example, let's consider that the `PostDetails` entity needs to store the following attributes:
+
+* `availabilityPeriod` - the time window during which the post is visible, which can be bounded (a start and end timestamp) or left open-ended, mapped to a PostgreSQL `tsrange`.
+* `readTimeBudget` - the estimated reading time of the post (e.g., the commonly-used "5 min read" indicator), mapped to an `interval`.
+* `attributes` - free-form key/value metadata, such as `locale=en` or `source=newsletter`, mapped to an `hstore`.
+
+Since JPA doesn't map any of these PostgreSQL-specific column types, each entity attribute is handled by a matching Hypersistence Utils custom Type:
+
+.The `PostDetails` entity with the aforementioned PostgreSQL-specific column mappings
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=pg-types,indent=0]
+----
+
+The following test persists a `Post` together with its `PostDetails`,
+setting the availability window, the read-time budget, and a couple of `hstore` attributes:
+
+.Persisting a Post and its PostDetails
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/test/java/com/bookstore/forum/PostgreSQLTypesTest.java[tag=persist,indent=0]
+----
+
+Hibernate inserts the parent `Post` entity first, then the `PostDetails` record,
+binding the `tsrange` window, the `interval` budget, and the `hstore` map through the Hypersistence Utils custom Types:
+
+.The SQL statements executed when persisting the PostDetails
+[source,sql]
+----
+Query:["select nextval('post_seq')"], Params:[()]
+
+Query:["insert into post (title,id) values (?,?)"], Params:[(PostgreSQL types,1)]
+
+Query:["
+insert into post_details (attributes,availability_period,read_time_budget,id)
+values (?,?,?,?)"],
+Params:[(
+  {difficulty=advanced, language=en},
+  [2026-01-01T00:00,2026-12-31T00:00],
+  8 mins 30 secs,
+  1
+)]
+----
+
+Reading the `PostDetails` back rebuilds the `Range`, the `Duration` and the `Map` from their PostgreSQL columns:
+
+.Fetching the PostDetails and asserting each type
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/test/java/com/bookstore/forum/PostgreSQLTypesTest.java[tag=fetch,indent=0]
+----
+
+Notice the identifiers in the SQL above: the `PostDetails` row is inserted with `id = 1`, the very same value as its `Post` entity,
+with which it forms a one-to-one relationship.
+That is due to the `@MapsId` annotation, and it is the mapping you should use by default
+whenever a child entity is in a strict one-to-one relationship with its parent:
+
+.`@MapsId` shares the parent's identifier
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=mapsid,indent=0]
+----
+
+The `PostDetails` takes the `Post`'s primary key as its own,
+so there is no separate surrogate key and no extra foreign-key column:
+the `id` column of the `post_details` table is both the primary key and the foreign key referencing the `post` table.
+This is the one-to-one mapping the Hypersistence Optimizer recommends, since it avoids the redundant column that a naive `@OneToOne` would add.
+
+==== What Hibernate 7 now maps by itself
+
+Not every one of these types still needs the Hypersistence Utils library,
+and it is worth knowing which.
+The code repository has a second module with the *native* equivalents,
+so the comparison is validated by integration tests, rather than being asserted theoretically:
+
+[cols="1,3", options="header"]
+|===
+| PostgreSQL type | Hibernate 7.3 support
+
+| `interval`
+| **Native.** `@JdbcTypeCode(SqlTypes.INTERVAL_SECOND)` on a `Duration` produces
+`interval second(6)`.
+
+| `inet`
+| **Native.** A plain `java.net.InetAddress` field maps to `inet` with no
+annotation at all.
+
+| `citext`
+| **Half.** `columnDefinition = "citext"` gives you a case-insensitive *unique
+constraint*, but Hibernate binds query parameters as `varchar`, so a derived
+query is still case-**sensitive** unless you write `CAST(:name AS citext)`.
+
+| `tsrange`
+| Hypersistence Utils only (`PostgreSQLRangeType`).
+
+| `hstore`
+| Hypersistence Utils only (`PostgreSQLHStoreType`).
+|===
+
+[WARNING]
+====
+When querying an `hstore` column,
+use the function form `exist(attributes, :key)` rather than the `?` operator
+because JDBC interprets the `?` symbol as a bind parameter placeholder and the prepared statement
+would never get to reach PostgreSQL.
+====
+
+=== `YearMonth`, on any database
+
+While `java.time.YearMonth` has no native Hibernate mapping,
+Hypersistence Utils offers two options, and which one you should use depends on
+how you plan to read the value from the database table column:
+
+.The same `YearMonth`, stored in two ways
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=yearmonth-fields,indent=0]
+----
+
+`YearMonthIntegerType` stores `2026-07` as the integer `202607`.
+That is compact, it sorts correctly, and it reads well in a report.
+`YearMonthDateType` stores it as the `date` `2026-07-01`,
+which is what you want if SQL date functions or a BI tool need to work with the column.
+
+The following test stores a `PostDetails` with both mappings populated,
+`publishedOn` set to July 2026 and `archivedOn` to December 2026:
+
+.Persisting a PostDetails with two YearMonth mappings
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/test/java/com/bookstore/forum/YearMonthTypesTest.java[tag=persist,indent=0]
+----
+
+In the generated `INSERT`, `publishedOn` is bound as the integer `202607`,
+while `archivedOn` is bound as the `date` `2026-12-01`:
+
+.The SQL statement that persists the two YearMonth columns
+[source,sql]
+----
+Query:["
+insert into year_month_post_details (archived_on,published_on,title,id)
+values (?,?,?,?)"],
+Params:[(
+  2026-12-01,
+  202607,
+  Mapping YearMonth on MySQL,
+  1
+)]
+----
+
+Reading the `PostDetails` back, both columns rebuild the exact same `YearMonth`, regardless of how they were stored:
+
+.Fetching the PostDetails and asserting both YearMonth values
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/test/java/com/bookstore/forum/YearMonthTypesTest.java[tag=fetch,indent=0]
+----
+
+There is one more thing to consider when the `YearMonth` column is queried by *range*.
+The integer encoding is not contiguous.
+Between every December and the following January there are 88 integer values
+that have no associated `YearMonth` (e.g., `202613` to `202700`),
+so a range that crosses a year boundary spans a far wider integer interval than the handful of real months it actually contains.
+
+On PostgreSQL, once a table holds more distinct year-months than the column's statistics target (100 by default),
+range selectivity is estimated from a histogram, and this non-contiguous domain skews the estimate.
+When running a test against a 60,000-row table, a `BETWEEN` spanning December 2026 and January 2027 was estimated at about 660 rows
+against the integer `publishedOn` mapping versus 200 against the date `archivedOn` mapping, the true count being 200.
+
+Equality and `IN` lookups are unaffected, and MySQL stays accurate either way, through index dives or a per-value histogram.
+So for range-heavy `YearMonth` querying on PostgreSQL, `YearMonthDateType` gives the optimizer a better distribution.
+The `YearMonthOptimizerSelectivityTest` in the book's code repository reproduces these execution plans on both databases.
 
