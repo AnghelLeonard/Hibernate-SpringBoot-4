@@ -4,8 +4,11 @@ import com.bookstore.forum.config.DatabaseType;
 import com.bookstore.forum.config.EnabledIfDatabaseAvailable;
 import com.bookstore.forum.config.TestDataSourceConfiguration;
 import com.bookstore.forum.entity.Post;
+import com.bookstore.forum.entity.PostStatus;
 import com.bookstore.forum.repository.PostJpaRepository;
 import com.bookstore.forum.repository.PostRepository;
+import com.bookstore.forum.repository.PostSummary;
+import com.bookstore.forum.service.ForumService;
 import io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -13,6 +16,7 @@ import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -51,6 +55,14 @@ class BaseJpaRepositoryTest {
     @Autowired
     private PostJpaRepository postJpaRepository;
 
+    @Autowired
+    @Qualifier("forumService")
+    private ForumService forumService;
+
+    @Autowired
+    @Qualifier("antiPatternForumService")
+    private ForumService antiPatternForumService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -83,9 +95,9 @@ class BaseJpaRepositoryTest {
         return detached;
     }
 
-    // tag::standard-save[]
     @Test
     public void standardSaveOnDetachedEntityTriggersSelectThenUpdate() {
+        // tag::standard-save[]
         Long id = persistPost("Original title");
 
         transactionTemplate.executeWithoutResult(status -> {
@@ -96,12 +108,12 @@ class BaseJpaRepositoryTest {
             postJpaRepository.save(detached);
             entityManager.flush();
 
-            // save() is a merge: it reads the row before updating it.
+            // save() calls merge, so it reads the row before updating it.
             SQLStatementCountValidator.assertSelectCount(1);
             SQLStatementCountValidator.assertUpdateCount(1);
         });
+        // end::standard-save[]
     }
-    // end::standard-save[]
 
     // tag::base-update[]
     @Test
@@ -135,7 +147,7 @@ class BaseJpaRepositoryTest {
     }
 
     @Test
-    public void updateAllIssuesADirectUpdatePerEntityWithoutAnySelect() {
+    public void updateAllAndFlushBatchesTheUpdatesWithoutAnySelect() {
         List<Long> ids = persistPosts(3);
 
         transactionTemplate.executeWithoutResult(status -> {
@@ -144,16 +156,39 @@ class BaseJpaRepositoryTest {
             SQLStatementCountValidator.reset();
             postRepository.updateAllAndFlush(detached);
 
-            // updateAll() delegates to StatelessSession.update per row: a direct
-            // UPDATE with NO SELECT. Note it does NOT batch here — a single
-            // StatelessSession.update forces the JDBC batch size to 0 (only the
-            // *Multiple stateless operations batch), so three rows leave as three
-            // UPDATE statements. The win over saveAll below is the absence of the
-            // per-entity SELECTs, not fewer UPDATEs.
+            // updateAllAndFlush() delegates to StatelessSession.update per row: a
+            // direct UPDATE with NO SELECT. As of Hypersistence Utils 3.15.5 the
+            // three rows are also sent as a SINGLE batched UPDATE (see
+            // updateAllBatching). The win over saveAll below is the absence of the
+            // per-entity SELECTs.
             SQLStatementCountValidator.assertSelectCount(0);
-            SQLStatementCountValidator.assertUpdateCount(3);
+            SQLStatementCountValidator.assertUpdateCount(1);
         });
     }
+
+    // tag::updateall-batch[]
+    @Test
+    public void updateAllBatching() {
+        // JDBC batching is enabled (hibernate.jdbc.batch_size=100), and as of
+        // Hypersistence Utils 3.15.5 updateAll batches the StatelessSession UPDATEs
+        // too: the configured batch size now reaches the StatelessSession that
+        // actually writes the rows.
+        int entityCount = 5;
+        List<Long> ids = persistPosts(entityCount);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            List<Post> detached = detachedCopies(ids, "Changed via updateAll");
+
+            SQLStatementCountValidator.reset();
+            postRepository.updateAll(detached);
+
+            // No wasted SELECTs (StatelessSession writes directly), and the 5 rows
+            // leave in a SINGLE batched UPDATE instead of one statement per row.
+            SQLStatementCountValidator.assertSelectCount(0);
+            SQLStatementCountValidator.assertUpdateCount(1);
+        });
+    }
+    // end::updateall-batch[]
 
     @Test
     public void standardSaveAllIssuesASelectPerDetachedEntity() {
@@ -173,6 +208,57 @@ class BaseJpaRepositoryTest {
             SQLStatementCountValidator.assertUpdateCount(1);
         });
     }
+
+    /**
+     * Seeds 50 posts. The 30 APPROVED ones carry the low view counts (1..30),
+     * while the 20 non-approved ones carry the <em>high</em> counts (100..119).
+     * That ordering is deliberate: a "top by views" that forgets the status
+     * filter would return the spam, so the filter genuinely changes the answer.
+     */
+    private void seedForFindAll() {
+        transactionTemplate.executeWithoutResult(status -> {
+            List<Post> posts = new ArrayList<>();
+            for (int i = 1; i <= 30; i++) {
+                posts.add(new Post("Approved #" + i, PostStatus.APPROVED, i));
+            }
+            for (int i = 0; i < 20; i++) {
+                PostStatus s = (i % 2 == 0) ? PostStatus.PENDING : PostStatus.SPAM;
+                posts.add(new Post("Noise #" + i, s, 100 + i));
+            }
+            postRepository.persistAll(posts);
+        });
+    }
+
+    // tag::findall-antipattern[]
+    @Test
+    public void findAllThenFilterInMemoryIsAnAntiPattern() {
+        seedForFindAll(); // 50 posts, only 30 of them APPROVED
+
+        // Same method, same signature, called on both services. The broken one
+        // (antiPatternForumService) fetches everything with findAll() and filters
+        // in memory; the good one (forumService) filters in SQL.
+        SQLStatementCountValidator.reset();
+        List<PostSummary> inMemory = antiPatternForumService.findMostViewedAndApprovedPosts(5);
+        SQLStatementCountValidator.assertSelectCount(1);
+
+        SQLStatementCountValidator.reset();
+        List<PostSummary> onDatabase = forumService.findMostViewedAndApprovedPosts(5);
+        SQLStatementCountValidator.assertSelectCount(1);
+
+        // Same answer: the top 5 APPROVED posts are the highest-numbered ones.
+        List<PostSummary> expected = List.of(
+            new PostSummary("Approved #30", 30), new PostSummary("Approved #29", 29),
+            new PostSummary("Approved #28", 28), new PostSummary("Approved #27", 27),
+            new PostSummary("Approved #26", 26));
+        assertEquals(expected, inMemory);
+        assertEquals(expected, onDatabase);
+        assertEquals(inMemory, onDatabase);
+
+        // Both report a single SELECT, so the anti-pattern is invisible from here:
+        // only the AntiPatternForumService source and the executed SQL reveal that
+        // it read all 50 rows to keep 5.
+    }
+    // end::findall-antipattern[]
 
     @Test
     public void lockByIdAcquiresPessimisticWriteLock() {
