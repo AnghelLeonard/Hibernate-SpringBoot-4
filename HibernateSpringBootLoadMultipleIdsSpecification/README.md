@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 21: How to Use Direct Fetching*
+# 📘 Summary of Item 21: *How to Use Direct Fetching*
 
 ## 🎯 Core Idea
 Direct fetching—loading an entity by its ID—is the most efficient way to retrieve a single JPA entity **when you already know the identifier** and **don’t plan to navigate lazy associations** in the current Persistence Context.
@@ -100,7 +100,7 @@ Options include:
 - `findAllById()`
 - JPQL `IN` queries
 - Spring Data `Specification`
-- Hibernate’s `MultiIdentifierLoadAccess` (supports batching and optional session checks)
+- Hibernate’s `findMultiple()` (supports batching and optional session checks)
 
 All benefit from session-level repeatable reads.
 

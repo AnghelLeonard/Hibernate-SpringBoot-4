@@ -100,7 +100,7 @@ Options include:
 - `findAllById()`
 - JPQL `IN` queries
 - Spring Data `Specification`
-- Hibernate’s `MultiIdentifierLoadAccess` (supports batching and optional session checks)
+- Hibernate’s `findMultiple()` (supports batching and optional session checks)
 
 All benefit from session-level repeatable reads.
 

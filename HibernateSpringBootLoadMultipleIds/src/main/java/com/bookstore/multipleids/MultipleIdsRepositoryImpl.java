@@ -4,8 +4,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.util.List;
-import org.hibernate.MultiIdentifierLoadAccess;
+import org.hibernate.BatchSize;
 import org.hibernate.Session;
+import org.hibernate.SessionCheckMode;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +28,8 @@ public abstract class MultipleIdsRepositoryImpl<T, ID extends Serializable>
     public List<T> fetchByMultipleIds(List<ID> ids) {
 
         Session session = entityManager.unwrap(Session.class);
-        MultiIdentifierLoadAccess<T> multiLoadAccess
-                = session.byMultipleIds(entityClass);
-        List<T> result = multiLoadAccess.multiLoad(ids);
+        
+        List<T> result = session.findMultiple(entityClass, ids);                
 
         return result;
     }
@@ -37,7 +37,9 @@ public abstract class MultipleIdsRepositoryImpl<T, ID extends Serializable>
     @Override
     public List<T> fetchInBatchesByMultipleIds(List<ID> ids, int batchSize) {
 
-        List<T> result = getMultiLoadAccess().withBatchSize(batchSize).multiLoad(ids);
+        Session session = entityManager.unwrap(Session.class);
+        
+        List<T> result = session.findMultiple(entityClass, ids, new BatchSize(batchSize));                
 
         return result;
     }
@@ -45,7 +47,9 @@ public abstract class MultipleIdsRepositoryImpl<T, ID extends Serializable>
     @Override
     public List<T> fetchBySessionCheckMultipleIds(List<ID> ids) {
 
-        List<T> result = getMultiLoadAccess().enableSessionCheck(true).multiLoad(ids);
+        Session session = entityManager.unwrap(Session.class);
+        
+        List<T> result = session.findMultiple(entityClass, ids, SessionCheckMode.ENABLED);                
 
         return result;
     }
@@ -53,17 +57,11 @@ public abstract class MultipleIdsRepositoryImpl<T, ID extends Serializable>
     @Override
     public List<T> fetchInBatchesBySessionCheckMultipleIds(List<ID> ids, int batchSize) {
 
-        List<T> result = getMultiLoadAccess().enableSessionCheck(true)
-                .withBatchSize(batchSize).multiLoad(ids);
+        Session session = entityManager.unwrap(Session.class);
+        
+        List<T> result = session.findMultiple(entityClass, ids, 
+                new BatchSize(batchSize), SessionCheckMode.ENABLED);                
 
         return result;
     }
-
-    private MultiIdentifierLoadAccess<T> getMultiLoadAccess() {
-
-        Session session = entityManager.unwrap(Session.class);
-
-        return session.byMultipleIds(entityClass);
-    }
-
 }
