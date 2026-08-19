@@ -1,17 +1,8 @@
 package com.bookstore.forum.entity;
 
-import com.bookstore.forum.converter.TsidAttributeConverter;
 import io.hypersistence.tsid.TSID;
 import io.hypersistence.utils.hibernate.id.Tsid;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -39,7 +30,6 @@ public class PostDetails {
     private String externalId;
 
     @Tsid
-    @Convert(converter = TsidAttributeConverter.class)
     @Column(name = "public_id")
     private TSID publicId;
     // end::tsid-attribute-types[]

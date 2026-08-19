@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -42,10 +42,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>26</java.version>
         <maven.compiler.release>26</maven.compiler.release>
-        <!-- hypersistence-utils-hibernate-73 targets Hibernate 7.3+ and Jackson 3,
-             so upgrade the Boot-managed Hibernate version (Boot 4.0.0 ships 7.1) -->
-        <hibernate.version>7.3.6.Final</hibernate.version>
+        <!-- Spring Boot 4.1.0 manages Hibernate 7.4.1.Final; pin it explicitly to keep
+             the Hypersistence Utils line in step. hypersistence-utils-hibernate-73 targets
+             Hibernate 7.3+ and Jackson 3, and is compatible with the Hibernate 7.4 line. -->
+        <!-- tag::hypersistence-utils-version[] -->
+        <hibernate.version>7.4.1.Final</hibernate.version>
         <hypersistence-utils.version>3.15.4</hypersistence-utils.version>
+        <!-- end::hypersistence-utils-version[] -->
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
         <datasource-proxy.version>1.11.0</datasource-proxy.version>
         <testcontainers.version>1.21.3</testcontainers.version>
@@ -65,11 +68,13 @@
                 <artifactId>HibernateSpringBootHypersistenceCore</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- tag::hypersistence-utils-dependency[] -->
             <dependency>
                 <groupId>io.hypersistence</groupId>
                 <artifactId>hypersistence-utils-hibernate-73</artifactId>
                 <version>${hypersistence-utils.version}</version>
             </dependency>
+            <!-- end::hypersistence-utils-dependency[] -->
             <dependency>
                 <groupId>io.hypersistence</groupId>
                 <artifactId>hypersistence-tsid</artifactId>

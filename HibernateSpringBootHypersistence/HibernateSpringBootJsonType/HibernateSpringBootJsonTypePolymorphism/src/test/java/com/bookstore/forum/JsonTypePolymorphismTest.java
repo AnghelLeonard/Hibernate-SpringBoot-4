@@ -43,12 +43,17 @@ class JsonTypePolymorphismTest {
 
     @Test
     public void jsonBinaryTypeRestoresEachBlockAsItsConcreteSubtype() {
+        // tag::persist[]
         Post post = new Post("Mapping polymorphic JSON")
             .addBlock(new TextBlock("Intro paragraph"))
             .addBlock(new CodeBlock("java", "var x = 1;"))
             .addBlock(new ImageBlock("https://example.com/a.png", "a diagram"));
 
-        Post loaded = forumService.findById(forumService.save(post).getId());
+        Long id = forumService.save(post).getId();
+        // end::persist[]
+
+        // tag::fetch[]
+        Post loaded = forumService.findById(id);
 
         List<PostContentBlock> body = loaded.getBody();
         assertEquals(3, body.size());
@@ -63,6 +68,7 @@ class JsonTypePolymorphismTest {
         ImageBlock image = assertInstanceOf(ImageBlock.class, body.get(2));
         assertEquals("https://example.com/a.png", image.getUrl());
         assertEquals("a diagram", image.getAlt());
+        // end::fetch[]
     }
 
     @Test

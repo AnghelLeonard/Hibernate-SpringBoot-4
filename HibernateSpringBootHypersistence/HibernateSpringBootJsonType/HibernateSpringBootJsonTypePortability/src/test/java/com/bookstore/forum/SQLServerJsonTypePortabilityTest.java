@@ -5,9 +5,9 @@ import com.bookstore.forum.config.EnabledIfDatabaseAvailable;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
-    "test.database=MYSQL",
-    "spring.sql.init.platform=mysql"
+    "test.database=SQLSERVER",
+    "spring.sql.init.platform=sqlserver"
 })
-@EnabledIfDatabaseAvailable(DatabaseType.MYSQL)
-class MySQLJsonTypePortabilityTest extends AbstractJsonTypePortabilityTest {
+@EnabledIfDatabaseAvailable(DatabaseType.SQLSERVER)
+class SQLServerJsonTypePortabilityTest extends AbstractJsonTypePortabilityTest {
 }

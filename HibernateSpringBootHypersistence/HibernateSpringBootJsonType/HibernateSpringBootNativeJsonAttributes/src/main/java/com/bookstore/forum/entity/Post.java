@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import tools.jackson.databind.JsonNode;
@@ -22,6 +24,8 @@ import java.util.Map;
  */
 @Entity
 @Table(name = "post")
+@DynamicInsert
+@DynamicUpdate
 public class Post {
 
     @Id
@@ -30,16 +34,14 @@ public class Post {
 
     private String title;
 
+    // tag::json-columns[]
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "properties")
     private PostProperties properties;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "metadata")
     private JsonNode metadata;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "attributes")
     private Map<String, String> attributes = new LinkedHashMap<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -47,8 +49,8 @@ public class Post {
     private String rawPayload;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "tags")
     private List<String> tags = new ArrayList<>();
+    // end::json-columns[]
 
     public Post() {
     }

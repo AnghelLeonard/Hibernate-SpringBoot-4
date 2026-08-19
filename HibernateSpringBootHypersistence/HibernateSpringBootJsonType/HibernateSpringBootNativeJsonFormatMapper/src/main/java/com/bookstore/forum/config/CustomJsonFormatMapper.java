@@ -1,5 +1,6 @@
 package com.bookstore.forum.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.format.FormatMapper;
@@ -11,33 +12,31 @@ import java.io.IOException;
 
 /**
  * A Hibernate {@link FormatMapper} for the <strong>native</strong> JSON feature
- * ({@code @JdbcTypeCode(SqlTypes.JSON)}) that applies the {@code snake_case}
- * Jackson property naming strategy &mdash; the native counterpart of the
- * {@code JsonType}-side {@link SnakeCaseObjectMapperSupplier}.
- *
- * <p>It is selected through the Hibernate property
- * {@code hibernate.type.json_format_mapper} (see {@code application.properties}),
- * which is the native equivalent of
- * {@code hypersistence.utils.jackson.object.mapper}. Because it has a public
- * no-argument constructor, Hibernate can instantiate it straight from the
- * property value's class name.</p>
- *
- * <p>Hibernate 7.3 ships {@link Jackson3JsonFormatMapper} (the Jackson 3 mapper
- * used by this book's stack) with a constructor that accepts a custom
- * {@link JsonMapper}; that mapper is {@code final}, so this class simply wraps a
- * snake_case-configured instance and delegates to it.</p>
+ * ({@code @JdbcTypeCode(SqlTypes.JSON)}), selected through
+ * {@code hibernate.type.json_format_mapper} (see {@code application.properties}).
+ * It builds the very same custom Jackson mapper as the {@code JsonType}-side
+ * {@code CustomObjectMapperSupplier} &mdash; {@code snake_case} naming plus
+ * {@code NON_NULL} inclusion &mdash; and delegates to Hibernate's
+ * {@link Jackson3JsonFormatMapper}, whose {@code JsonMapper}-accepting
+ * constructor is how a custom mapper is plugged into the native feature. Because
+ * this class has a public no-argument constructor, Hibernate can instantiate it
+ * straight from the property value's class name.
  */
-public class SnakeCaseJsonFormatMapper implements FormatMapper {
+public class CustomJsonFormatMapper implements FormatMapper {
 
     private final FormatMapper delegate;
 
-    public SnakeCaseJsonFormatMapper() {
+    // tag::mapper[]
+    public CustomJsonFormatMapper() {
         JsonMapper jsonMapper = JsonMapper.builder()
-            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .findAndAddModules()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .changeDefaultPropertyInclusion(
+                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
             .build();
         this.delegate = new Jackson3JsonFormatMapper(jsonMapper);
     }
+    // end::mapper[]
 
     @Override
     public <T> T fromString(CharSequence charSequence, JavaType<T> javaType, WrapperOptions options) {

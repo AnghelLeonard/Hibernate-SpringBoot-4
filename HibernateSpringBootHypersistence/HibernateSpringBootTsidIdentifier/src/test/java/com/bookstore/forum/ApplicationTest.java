@@ -59,7 +59,7 @@ public class ApplicationTest {
         // String @Tsid column
         assertNotNull(details.getExternalId());
         assertTrue(TSID.isValid(details.getExternalId()));
-        // TSID-typed @Tsid column (mapped to bigint via the AttributeConverter)
+        // TSID-typed @Tsid column (mapped to bigint directly by @Tsid, no converter)
         TSID publicId = details.getPublicId();
         assertNotNull(publicId);
         assertTrue(TSID.isValid(publicId.toString()));

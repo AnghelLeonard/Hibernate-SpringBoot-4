@@ -1,228 +1,927 @@
-= Filling Hibernate's Gaps with Hypersistence Utils
+= Enhancing Spring and Hibernate with Hypersistence Utils
 Vlad Mihalcea
 :source-language: java
 :sourcedir: {examplesdir}
 
-Hibernate maps the SQL standard well. Your database is not the SQL standard.
+In this chapter, we are going to see how https://github.com/vladmihalcea/hypersistence-utils[Hypersistence Utils] extends both Spring and Hibernate capabilities,
+and provides you with a set of utilities that address certain shortcomings of these two frameworks.
 
-Somewhere between the two sits every column type you actually wanted to use: a
-PostgreSQL `jsonb` document, a `text[]`, an `inet` address, a `tsrange`, a
-`hstore`. And somewhere alongside them sit the everyday operations JPA never
-quite got right: updating a detached entity without reading it first, retrying a
-transaction that failed for a reason that will not repeat, finding out which
-line of your code fired that query.
+While Hibernate provides great support for mapping the most common SQL column types,
+and since version 6, you also have support for JSON and array columns,
+there are still gaps that the library tries to fill.
+Some of them are non-standard column types Hibernate does not map on its own,
+such as multi-dimensional arrays, PostgreSQL ranges, intervals, and `hstore`.
+Others are Java types Hibernate omits, such as `MonetaryAmount`.
 
-https://github.com/vladmihalcea/hypersistence-utils[Hypersistence Utils] is the
-library that fills those gaps. This chapter walks through the parts of it worth
-knowing, one working project at a time. Every listing you are about to read is
-included straight from a project in this book's repository at build time — none
-of it is retyped, and none of it can drift from the code that is actually
-tested.
+In fact, this is exactly the reason why most Java developers got to know this OSS library in the first place.
+When it was released in 2017 (under the name of Hibernate Types),
+it provided support for mapping JSON columns in PostgreSQL, MySQL, Oracle, and SQL Server.
+While the custom Hibernate Types are still the most popular feature offered by this framework,
+it now provides many other Hibernate-related enhancements,
+such as the time-sorted pseudo-random identifiers,
+or a new `BatchSequenceGenerator` that allows you to fetch multiple sequence values in a single roundtrip from a database sequence that has an increment step of just 1.
+
+And Hypersistence Utils is no longer limited to enhancing Hibernate since it also provides a set of Spring utilities that can improve your data access layer,
+such as a better repository contract that removes the `SELECT` before every detached update,
+a retry aspect that can repeat a transaction only when it is worth retrying,
+and a set of query utilities that allow you to find out what SQL your application actually runs,
+and which line of your code triggered it.
+
+Next, we are going to walk through the parts worth knowing,
+and each feature is grouped by category: enhanced **identifiers**,
+the **column types** Hibernate cannot map on its own,
+and the **Spring utilities** that improve the data access layer beyond what Spring Data JPA can offer.
+
+Every code listing you are about to read is included at build time from an actual integration test in this book's coding repository.
+None of the code is retyped, so it cannot drift from what is actually tested,
+and the SQL statements shown next to it are captured from those same test runs.
+I've used this practice when writing the Hibernate User Guide since it is the most efficient way to be sure that the code you read is correct and works as it's supposed to.
 
 == Adding the library
 
-Hypersistence Utils ships one artifact per Hibernate line, and you must match
-yours. This book uses Hibernate 7.3, so the artifact is
-`hypersistence-utils-hibernate-73`:
+Hypersistence Utils ships one artifact per Hibernate line,
+and you must match the one your project is using.
+This book uses Hibernate 7.4, and since the library has no dedicated line for it yet,
+the artifact is the most recent one, `hypersistence-utils-hibernate-73`, which is compatible with the 7.4 line.
+Its version is set once, as a Maven property, just like for the Hibernate one:
 
 [source,xml]
 ----
-<dependency>
-    <groupId>io.hypersistence</groupId>
-    <artifactId>hypersistence-utils-hibernate-73</artifactId>
-    <version>3.15.4</version>
-</dependency>
+include::{sourcedir}/pom.xml[tag=hypersistence-utils-version,indent=0]
 ----
 
-[NOTE]
-====
-The `-73` line targets Hibernate 7.3 *and Jackson 3* (`tools.jackson.*`), which
-is the Jackson that Spring Boot 4 ships by default. Spring Boot 4.0.0 itself
-manages Hibernate 7.1, so every example project overrides
-`<hibernate.version>7.3.6.Final</hibernate.version>` — a property Boot's parent
-POM honours.
-====
+The dependency itself is declared in the parent POM's `dependencyManagement`,
+so every example project in this chapter inherits it without repeating the version:
 
-The examples all model the bookstore's discussion forum: a `Post` is a thread, a
-`PostComment` is a reply, `PostDetails` carries the thread's metadata, and a
-`Tag` labels it. One rule holds across every project in this chapter: **`Post` is
-the aggregate root.** A `PostDetails` or a `PostComment` never exists without the
-`Post` it belongs to — if there is no thread, there is nothing to hold details
-about.
+[source,xml]
+----
+include::{sourcedir}/pom.xml[tag=hypersistence-utils-dependency,indent=0]
+----
 
-== Identifiers that sort themselves: `@Tsid`
+The examples used in this chapter model a bookstore discussion forum.
+A `Post` is a thread, a `PostComment` is a reply,
+and the `PostDetails` carries additional information for the thread.
+There is also a `Tag` that can label threads of discussion.
+As an entity, the **`Post` is the aggregate root**,
+while the `PostDetails` and `PostComment` never exist without an associated `Post`.
+If there is no thread, there is no reason to hold any additional details.
 
-`AUTO_INCREMENT` identifiers leak your row count and force Hibernate to give up
-JDBC batch inserts. `UUID` identifiers fix the leak and destroy your index
-locality instead: random 128-bit values scatter writes across the whole B+Tree.
+== Identifiers
 
-A TSID — Time-Sorted Identifier — is the compromise that costs nothing. It packs
-a millisecond timestamp and a random component into 64 bits, so it fits a
-`bigint`, it is generated by the application rather than the database, and
-consecutive values are *increasing*, which is exactly what a B+Tree wants.
+Every entity needs a primary key, and there are multiple options you can choose from.
+If your entity has a natural key, you can use it as the identifier, like the ISBN of a book.
+Among our entities, the `Tag` has a natural key, which is its name,
+so we could use that as the identifier.
+However, even for the `Tag`, we are going to use a surrogate key instead,
+because we can choose a more compact numerical representation that is more efficient for the database to index and query.
+
+For the rest of the entities, we have no natural key, so we need to use a surrogate key instead,
+and, based on where the identifier generation takes place, we can have:
+
+* Application-generated identifiers, such as `UUID`.
+* Database-generated identifiers, such as `IDENTITY` or `SEQUENCE`,
+which are covered by the SQL Standard and supported by many relational database systems.
+
+For both categories of identifier generators,
+the Hypersistence Utils library provides alternatives that can be more efficient and more flexible than the standard solutions supported by Hibernate:
+
+* A client-generated, time-sorted identifier,
+inspired by the https://en.wikipedia.org/wiki/Snowflake_ID[Snowflake identifier] that https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake[Twitter] used to overcome the fact that Cassandra didn't have a sequential identifier generator.
+* A bulk-fetch sequence identifier generator that,
+unlike the Hibernate `pooled` and `pooled-lo` identifier generators,
+can use a database sequence that has an increment size of one,
+leaving no gaps when the sequence is used by other clients, such as ETL jobs or database triggers.
+
+=== Identifiers that sort themselves: `@Tsid`
+
+For application-generated identifiers, UUIDs are very convenient because, at 128 bits, they are effectively unique,
+and many programming languages either offer built-in support or have popular libraries you can use to generate them.
+Unfortunately, the most common UUID type is version 4, which is purely random, and that's not very convenient
+because primary keys are usually indexed, and the most common option is the B+Tree index.
+Because B+Tree indexes are sorted data structures, random values will cause the index to be sparsely populated.
+For example, a PostgreSQL index node is mapped in memory on an 8 KB page that may contain hundreds of entries.
+When you insert a new row with a random UUID, the database has to find the right page to place it on,
+and if that page is full, it splits into new nodes to keep the tree balanced,
+so the index ends up with many sparsely populated pages.
+
+To solve the randomness problem, the TSID (Time-Sorted Identifier) uses the current timestamp to fill in the first bytes of the identifier,
+so newer values are increasing monotonically with time.
+So, for a B+Tree index, this means that newer identifiers will be appended in the last leaf node of the current index, after the previously inserted value,
+therefore filling the index pages continuously.
+
+The second part of the identifier is filled with a random number.
+Because the TSID, like the Snowflake identifier, has 64 bits, it fits in a `bigint` column, which is twice as compact as a UUID.
+
+To use a TSID as an entity identifier, you have to use the `@Tsid` annotation, as illustrated by the following example:
 
 .Applying a TSID to an identifier
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/Post.java[tag=tsid]
+include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/Post.java[tag=tsid,indent=0]
 ----
 
-That is the entire mapping. The value is assigned before the `INSERT` reaches
-the database, which is the property that matters most:
+The identifier value is generated at flush time, before the `INSERT` reaches the database,
+and that is the property that matters most:
 
 .Client-side generation keeps batching alive
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/test/java/com/bookstore/forum/PostBatchInsertTest.java[tag=batching]
+include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/test/java/com/bookstore/forum/PostBatchInsertTest.java[tag=batching,indent=0]
 ----
 
-Thirty posts, **zero** `SELECT` statements and exactly **one** `INSERT` — a
-single JDBC batch. With `GenerationType.IDENTITY` this test cannot be written at
-all: Hibernate must execute each `INSERT` on its own to learn the generated key,
-so batching is silently disabled. The loop at the end asserts the other half of
-the bargain: the identifiers come out in ascending order.
+When running the above test case, Hibernate will generate the following statement:
 
-=== Three attribute types, one annotation
+[source,sql]
+----
+Type:Prepared, Batch:True, QuerySize:1, BatchSize:30,
+Query:["insert into post (title,id) values (?,?)"],
+Params:[
+  (Post nr. 1,877183623477788849),(Post nr. 2,877183623553286332),
+  (Post nr. 3,877183623553286333),(Post nr. 4,877183623557480501),
+  ...
+  (Post nr. 29,877183623574257779),(Post nr. 30,877183623574257780)
+]
+----
 
-`@Tsid` is not limited to the identifier. It also populates a `String` column —
-useful for a public-facing identifier you want to put in a URL — and the
-`TSID` type itself:
+Although we saved thirty posts, there was just **one** `INSERT`, which executed in a single JDBC batch.
+
+==== Using TSID for external identifiers
+
+`@Tsid` is not limited to the entity identifier.
+It can also populate a `String` or a `TSID` column,
+which can be used as public-facing identifiers that you'd exchange with a client.
 
 .A TSID as a public identifier and as a typed column
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=tsid-attribute-types]
+include::{sourcedir}/HibernateSpringBootTsidIdentifier/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=tsid-attribute-types,indent=0]
 ----
 
-[TIP]
-====
-The library ships no `AttributeConverter` for the `TSID` type, so the third
-mapping needs one of your own (a dozen lines converting to and from `Long`).
-The `String` form needs `length = 13` — that is the width of a Crockford
-base-32-encoded TSID.
-====
+=== Sequences that stay usable by everyone
 
-== JSON columns, portably
+While fetching a sequence value using a call to the database is fine for an OLTP transaction that creates a few records,
+this might be very inefficient for a batch processing task that has to insert thousands of records.
 
-Every database spells JSON differently: MySQL has `json`, PostgreSQL has `json`
-and `jsonb`, Oracle and SQL Server store it in text columns. `JsonType` hides
-that difference behind one annotation, and it will map a POJO, a raw
-`JsonNode`, or a plain `Map`:
+For this purpose, Hibernate provides the `pooled` and `pooled-lo` sequence optimizers,
+which use a database sequence that has a higher increment step (e.g., `INCREMENT BY 50`).
+When the sequence generator runs out of values, it calls the sequence, and then it can generate
+N entity identifiers in memory (N is the sequence increment step).
 
-.Three JSON columns, three Java shapes
+While this strategy works fine for Hibernate, any other client (e.g., an ETL job, a `psql` script, or a trigger)
+that calls `nextval` on the same database sequence will take one identifier and throw away forty-nine identifier values,
+because the pooling optimizer lives in the application, not in the database.
+
+`BatchSequenceGenerator` addresses this shortcoming by *fetching* the actual sequence values from the database
+using a recursive CTE, or `generate_series` on PostgreSQL, to draw N values in one statement:
+
+.Two mappings of one table, sharing one sequence
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-columns]
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/Post.java[tag=oltp-sequence,indent=0]
 ----
 
-Hibernate 7 has native JSON support of its own —
-`@JdbcTypeCode(SqlTypes.JSON)` — and for a plain document column you should
-prefer it: it is dialect-aware, needs no `columnDefinition`, and works on all
-four major databases. The repository carries both variants side by side so you
-can compare them.
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/BatchedPost.java[tag=batch-sequence,indent=0]
+----
 
-`JsonType` still earns its place for two reasons:
+Both the `Post` and the `BatchedPost` entities fetch the identifier values from the `batch_seq_post_seq` sequence, but the OLTP `Post` mapping takes one value at a time,
+while the `BatchedPost` entity fetches ten per roundtrip:
 
-Content-level dirty checking:: `JsonType` compares the *parsed* JSON when
-deciding whether a column changed. The native mapping compares object
-identity, so a POJO without `equals` triggers an `UPDATE` on every flush — even
-in a read-only transaction that touched nothing.
-Reach:: `JsonNode`, `String` and older Hibernate versions are all supported.
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=batch-import,indent=0]
+----
 
-=== A custom `ObjectMapper`
+When executing the above test case, Hibernate generates the following SQL statements:
 
-Both mappings let you supply your own Jackson configuration, through different
-properties:
+[source,sql]
+----
+Type:Prepared, Batch:False, QuerySize:1, BatchSize:0,
+Query:["SELECT nextval('batch_seq_post_seq') FROM generate_series(1, ?)"],
+Params:[(10)]
+
+Type:Prepared, Batch:True, QuerySize:1, BatchSize:10,
+Query:["insert into batch_seq_post (title,id) values (?,?)"],
+Params:[
+  (Imported post 1,1),
+  (Imported post 2,2),
+  ...
+  (Imported post 9,9),
+  (Imported post 10,10)
+]
+----
+
+And, with the `BatchSequenceGenerator` in place,
+a script that knows nothing about Hibernate can still interleave with the application:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=interop,indent=0]
+----
+
+When running the above code example, we get the following SQL statements:
+
+[source,sql]
+----
+Query:["select nextval('batch_seq_post_seq')"], Params:[()]
+Query:["insert into batch_seq_post (title,id) values (?,?)"],
+Params:[(Written by the application,1)]
+
+Query:["select nextval('batch_seq_post_seq')"], Params:[()]
+Query:["insert into batch_seq_post (id, title) values (?, ?)"],
+Params:[(2,Written by an ETL job)]
+
+Query:["select nextval('batch_seq_post_seq')"], Params:[()]
+Query:["insert into batch_seq_post (title,id) values (?,?)"],
+Params:[(Written by the application again,3)]
+----
+
+When examining the sequences, we can see that a `pooled` optimizer redefines the increment step of its own sequence,
+so `pooled_post_seq` uses `50`,
+while `batch_seq_post_seq`, shared by both `Post` and `BatchedPost`, keeps an increment size of `1`:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=increments,indent=0]
+----
+
+[NOTE]
+====
+`@BatchSequence` is not gap-free in all circumstances.
+The unused values that were fetched by a given transaction will be lost if the
+transaction rolls back.
+====
+
+== Hibernate Types
+
+This is the gap the Hypersistence Utils library is best known for.
+Hibernate 7 maps the SQL-standard types and, increasingly, the common vendor extensions (e.g., JSON, arrays, inet).
+However, some databases, such as PostgreSQL, have a great variety of column types that are left for you to map via
+the Hibernate custom type API, and Hypersistence Utils aims to help you with this task, by providing additional
+Hibernate Types for ranges, intervals, monetary amounts, or key/value maps.
+
+Even for the types that Hibernate has added support for in recent versions, such as JSON and arrays, Hypersistence Utils
+can provide some additional features. For example, the generic `JsonType` can work with PostgreSQL, Oracle, SQL Server, or MySQL,
+without you having to change the entity mapping. And the `MultiDimensionalArrayType` can handle nested arrays, which may be convenient
+for some applications.
+
+Nevertheless, where Hibernate 7 or 6 has since caught up, we are going to mention it,
+because the honest advice is that you no longer need the library for some of the types that have been
+traditionally offered by Hypersistence Utils.
+
+=== JSON columns, portably
+
+It's common to assume that the SQL standard defines only columns that strictly adhere to the relational model.
+However, while most column types are based on the relational model, the SQL standard takes into consideration
+application needs, and, from time to time, adds support for non-relational models.
+
+For example, SQL:2003 added support for the XML data type since XML was very popular around that time.
+And because JSON has become a very common data representation, SQL:2016 added support for storing JSON objects in
+`VARCHAR`, `CLOB`, or `BLOB` column types, which was further improved in SQL:2023 via native JSON types.
+
+Some relational databases had been supporting JSON types even before 2016.
+PostgreSQL was one of the first relational databases to support JSON, adding support for a `json` column in 9.2 (2012)
+for storing JSON objects in a text-based storage, and a `jsonb` column in 9.4 (2014) that can store JSON objects
+in a binary format. MySQL added the `json` column type in 2015 with the 5.7.8 release.
+
+Having so many options to store JSON objects, the `JsonType` aims to remove this burden from the Java developer,
+and allows you to map a POJO, a `String`, a `JsonNode`, a `Map`, or a `List` to the aforementioned database-specific JSON storage types.
+
+.`JsonType` mapping example
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-columns,indent=0]
+----
+
+Every JSON entity in this section also carries `@DynamicInsert` and `@DynamicUpdate` at the class level:
+
+.The JSON entities use dynamic insert and update
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=dynamic,indent=0]
+----
+
+`@DynamicInsert` limits each `INSERT` to the columns we actually populate,
+while `@DynamicUpdate` keeps a column out of the `UPDATE` unless its value changed.
+This is especially relevant for JSON columns since a document can be large, and we do not want to re-send it on every flush when only another column changed.
+Because of these two annotations, the SQL statements captured throughout this section list only the columns that are actually written.
+
+The reason we're using the `columnDefinition = "json"` on the columns annotated with `JsonType` is because
+this Hibernate Type maps to the JDBC `Types.OTHER`, which Hibernate cannot turn into a column type on its own,
+so the schema generator does not know what DDL type to emit for the column unless we tell it.
+If you leave the `columnDefinition` out, the schema generation fails with the following exception:
+
+[source,text]
+----
+Unable to determine SQL type name for column 'attributes' of table 'post'
+because there is no type mapping for org.hibernate.type.SqlTypes code: 1111 (OTHER)
+----
+
+This is a limitation of Hibernate's `hbm2ddl` schema generation only, and it's not as bad as it looks.
+The `hbm2ddl` tool is a prototyping aid, not something you should run in production,
+where the schema is versioned and migrated by a dedicated tool like Flyway or Liquibase.
+And once the schema is created before the application bootstraps, `JsonType` no longer needs the `columnDefinition`,
+because, at runtime, it already knows how to read and write the JSON column for the underlying database.
+
+To prove that, the following entity maps its JSON attributes with `JsonType` and no `columnDefinition` at all:
+
+.A `JsonType` mapping without any `columnDefinition`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePortability/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-no-columndef,indent=0]
+----
+
+The schema is created up front by a migration script that runs before Hibernate bootstraps,
+which is exactly what Flyway would do for you in production:
+
+.The migration script that creates the JSON schema on PostgreSQL
+[source,sql]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePortability/src/main/resources/schema-postgresql.sql[tag=schema-postgresql,indent=0]
+----
+
+Based on the underlying relational database, `JsonType` binds the JSON attribute to the column type that best fits the database's native JSON support:
+
+.The JSON column type that `JsonType` binds for each database
+[cols="1,2", options="header"]
+|===
+| Database | Column type
+
+| MySQL | `json`, bound as text
+| PostgreSQL | `jsonb`, bound as a binary object
+| SQL Server | `nvarchar(max)`, bound as text
+| Oracle | native `json`, bound as bytesfootnote:[This is what Oracle 21c and newer use. Below 21c, `JsonType` binds JSON as text, where a `clob` column fits.]
+|===
+
+Hibernate 7 has native JSON support of its own, through `@JdbcTypeCode(SqlTypes.JSON)`,
+and, most often, you are better off preferring it.
+It is dialect-aware, it needs no `columnDefinition`, and it works on all four major databases (PostgreSQL, Oracle, SQL Server, and MySQL).
+The book code repository carries both variants side by side so you can compare them.
+The same five columns, mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`, look like this:
+
+.Native Hibernate JSON mapping example
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonAttributes/src/main/java/com/bookstore/forum/entity/Post.java[tag=json-columns,indent=0]
+----
+
+Unlike `JsonType`, the native mapping does not need a `columnDefinition`,
+because the dialect already knows which column type to use for a JSON attribute.
+Therefore, the schema that Hibernate generates picks the right storage type for each database:
+
+.Default JSON column type generated by `@JdbcTypeCode(SqlTypes.JSON)`
+[cols="1,2", options="header"]
+|===
+| Database | Generated column type
+
+| MySQL | `json`
+| PostgreSQL | `jsonb`
+| SQL Server | `nvarchar(max)`
+| Oracle | `blob` with an `is json` check constraintfootnote:[On Oracle 21c and newer, the native `json` column type is used instead.]
+|===
+
+On Hibernate 7, the native JSON mapping and the Hypersistence Utils `JsonType` overlap significantly, but they are not interchangeable.
+The following table sums up how they compare:
+
+.`@Type(JsonType.class)` versus native `@JdbcTypeCode(SqlTypes.JSON)`
+[cols="1,2,2", options="header"]
+|===
+| | `@Type(JsonType.class)` | `@JdbcTypeCode(SqlTypes.JSON)`
+
+| Java attribute types | POJO, `JsonNode`, `Map`, `String`, `List` | POJO, `JsonNode`, `Map`, `String`, `List`
+| `hbm2ddl` schema generation | needs a `columnDefinition` | works on its own, dialect-aware
+| Schema from a migration tool | no `columnDefinition` needed | no `columnDefinition` needed
+| Dirty checking | content-based, skips no-op `UPDATE` statements | identity-based, issues redundant `UPDATE` statements
+| Hibernate version | 5 and newer | 6 and newer
+|===
+
+If you let Hibernate generate the schema for a plain document column, the native mapping is the simpler choice.
+The one behavior that still sets `JsonType` apart is how the two mappings handle dirty checking.
+
+`JsonType` compares the *parsed* JSON content when deciding whether the entity attribute has changed,
+so loading an entity and leaving its JSON attribute untouched,
+or updating the attribute with the same content, does not trigger an `UPDATE`:
+
+.`JsonType` skips the UPDATE when the JSON content is unchanged
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeAttributes/src/test/java/com/bookstore/forum/JsonTypeAttributesTest.java[tag=dirty-checking,indent=0]
+----
+
+Running the three scenarios above, `JsonType` loads the row each time, but only the genuine content change triggers an `UPDATE`:
+
+.The SQL statements `JsonType` executes
+[source,sql]
+----
+-- touch(id): the row is loaded, and the transaction commits unchanged
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(877435976001019965)]
+-- no UPDATE is flushed
+
+-- update(..., p.setProperties(pinnedProperties())): a new instance, but equal content
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(877435976001019965)]
+-- still no UPDATE
+
+-- update(..., p.getProperties().setFlair("hot")): a real content change
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(877435976001019965)]
+
+Query:["update post set properties=? where id=?"],
+Params:[(
+  {"flair":"hot","attachments":["table-of-contents.pdf"],"pinned":true},
+  877435976001019965
+)]
+----
+
+The Hibernate-native JSON mapping compares object identity instead of content,
+so a mutable POJO without an `equals` method will trigger an `UPDATE` on every flush,
+even when nothing actually changed:
+
+.The native mapping issues a redundant UPDATE for an unchanged POJO
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonAttributes/src/test/java/com/bookstore/forum/NativeJsonAttributesTest.java[tag=redundant-update,indent=0]
+----
+
+The very same two scenarios now flush an `UPDATE` each, even though the JSON content never changes:
+
+.The SQL statements the native mapping executes
+[source,sql]
+----
+-- touch(id): the row is loaded, and the transaction commits unchanged
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(1)]
+-- ...yet the native mapping still flushes an UPDATE for the unchanged properties
+Query:["update post set properties=cast(? as json) where id=?"],
+Params:[({"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},1)]
+
+-- update(..., p.setProperties(pinnedProperties())): a new instance, but equal content
+Query:["
+select p1_0.id,p1_0.attributes,p1_0.metadata,
+       p1_0.properties,p1_0.raw_payload,p1_0.tags,p1_0.title
+from post p1_0
+where p1_0.id=?"],
+Params:[(1)]
+-- ...and the UPDATE fires again, for the very same properties content
+Query:["update post set properties=cast(? as json) where id=?"],
+Params:[({"pinned":true,"flair":"must-read","attachments":["table-of-contents.pdf"]},1)]
+----
+
+The reason for these unwanted `UPDATE` statements lies in how Hibernate dirty-checks a mutable attribute.
+When the entity is loaded, Hibernate takes a snapshot of its state and keeps it in the persistence context,
+and for a mutable attribute like a JSON column, that snapshot is a *deep copy* of the loaded value.
+So the managed entity and its snapshot end up holding two different `PostProperties` instances.
+
+At flush time, the dirty-checking mechanism compares the entity's current value against that snapshot,
+and since `PostProperties` does not override `equals`, the comparison falls back to object identity.
+The two instances are never identity-equal, so Hibernate concludes the attribute has changed and issues an `UPDATE`,
+even when the serialized JSON is byte-for-byte the same.
+This is why the `touch` method triggers an `UPDATE` even though it doesn't change the entity.
+The entity JSON attribute is a different object instance from the loaded value the moment the entity finishes loading.
+
+Thanks to `@DynamicUpdate`, the redundant `UPDATE` is narrowed to the `properties` column alone,
+which is the one JSON attribute mapped to a POJO that lacks an `equals`;
+a column backed by a `Map`, `List`, `String` or `JsonNode` has value-based equality, so it would be spared even if it were populated.
+
+On the other hand, `JsonType` can omit these unnecessary `UPDATE` statements, because it compares the *JSON content* rather than object identity,
+so the two instances are seen as equal and no `UPDATE` is flushed.
+If you prefer the native mapping, you are better off overriding the `equals` and `hashCode` method of the POJO class wrapping the JSON content.
+This way, the dirty checking mechanism will detect that the object content has not changed and not trigger the extra `UPDATE` statements.
+
+==== How to provide a custom `ObjectMapper`
+
+Both mappings serialize through Jackson, and both let you replace the default mapper with one of your own.
+`JsonType` takes an `ObjectMapperSupplier`, wired in through a Hypersistence Utils property,
+while the native feature takes a Hibernate `FormatMapper`, wired in through a Hibernate property:
 
 [source,properties]
 ----
 # Hypersistence Utils
 spring.jpa.properties.hypersistence.utils.jackson.object.mapper=\
-  com.bookstore.forum.config.SnakeCaseObjectMapperSupplier
+  com.bookstore.forum.config.CustomObjectMapperSupplier
 
 # Native Hibernate
 spring.jpa.properties.hibernate.type.json_format_mapper=\
-  com.bookstore.forum.config.SnakeCaseJsonFormatMapper
+  com.bookstore.forum.config.CustomJsonFormatMapper
 ----
 
-=== Polymorphic JSON, and a trap
+To see how a custom mapper can change the JSON object prior to persisting it into the database,
+we are going to create a custom mapper that renames the field names from `camelCase` to `snake_case`
+and omits all JSON attributes that contain `null` values.
+Both examples store the same POJO payload, which has a couple of camelCase fields
+and two `java.time` timestamps, one of which is left `null`:
 
-Storing a heterogeneous list — text blocks, image blocks, code blocks — in one
-JSON column needs a Jackson discriminator. The obvious mapping does not work
-with `JsonType`, and the reason is worth understanding:
+.The JSON payload POJO
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeObjectMapper/src/main/java/com/bookstore/forum/entity/PostProperties.java[tag=fields,indent=0]
+----
+
+The `snake_case` strategy renames `flairLabel` to `flair_label`,
+and `NON_NULL` inclusion drops the `editedOn` JSON attribute from the stored document when it contains a `null` value.
+Both examples build the same `Post`, set the payload above, and save it,
+so the only thing that differs is which mapping serializes it.
+
+Before we look at each side, note what we did *not* have to configure.
+On Jackson 3, `java.time` values serialize to ISO-8601 strings out of the box,
+so an `OffsetDateTime` no longer needs the `JavaTimeModule` and the `WRITE_DATES_AS_TIMESTAMPS` tweak that Jackson 2 required.
+Reading is lenient by default, too.
+A JSON document that carries an extra key that your POJO does not map is accepted rather than rejected,
+which is exactly what you want for a column whose shape evolves over time.
+The mapper therefore configures only the two things that actually differ from the Jackson 3 defaults.
+
+===== JsonType
+
+On the `JsonType` side, the supplier builds the mapper:
+
+.Custom `ObjectMapper` for `JsonType`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeObjectMapper/src/main/java/com/bookstore/forum/config/CustomObjectMapperSupplier.java[tag=mapper,indent=0]
+----
+
+The test builds the `Post`, sets the camelCase payload, and saves it:
+
+.Saving a `Post` whose JSON is serialized by the custom `ObjectMapper`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypeObjectMapper/src/test/java/com/bookstore/forum/JsonTypeObjectMapperTest.java[tag=save,indent=0]
+----
+
+When the transaction flushes, the custom mapper serializes the POJO,
+and Hibernate sends the following `INSERT`, whose bind parameter carries the transformed JSON:
+
+.The SQL statement JsonType executes
+[source,sql]
+----
+Query:["
+insert into object_mapper_post (properties,title,id)
+values (?,?,?)"],
+Params:[(
+  {"flair_label":"must-read","pinned_by_moderator":true,"created_on":"2026-08-18T09:45:00Z"},
+  Custom ObjectMapper for JsonType,
+  1
+)]
+----
+
+The stored JSON uses `snake_case` keys, an ISO-8601 `created_on` timestamp, and no `edited_on` attribute at all.
+
+===== Hibernate native
+
+The Hibernate native solution uses the very same mapper and hands it to Hibernate's `Jackson3JsonFormatMapper`,
+delegating the remaining `FormatMapper` methods to that instance:
+
+.Custom `FormatMapper` for the native mapping
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonFormatMapper/src/main/java/com/bookstore/forum/config/CustomJsonFormatMapper.java[tag=mapper,indent=0]
+----
+
+The test is identical to the previous `JsonType` example, except that the JPA entity mapping
+uses the native `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`:
+
+.Saving a `Post` whose JSON is serialized by the custom `FormatMapper`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootNativeJsonFormatMapper/src/test/java/com/bookstore/forum/NativeJsonFormatMapperTest.java[tag=save,indent=0]
+----
+
+While the bind parameter values are identical to the previous `JsonType` example,
+the native mapping wraps the JSON bind parameter in a `cast(? as json)` expression:
+
+.The SQL statement the native mapping executes
+[source,sql]
+----
+Query:["
+insert into format_mapper_post (properties,title,id)
+values (cast(? as json),?,?)"],
+Params:[(
+  {"flair_label":"must-read","pinned_by_moderator":true,"created_on":"2026-08-18T09:45:00Z"},
+  Custom FormatMapper for native JSON,
+  1
+)]
+----
+
+Nevertheless, both mappings produce identical JSON objects, in spite of the additional `cast(? as json)`.
+
+==== Polymorphic JSON structures
+
+Let's assume that we have a variety of content blocks (e.g., text, image, code snippets) that the user
+can add to a given post.
+Because we are going to save the content blocks in a JSON object, we need a Jackson discriminator
+to identify the type of each block when reading it back from the database.
+For this reason, we are going to use the `@JsonTypeInfo` annotation on the base class of the content blocks,
+as illustrated by the following mapping:
 
 .The discriminator has to be a real bean property
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/main/java/com/bookstore/forum/entity/PostContentBlock.java[lines=32..47]
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/main/java/com/bookstore/forum/entity/PostContentBlock.java[tag=discriminator,indent=0]
 ----
 
-`JsonType` serializes through `writeValueAsString(value)` *without* passing the
-declared generic type, so Jackson's polymorphic type serializer never runs and a
-plain `@JsonTypeInfo` discriminator is silently dropped on write. Exposing the
-discriminator as a genuine `getType()` getter and declaring
-`As.EXISTING_PROPERTY` makes it survive.
+Since the discriminator is exposed as a genuine bean property,
+we need the `As.EXISTING_PROPERTY` option to tell Jackson to use the `type` property rather than adding a new one.
 
-The native `@JdbcTypeCode(SqlTypes.JSON)` mapping does *not* have this problem —
-it passes the resolved generic type — but the mapping above works for both, so
-it is the one to reach for.
+Both the native `@JdbcTypeCode(SqlTypes.JSON)` and `JsonType` mappings can handle polymorphic JSON structures.
+The following example uses the PostgreSQL-specific `JsonBinaryType`, which stores the content blocks in a `jsonb` column.
 
-== Array columns
+The test builds a `Post` whose body mixes all three block types, and saves it:
 
-PostgreSQL arrays are a genuine column type, not a serialization trick, and
-Hypersistence Utils maps every useful shape of them: `String[]`, `int[]`,
-`List<String>`, `LocalDate[]`, `UUID[]`, enum arrays and even multidimensional
-arrays.
-
-.The two array types Hibernate cannot map natively
+.Persisting a polymorphic list of content blocks
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=enum-array]
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/test/java/com/bookstore/forum/JsonTypePolymorphismTest.java[tag=persist,indent=0]
 ----
 
-For simple arrays, Hibernate 7 needs no annotation at all — declare
-`private String[] keywords;` and you get a `text array` column. The two mappings
-above are where that stops being true:
+The whole list is serialized into a single `jsonb` column,
+and each element carries the `type` discriminator (`text`, `code`, `image`) that lets it be revived later:
 
-* An enum array maps natively to `smallint array` (ordinals), *not* to a
-  PostgreSQL `post_status[]`. `EnumArrayType` with the `SQL_ARRAY_TYPE`
-  parameter gives you the real enum array type.
-* A multidimensional array is rejected outright: the `EntityManagerFactory`
-  fails to start with _"Nested arrays (with the exception of `byte[][]`) are not
-  supported"_. `MultiDimensionalArrayType` maps it.
+.The SQL statement that persists the polymorphic JSON
+[source,sql]
+----
+Query:["
+insert into polymorphic_post (body,title,id)
+values (?,?,?)"],
+Params:[(
+  [
+    {"markdown":"Intro paragraph","type":"text"},
+    {"language":"java","source":"var x = 1;","type":"code"},
+    {"url":"https://example.com/a.png","alt":"a diagram","type":"image"}
+  ],
+  Mapping polymorphic JSON,
+  1
+)]
+----
+
+When we read the `Post` back, Jackson uses the `type` discriminator to reconstruct each element as its concrete subtype
+(e.g., `TextBlock`, `CodeBlock`, and `ImageBlock`), so the list comes back exactly as it was prior to being persisted:
+
+.Fetching the post and asserting each block's concrete type
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePolymorphism/src/test/java/com/bookstore/forum/JsonTypePolymorphismTest.java[tag=fetch,indent=0]
+----
+
+=== Array columns
+
+Unlike other relational databases that added support for array column types later,
+the array support in PostgreSQL goes back to its very inception in 1986, as illustrated by Michael Stonebraker and Lawrence A. Rowe's
+paper, https://www.researchgate.net/publication/2790621_The_design_of_POSTGRES[The Design of POSTGRES].
+So, right from the start, PostgreSQL provided support for variable-length multi-dimensional arrays.
+
+Just like PostgreSQL, Hypersistence Utils also offered support for PostgreSQL arrays from the very beginning in 2017,
+and with time, the library added support for `String[]`, `int[]` or other numerical arrays, `List<String>`, `LocalDate[]`, `UUID[]`,
+enum arrays and even multidimensional arrays.
+
+On the other hand, Hibernate added support for arrays in version 6.0, which was released in 2022.
+Just like with JSON, the native array types of Hibernate provide better integration with the `hbm2ddl` schema generation tool,
+and they are preferred over the Hypersistence Utils array types for many common use cases.
+
+==== Native Hibernate arrays
+
+Hibernate 7 maps the common single-dimension array and collection types natively, with no annotation and no `columnDefinition`.
+Declare the attributes as plain Java arrays or a `List`, and the dialect picks the SQL array type for you:
+
+.Single-dimension arrays mapped natively
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=mapping,indent=0]
+----
+
+On PostgreSQL, these map to a `varchar(255) array` for the `String[]` and the `List<String>`,
+an `integer array` for the `Integer[]`, a `date array` for the `LocalDate[]`, and a `uuid array` for the `UUID[]`.
+The test persists a `Post` carrying all five attributes:
+
+.Persisting a Post with natively-mapped arrays
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArrayTypes/src/test/java/com/bookstore/forum/NativeArrayTypesTest.java[tag=persist,indent=0]
+----
+
+Hibernate binds each attribute as a SQL array literal in a single `INSERT`:
+
+.The SQL statement the native array mapping executes
+[source,sql]
+----
+Query:["
+insert into native_array_post
+  (editor_ids,keywords,publication_dates,scores,title,topics,id)
+values (?,?,?,?,?,?,?)"],
+Params:[(
+  {"c65a3bcb-8b36-46d4-bddb-ae96ad016eb1","72e95717-5294-4c15-aa64-a3631cf9a800"},
+  {"hibernate","arrays"},
+  {"2026-01-01","2026-02-01"},
+  {"5","4","5"},
+  Mapping PostgreSQL arrays natively,
+  {"mapping","types"},
+  1
+)]
+----
+
+Fetching the `Post` back rebuilds each Java array from the associated SQL array columns:
+
+.Fetching the Post and asserting the arrays
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArrayTypes/src/test/java/com/bookstore/forum/NativeArrayTypesTest.java[tag=fetch,indent=0]
+----
+
+However, not all array types are supported natively by Hibernate 7, and the Hypersistence Utils library still provides additional support for
+non-trivial mappings, such as enum and multidimensional arrays.
+
+==== Enum arrays
+
+Mapped natively, a `PostStatus[]` would fall back to an *ordinal* `smallint array`:
+the database stores `0, 1, 2` instead of `DRAFT, PUBLISHED, ARCHIVED`,
+which has several disadvantages:
+
+* the integer ordinals are less readable than the enum names;
+* adding a new enum value in the middle of the current enumeration shifts the ordinals, breaking the integer arrays stored previously;
+* inserting a `smallint` value that has no associated Java enum is valid for a `smallint array`, but it will fail at runtime when loading the array column value.
+
+For these reasons, Hypersistence Utils provides an `EnumArrayType` that can bind a `PostStatus[]` attribute
+to a native PostgreSQL `post_status[]` enum array,
+so the values are stored as their names and the column carries the database enum type:
+
+.Mapping a Java enum array to a native `post_status[]`
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=enum-array,indent=0]
+----
 
 [NOTE]
 ====
-The PostgreSQL enum type has to exist before Hibernate generates the table. Put
-`CREATE TYPE` in `schema.sql` and leave `spring.jpa.defer-datasource-initialization`
-at its default of `false` — that ordering runs the script *before* the
-`EntityManagerFactory` is built.
+The PostgreSQL enum type has to exist before Hibernate generates the table.
+Put `CREATE TYPE post_status AS ENUM (...)` in `schema.sql` and leave `spring.jpa.defer-datasource-initialization` at its default of `false`,
+so that the schema initialization script runs *before* the `EntityManagerFactory` is bootstrapped.
 ====
 
-== Database-specific types
+The test stores a post that contains all status values, and reads the same enum constants back:
 
-Ranges, intervals, `hstore`, `inet`, `citext`: the types that make PostgreSQL
-worth choosing, and that plain JPA has no vocabulary for.
-
-.A publication window, a duration and a key/value map
+.Round-tripping a native enum array
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=pg-types]
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/test/java/com/bookstore/forum/HypersistenceArrayTypesTest.java[tag=enum-roundtrip,indent=0]
 ----
 
-Note the aggregate root rule in the same file — the details share the post's
-identifier rather than carrying a surrogate key of their own:
+Because the `Post` entity is annotated with `@DynamicInsert`, the statement lists only the columns we actually set,
+rather than all nine, so the `status_history` array stands out, bound as a native enum literal and not as an ordinal `smallint[]`:
 
+.The SQL statement the enum array mapping executes
+[source,sql]
+----
+Query:["
+insert into hypersistence_array_post (status_history,title,topics,id)
+values (?,?,?,?)"],
+Params:[(
+  {"DRAFT","PUBLISHED","ARCHIVED"},
+  A post that moved through every status,
+  {},
+  5
+)]
+----
+
+==== Multidimensional arrays
+
+The native array mapping doesn't work with nested arrays.
+If the entity contains an `Integer[][]` entity attribute, when the `EntityManagerFactory` bootstraps,
+we are going to get a _"Nested arrays (with the exception of byte[][]) are not supported"_ failure message.
+
+Yet a multidimensional numeric array is a natural fit for AI workloads.
+For example, we could persist a small tensor of embedding vectors next to a document,
+ready to feed a RAG pipeline or an MCP server without a round-trip to a separate vector store.
+
+The `MultiDimensionalArrayType` from Hypersistence Utils addresses this mapping requirement,
+allowing us to map a `double[][]` array to a PostgreSQL `float8[][]` column type.
+A dense tensor has a value in every cell, so we use the primitive `double[][]` rather than the boxed `Double[][]`, which would allow `null` elements we never need:
+
+.Mapping an embedding tensor as a `float8[][]`
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=mapsid]
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/main/java/com/bookstore/forum/entity/Post.java[tag=multidim-array,indent=0]
 ----
 
-=== What Hibernate 7 now maps by itself
+The test saves an embedding tensor and reads it back from the database:
 
-Not every one of these types still needs the library, and it is worth knowing
-which. The repository has a second module with the *native* equivalents, so the
-comparison is tested rather than asserted:
+.Round-tripping an embedding tensor
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersistenceArrayTypes/src/test/java/com/bookstore/forum/HypersistenceArrayTypesTest.java[tag=tensor-roundtrip,indent=0]
+----
+
+The nested Java array containing the tensor is bound as a nested SQL array by the `MultiDimensionalArrayType`:
+
+.The SQL statement the multidimensional array mapping executes
+[source,sql]
+----
+Query:["
+insert into hypersistence_array_post (embedding_matrix,title,topics,id)
+values (?,?,?,?)"],
+Params:[(
+  {{"0.12","0.9","0.31"},{"0.44","0.05","0.87"}},
+  Best books to learn Spring Boot?,
+  {},
+  3
+)]
+----
+
+=== Database-specific types
+
+Apart from JSON and arrays, PostgreSQL has a great variety of types you can use,
+such as ranges, intervals, `hstore`, `inet`, `citext`, for which JPA has no built-in support.
+
+For example, let's consider that the `PostDetails` entity needs to store the following attributes:
+
+* `availabilityPeriod` - the time window during which the post is visible, which can be bounded (a start and end timestamp) or left open-ended, mapped to a PostgreSQL `tsrange`.
+* `readTimeBudget` - the estimated reading time of the post (e.g., the commonly-used "5 min read" indicator), mapped to an `interval`.
+* `attributes` - free-form key/value metadata, such as `locale=en` or `source=newsletter`, mapped to an `hstore`.
+
+Since JPA doesn't map any of these PostgreSQL-specific column types, each entity attribute is handled by a matching Hypersistence Utils custom Type:
+
+.The `PostDetails` entity with the aforementioned PostgreSQL-specific column mappings
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=pg-types,indent=0]
+----
+
+The following test persists a `Post` together with its `PostDetails`,
+setting the availability window, the read-time budget, and a couple of `hstore` attributes:
+
+.Persisting a Post and its PostDetails
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/test/java/com/bookstore/forum/PostgreSQLTypesTest.java[tag=persist,indent=0]
+----
+
+Hibernate inserts the parent `Post` entity first, then the `PostDetails` record,
+binding the `tsrange` window, the `interval` budget, and the `hstore` map through the Hypersistence Utils custom Types:
+
+.The SQL statements executed when persisting the PostDetails
+[source,sql]
+----
+Query:["select nextval('post_seq')"], Params:[()]
+
+Query:["insert into post (title,id) values (?,?)"], Params:[(PostgreSQL types,1)]
+
+Query:["
+insert into post_details (attributes,availability_period,read_time_budget,id)
+values (?,?,?,?)"],
+Params:[(
+  {difficulty=advanced, language=en},
+  [2026-01-01T00:00,2026-12-31T00:00],
+  8 mins 30 secs,
+  1
+)]
+----
+
+Reading the `PostDetails` back rebuilds the `Range`, the `Duration` and the `Map` from their PostgreSQL columns:
+
+.Fetching the PostDetails and asserting each type
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/test/java/com/bookstore/forum/PostgreSQLTypesTest.java[tag=fetch,indent=0]
+----
+
+Notice the identifiers in the SQL above: the `PostDetails` row is inserted with `id = 1`, the very same value as its `Post` entity,
+with which it forms a one-to-one relationship.
+That is due to the `@MapsId` annotation, and it is the mapping you should use by default
+whenever a child entity is in a strict one-to-one relationship with its parent:
+
+.`@MapsId` shares the parent's identifier
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHypersistencePostgreSQLTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=mapsid,indent=0]
+----
+
+The `PostDetails` takes the `Post`'s primary key as its own,
+so there is no separate surrogate key and no extra foreign-key column:
+the `id` column of the `post_details` table is both the primary key and the foreign key referencing the `post` table.
+This is the one-to-one mapping the Hypersistence Optimizer recommends, since it avoids the redundant column that a naive `@OneToOne` would add.
+
+==== What Hibernate 7 now maps by itself
+
+Not every one of these types still needs the Hypersistence Utils library,
+and it is worth knowing which.
+The code repository has a second module with the *native* equivalents,
+so the comparison is validated by integration tests, rather than being asserted theoretically:
 
 [cols="1,3", options="header"]
 |===
@@ -230,16 +929,16 @@ comparison is tested rather than asserted:
 
 | `interval`
 | **Native.** `@JdbcTypeCode(SqlTypes.INTERVAL_SECOND)` on a `Duration` produces
-  `interval second(6)`.
+`interval second(6)`.
 
 | `inet`
 | **Native.** A plain `java.net.InetAddress` field maps to `inet` with no
-  annotation at all.
+annotation at all.
 
 | `citext`
 | **Half.** `columnDefinition = "citext"` gives you a case-insensitive *unique
-  constraint*, but Hibernate binds query parameters as `varchar`, so a derived
-  query is still case-**sensitive** unless you write `CAST(:name AS citext)`.
+constraint*, but Hibernate binds query parameters as `varchar`, so a derived
+query is still case-**sensitive** unless you write `CAST(:name AS citext)`.
 
 | `tsrange`
 | Hypersistence Utils only (`PostgreSQLRangeType`).
@@ -250,224 +949,75 @@ comparison is tested rather than asserted:
 
 [WARNING]
 ====
-When querying an `hstore` column, use the function form `exist(attributes, :key)`
-rather than the `?` operator — JDBC parses `?` as a bind placeholder and the
-statement never reaches PostgreSQL intact.
+When querying an `hstore` column,
+use the function form `exist(attributes, :key)` rather than the `?` operator
+because JDBC interprets the `?` symbol as a bind parameter placeholder and the prepared statement
+would never get to reach PostgreSQL.
 ====
 
 === `YearMonth`, on any database
 
-`java.time.YearMonth` has no native mapping anywhere. Hypersistence Utils offers
-two, and which one you want depends on who else reads the column:
+While `java.time.YearMonth` has no native Hibernate mapping,
+Hypersistence Utils offers two options, and which one you should use depends on
+how you plan to read the value from the database table column:
 
-.The same `YearMonth`, stored two ways
+.The same `YearMonth`, stored in two ways
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=yearmonth-fields]
+include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/main/java/com/bookstore/forum/entity/PostDetails.java[tag=yearmonth-fields,indent=0]
 ----
 
-`YearMonthIntegerType` stores `2026-07` as the integer `202607` — compact, sorts
-correctly, and immediately readable in a report. `YearMonthDateType` stores it as
-the `date` `2026-07-01`, which is what you want if SQL date functions or a BI
-tool need to work with the column.
+`YearMonthIntegerType` stores `2026-07` as the integer `202607`.
+That is compact, it sorts correctly, and it reads well in a report.
+`YearMonthDateType` stores it as the `date` `2026-07-01`,
+which is what you want if SQL date functions or a BI tool need to work with the column.
 
-== A better repository contract: `BaseJpaRepository`
+The following test stores a `PostDetails` with both mappings populated,
+`publishedOn` set to July 2026 and `archivedOn` to December 2026:
 
-Spring Data's `JpaRepository.save()` is one method doing two jobs. Given a
-detached entity it calls `merge()`, and `merge()` must first `SELECT` the row to
-build a managed copy — a read you did not ask for and do not need, because you
-already know what the row should look like.
-
-`BaseJpaRepository` splits the method in two. Wire it in once:
-
+.Persisting a PostDetails with two YearMonth mappings
 [source,java]
 ----
-@SpringBootApplication
-@EnableJpaRepositories(repositoryBaseClass = BaseJpaRepositoryImpl.class)
-public class MainApplication { /* ... */ }
+include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/test/java/com/bookstore/forum/YearMonthTypesTest.java[tag=persist,indent=0]
 ----
 
-.The repository interface
+In the generated `INSERT`, `publishedOn` is bound as the integer `202607`,
+while `archivedOn` is bound as the `date` `2026-12-01`:
+
+.The SQL statement that persists the two YearMonth columns
+[source,sql]
+----
+Query:["
+insert into year_month_post_details (archived_on,published_on,title,id)
+values (?,?,?,?)"],
+Params:[(
+  2026-12-01,
+  202607,
+  Mapping YearMonth on MySQL,
+  1
+)]
+----
+
+Reading the `PostDetails` back, both columns rebuild the exact same `YearMonth`, regardless of how they were stored:
+
+.Fetching the PostDetails and asserting both YearMonth values
 [source,java]
 ----
-include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/repository/PostRepository.java[tag=repository]
+include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/test/java/com/bookstore/forum/YearMonthTypesTest.java[tag=fetch,indent=0]
 ----
 
-Notice what is *missing*: there is no `save()` and no `findAll()`. That is the
-whole point — you are made to choose between `persist` (this row is new) and
-`update` (this row exists), and the choice is enforced by the compiler.
+There is one more thing to consider when the `YearMonth` column is queried by *range*.
+The integer encoding is not contiguous.
+Between every December and the following January there are 88 integer values
+that have no associated `YearMonth` (e.g., `202613` to `202700`),
+so a range that crosses a year boundary spans a far wider integer interval than the handful of real months it actually contains.
 
-.The standard contract: a SELECT you did not want
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=standard-save]
-----
+On PostgreSQL, once a table holds more distinct year-months than the column's statistics target (100 by default),
+range selectivity is estimated from a histogram, and this non-contiguous domain skews the estimate.
+When running a test against a 60,000-row table, a `BETWEEN` spanning December 2026 and January 2027 was estimated at about 660 rows
+against the integer `publishedOn` mapping versus 200 against the date `archivedOn` mapping, the true count being 200.
 
-.The explicit contract: a direct UPDATE
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=base-update]
-----
+Equality and `IN` lookups are unaffected, and MySQL stays accurate either way, through index dives or a per-value histogram.
+So for range-heavy `YearMonth` querying on PostgreSQL, `YearMonthDateType` gives the optimizer a better distribution.
+The `YearMonthOptimizerSelectivityTest` in the book's code repository reproduces these execution plans on both databases.
 
-`update()` delegates to Hibernate's `StatelessSession`, which writes the row
-without a persistence context and therefore without reading it first.
-
-[IMPORTANT]
-====
-`updateAll()` removes the N `SELECT`s but it does **not** batch the `UPDATE`s.
-`StatelessSessionImpl` sets the JDBC batch size to `0` for a single `update()`
-call — a non-zero batch size would force write-behind, which is precisely what a
-stateless session refuses to do. Three detached entities produce three
-`UPDATE` statements. Compare that with `saveAll()`, which produces three
-`SELECT`s *and* one batched `UPDATE`: you are trading reads for roundtrips, so
-measure which one your workload actually cares about.
-====
-
-== Retrying what is worth retrying
-
-Some failures are worth a second attempt and some are not. A lock acquisition
-timeout is transient: whoever held the lock has since committed, and running the
-transaction again will probably succeed. An optimistic locking failure is not
-transient in the same sense — retrying it silently overwrites somebody else's
-concurrent decision, which is the exact outcome the version column existed to
-prevent.
-
-`@Retry` is generic; you decide which exceptions qualify:
-
-.Retrying only recoverable failures
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootRetry/src/main/java/com/bookstore/forum/service/RetryableForumService.java[tag=retry]
-----
-
-The structure matters as much as the annotation. `@Retry` sits on a method that
-is **not** `@Transactional`, and that method delegates to a *different* bean
-which is. Crossing the proxy boundary is what gives each attempt a fresh
-transaction and a fresh read of the row; annotating one method with both would
-retry inside the failed transaction, which cannot succeed.
-
-The repository proves this with two threads and a `CountDownLatch`: one holds a
-`PESSIMISTIC_WRITE` lock while the other times out, retries, and commits once the
-lock is released. Without `@Retry` the same scenario fails outright.
-
-== Finding out what Hibernate is doing
-
-Three tools, each answering a different question about a query.
-
-`SQLExtractor`:: *What SQL will this JPQL become?* It translates without
-executing, which makes it a fine thing to assert on in a test:
-+
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootQueryUtilities/src/test/java/com/bookstore/forum/QueryUtilitiesTest.java[tag=sql-extractor]
-----
-
-`QueryStackTraceLogger`:: *Which of my methods fired this query?* Give it your
-base package and it logs the application frame responsible — the fastest way to
-find the origin of a query you did not expect. It only logs at `DEBUG`.
-
-`JfrQueryLogger`:: *What did production actually run?* It emits a JDK Flight
-Recorder event per query, so the SQL turns up in a JFR recording alongside GC
-and thread data.
-
-The last two are both `StatementInspector` implementations, and Hibernate accepts
-only one. A no-argument composite solves it without any programmatic
-configuration:
-
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootQueryUtilities/src/main/java/com/bookstore/forum/config/CompositeStatementInspector.java[tag=composite]
-----
-
-[source,properties]
-----
-spring.jpa.properties.hibernate.session_factory.statement_inspector=\
-  com.bookstore.forum.config.CompositeStatementInspector
-logging.level.io.hypersistence.utils.hibernate.query.QueryStackTraceLogger=DEBUG
-----
-
-Hibernate instantiates that class reflectively, which is why the no-argument
-constructor matters.
-
-== Sequences that stay usable by everyone
-
-A sequence roundtrip per inserted row is fine for a single-row transaction and
-ruinous for a bulk import. The usual answer is the `pooled` optimizer: declare
-the sequence `INCREMENT BY 50` and let Hibernate hand out blocks from memory.
-
-It works, and it quietly makes the sequence Hibernate's private property. Any
-other client — an ETL job, a `psql` script, a trigger — that calls `nextval`
-takes one identifier and burns forty-nine, because the pooling lives in the
-application, not in the database.
-
-`BatchSequenceGenerator` gets the same roundtrip reduction without that. It
-batches the *fetch* instead of inflating the increment, using a recursive CTE
-(on PostgreSQL, `generate_series`) to draw many values in one statement:
-
-.Two mappings of one table, sharing one sequence
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/Post.java[tag=oltp-sequence]
-----
-
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com/bookstore/forum/entity/BatchedPost.java[tag=batch-sequence]
-----
-
-Both draw from `batch_seq_post_seq`. The OLTP mapping takes one value at a time;
-the import mapping takes ten per roundtrip:
-
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=batch-import]
-----
-
-Ten rows, one `SELECT`, one batched `INSERT`. And because the sequence was never
-redefined, a script that knows nothing about Hibernate can still interleave with
-the application:
-
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=interop]
-----
-
-The difference is visible straight from the catalog:
-
-[source,java]
-----
-include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/test/java/com/bookstore/forum/BatchSequenceGeneratorTest.java[tag=increments]
-----
-
-[NOTE]
-====
-`@BatchSequence` is not gap-free in the absolute sense — the unused tail of a
-fetch is lost, so size `fetchSize` to your import chunk. What it preserves is
-*interoperability*: the sequence remains an ordinary `INCREMENT BY 1` sequence
-that anything can consume.
-====
-
-`@SequenceOptimizer` is the companion annotation for when you do want an
-optimizer, chosen explicitly rather than inferred from `allocationSize`.
-
-== Summary
-
-Hypersistence Utils is not one feature; it is a collection of answers to
-questions Hibernate leaves open. The ones worth remembering:
-
-* `@Tsid` gives you sortable, batch-friendly, non-guessable identifiers in 64 bits.
-* `JsonType` and the array types map the columns your database really has —
-  though Hibernate 7 has caught up on plain JSON, simple arrays, `interval` and
-  `inet`, so check before reaching for the library.
-* `BaseJpaRepository` replaces `save()` with `persist()` and `update()`, and the
-  `SELECT` before every detached update disappears.
-* `@Retry` retries what is transient; you choose the exception list, and the
-  annotation goes on a non-transactional method that delegates to a
-  transactional one.
-* `SQLExtractor`, `QueryStackTraceLogger` and `JfrQueryLogger` answer *what*,
-  *who* and *when* about your SQL.
-* `BatchSequenceGenerator` speeds up imports without turning your sequence into
-  something only Hibernate can use.
-
-Every claim above is a test in this book's repository. If one of them ever stops
-being true, that build fails — which is the subject of the next chapter.

@@ -3,6 +3,7 @@ package com.bookstore.forum;
 import com.bookstore.forum.entity.Post;
 import com.bookstore.forum.entity.PostProperties;
 import com.bookstore.forum.service.ForumService;
+import java.time.OffsetDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
@@ -25,7 +26,7 @@ public class MainApplication {
     public ApplicationRunner init(ForumService forumService) {
         return args -> {
             Post post = new Post("Custom FormatMapper for native JSON");
-            post.setProperties(new PostProperties("must-read", true));
+            post.setProperties(new PostProperties("must-read", true, OffsetDateTime.now()));
 
             Post loaded = forumService.findById(forumService.save(post).getId());
             LOGGER.info("Loaded flairLabel: {}, pinnedByModerator: {}",

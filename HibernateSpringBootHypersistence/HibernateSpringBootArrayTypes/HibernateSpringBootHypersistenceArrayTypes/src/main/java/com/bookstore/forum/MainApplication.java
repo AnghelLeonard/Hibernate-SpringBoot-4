@@ -35,13 +35,13 @@ public class MainApplication {
             post.setPublicationDates(new LocalDate[]{LocalDate.of(2026, 1, 1)});
             post.setEditorIds(new UUID[]{UUID.randomUUID()});
             post.setStatusHistory(new PostStatus[]{PostStatus.DRAFT, PostStatus.PUBLISHED});
-            post.setRatingMatrix(new Integer[][]{{5, 4}, {3, 5}});
+            post.setEmbeddingMatrix(new double[][]{{0.12, 0.90, 0.31}, {0.44, 0.05, 0.87}});
 
             Post loaded = forumService.findById(forumService.save(post).getId());
-            LOGGER.info("Loaded keywords: {}, statuses: {}, matrix rows: {}",
+            LOGGER.info("Loaded keywords: {}, statuses: {}, embedding rows: {}",
                 (Object) loaded.getKeywords(),
                 (Object) loaded.getStatusHistory(),
-                loaded.getRatingMatrix().length);
+                loaded.getEmbeddingMatrix().length);
 
             LOGGER.info("Posts tagged 'arrays' (= ANY): {}",
                 forumService.findByKeyword("arrays").size());

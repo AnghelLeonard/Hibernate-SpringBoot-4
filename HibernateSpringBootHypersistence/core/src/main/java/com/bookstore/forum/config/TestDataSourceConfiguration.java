@@ -1,5 +1,6 @@
 package com.bookstore.forum.config;
 
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -28,6 +29,7 @@ public class TestDataSourceConfiguration {
         return ProxyDataSourceBuilder
             .create(databaseType.provider().dataSource())
             .name("DATA_SOURCE_PROXY")
+            .logQueryBySlf4j(SLF4JLogLevel.DEBUG)
             .countQuery()
             .build();
     }

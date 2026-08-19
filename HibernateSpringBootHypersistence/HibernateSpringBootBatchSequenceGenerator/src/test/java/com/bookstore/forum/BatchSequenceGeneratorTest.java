@@ -84,7 +84,11 @@ class BatchSequenceGeneratorTest {
         SQLStatementCountValidator.reset();
 
         List<Long> ids = forumService
-            .importPosts(IntStream.rangeClosed(1, 10).mapToObj(i -> "Imported post " + i).toList())
+            .importPosts(
+                IntStream.rangeClosed(1, 10)
+                    .mapToObj(i -> "Imported post " + i)
+                    .toList()
+            )
             .stream()
             .map(BatchedPost::getId)
             .toList();
@@ -107,9 +111,12 @@ class BatchSequenceGeneratorTest {
     // tag::interop[]
     @Test
     public void theSameSequenceServesHibernateAndPlainDatabaseScripts() {
-        long fromHibernate = forumService.createPost("Written by the application").getId();
-        long fromScript = forumService.insertPostAsADatabaseScriptWould("Written by an ETL job");
-        long fromHibernateAgain = forumService.createPost("Written by the application again").getId();
+        long fromHibernate = forumService
+            .createPost("Written by the application").getId();
+        long fromScript = forumService
+            .insertPostAsADatabaseScriptWould("Written by an ETL job");
+        long fromHibernateAgain = forumService
+            .createPost("Written by the application again").getId();
 
         assertEquals(fromHibernate + 1, fromScript,
             "A non-Hibernate client must get the very next sequence value");

@@ -95,21 +95,26 @@ public class JsonTypeAttributesTest {
 
     @Test
     public void jsonTypeSkipsTheUpdateWhenTheContentIsUnchanged() {
+        // tag::dirty-checking[]
         Post post = new Post("Is Hibernate Spring Boot 4 worth reading?");
         post.setProperties(pinnedProperties());
         Long id = forumService.save(post).getId();
 
+        // A read-only touch does not flush an UPDATE.
         reset();
         forumService.touch(id);
         assertUpdateCount(0);
 
+        // Replacing the payload with an equal-content instance is a no-op too.
         reset();
         forumService.update(id, p -> p.setProperties(pinnedProperties()));
         assertUpdateCount(0);
 
+        // Only a real content change triggers the UPDATE.
         reset();
         forumService.update(id, p -> p.getProperties().setFlair("hot"));
         assertUpdateCount(1);
+        // end::dirty-checking[]
     }
 
     @Test

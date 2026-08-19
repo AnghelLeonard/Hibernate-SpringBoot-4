@@ -34,7 +34,7 @@ public class MainApplication {
             Post post = new Post("Mapping PostgreSQL-specific types with Hypersistence Utils");
 
             PostDetails details = new PostDetails(post);
-            details.setPublicationPeriod(Range.closed(
+            details.setAvailabilityPeriod(Range.closed(
                 LocalDateTime.of(2026, 1, 1, 0, 0),
                 LocalDateTime.of(2026, 12, 31, 23, 59)));
             details.setReadTimeBudget(Duration.ofMinutes(8));
