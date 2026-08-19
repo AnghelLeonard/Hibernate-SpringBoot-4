@@ -5,8 +5,11 @@ import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class RetryableForumService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RetryableForumService.class);
+
     private final PostService postService;
 
     public RetryableForumService(PostService postService) {
@@ -38,17 +43,19 @@ public class RetryableForumService {
     }
 
     // tag::retry[]
-    @Retry(times = 5, on = {
+    @Retry(times = 30, on = {
         LockTimeoutException.class,
         PessimisticLockException.class,
         LockAcquisitionException.class,
         JDBCConnectionException.class,
         CannotAcquireLockException.class,
+        PessimisticLockingFailureException.class,
         QueryTimeoutException.class,
         DataAccessResourceFailureException.class
     })
     public void incrementLikes(Long id, int delta, AtomicInteger attempts) {
-        attempts.incrementAndGet();
+        int attempt = attempts.incrementAndGet();
+        LOGGER.info("Attempt #{} to increment likes", attempt);
         postService.incrementLikes(id, delta);
     }
     // end::retry[]

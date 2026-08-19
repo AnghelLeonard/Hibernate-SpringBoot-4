@@ -1233,5 +1233,144 @@ Compare that with the standard `saveAll()`, which issues one `SELECT` per detach
 Since `updateAll()` gives you the same batched `UPDATE` without paying for those reads,
 you are better off using `updateAll()` whenever you already know the rows exist in the database.
 
+=== Retrying what is worth retrying
 
+Business methods that perform database operations can fail for a variety of reasons.
+While some failures are permanent, such as a `ConstraintViolationException`,
+others are transient, such as a lock acquisition timeout or a dropped connection.
+
+Transient failures may be recoverable, meaning that the very same operation could succeed if we simply retry it.
+A lock acquisition timeout is a good example, because whoever held the lock might have committed in the meantime,
+so a new attempt has a good chance of acquiring the lock and moving on.
+A deadlock failure, a connection acquisition failure, or a dropped connection fall into the same category of recoverable exceptions.
+
+And, of course, we also have non-transient failures, and retrying them is neither useful nor advisable.
+Let's take the `OptimisticLockException` since it is a common case.
+An `OptimisticLockException` tells you that in between you reading a table record and the moment you attempt
+to change that record, some other concurrent transaction has managed to change the very same record and committed the change.
+Retrying the same business transaction would either fail with an `OptimisticLockException` if you're passing the same stale version
+or, even worse, proceed while silently overwriting the existing database record, therefore causing a lost update anomaly.
+
+For this reason, before adding any retry logic to your business methods,
+you have to split failures into these two categories,
+and retry only the ones that are actually recoverable.
+
+Hypersistence Utils provides a generic `@Retry` annotation that you can use for this purpose.
+You put it on a service method and list the exceptions that, when caught, should trigger a new attempt:
+
+.The `@Retry` method lists only the recoverable failures
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootRetry/src/main/java/com/bookstore/forum/service/RetryableForumService.java[tag=retry,indent=0]
+----
+
+The `on` clause lists the transient failures that will trigger a retry, such as lock-acquisition timeouts,
+query timeouts, and connection-acquisition failures.
+Behind the scenes, the `@Retry` annotation is implemented as a Spring AOP aspect that intercepts the method call,
+catches the listed exceptions, and re-invokes the method.
+
+It's worth noting that the `@Retry` annotation sits on a method that is **not** `@Transactional`,
+and that method delegates to a *different* bean, the `PostService`, which is the one that starts a `@Transactional` boundary.
+Crossing that proxy boundary is what gives every attempt a brand-new transaction and a fresh read of the record.
+If the service method is annotated with both `@Retry` and `@Transactional`,
+the retry would run inside the same transaction context that already failed and was marked for rollback,
+so it could never succeed on a new attempt.
+
+To see the retry in action, we need two threads that compete to acquire a lock on the same row.
+For example, let's imagine we have a forum post whose `likes` counter is updated by two concurrent requests.
+The first thread acquires a `PESSIMISTIC_WRITE` lock, increments the `likes` entity attribute,
+and then holds the lock while it simulates a slow downstream service call, keeping its transaction open:
+
+.Thread A acquires the lock and holds it while a slow service runs
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootRetry/src/main/java/com/bookstore/forum/service/PostService.java[tag=lock-and-hold,indent=0]
+----
+
+[NOTE]
+====
+In a relational database system, once a transaction acquires an exclusive lock, either implicitly via an `UPDATE` or `DELETE`,
+or explicitly via a `FOR UPDATE` clause, no other transaction can acquire an exclusive lock on the same row until the first transaction
+commits or rolls back.
+
+The exclusive locks cannot be released prior to the end of the transaction, so any other transaction that attempts to acquire
+a lock on the same row will block until the first transaction finishes or the lock acquisition times out.
+====
+
+The second thread also wants to modify the same post, and since the record is already locked by the first thread,
+it will block until the lock is released.
+For this reason, we are going to set a very small lock-acquisition timeout,
+so that a contended lock acquisition fails fast in order to give us the opportunity to retry the operation in a new transaction:
+
+.Thread B fails fast on a contended lock so the operation can be retried
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootRetry/src/main/java/com/bookstore/forum/service/PostService.java[tag=increment-likes,indent=0]
+----
+
+For this example we are using PostgreSQL because its `lock_timeout` is expressed in milliseconds.
+MySQL cannot do this, since its `innodb_lock_wait_timeout` has second granularity.
+
+We set the PostgreSQL lock timeout to just 10 ms and watch the contended attempt fail almost instantly.
+
+The two threads are coordinated with a `CountDownLatch`,
+so that Thread B starts only after Thread A has acquired the lock and is holding it while simulating a slow service call:
+
+.The two-thread contention test
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootRetry/src/test/java/com/bookstore/forum/RetryLockAcquisitionTest.java[tag=retry-test,indent=0]
+----
+
+When we run this test, Thread B's first attempt blocks on the lock held by Thread A,
+times out after 10 ms, and the `@Retry` aspect runs the method again in a brand-new transaction.
+This process repeats several times until Thread A's slow service call finishes,
+its transaction commits, and the lock is finally released.
+The very next attempt from Thread B then acquires the lock and commits.
+
+Since each thread logs what it is doing, the captured output shows the whole interleaving:
+
+[source,text]
+----
+[main]     Created Post(id=1) with likes=0
+[main]     Submitting Thread-A (the lock holder)
+
+[Thread-A] Acquiring the PESSIMISTIC_WRITE lock
+[Thread-A] Lock acquired, likes 0 -> 10
+[Thread-A] Holding the lock for 1000ms (simulating a slow service call)
+
+[main]     Thread-A holds the lock; submitting Thread-B (the retrier)
+
+[Thread-B] Attempt #1 to increment likes
+[Thread-B] Trying to acquire the lock (lock_timeout=10ms)
+[Thread-B] Retryable failure was caught, 29 remaining retries ...
+
+[Thread-B] Attempt #2 to increment likes
+[Thread-B] Trying to acquire the lock (lock_timeout=10ms)
+[Thread-B] Retryable failure was caught, 28 remaining retries ...
+
+... attempts #3, #4 and #5 time out on the lock in the very same way ...
+
+[Thread-B] Attempt #6 to increment likes
+
+[Thread-A] Slow service finished, committing and releasing the lock
+
+[Thread-B] Trying to acquire the lock (lock_timeout=10ms)
+[Thread-B] Lock acquired, likes 10 -> 11, committing
+
+[main]     Both threads finished; Thread-B needed 6 attempts; final likes=11
+----
+
+Reading those log lines from top to bottom gives us the following sequence diagram:
+
+.Thread B keeps retrying the 10 ms lock acquisition until Thread A commits and releases the lock
+image::../images/retry-sequence.svg[Retry lock-acquisition sequence diagram,align=center,pdfwidth=100%]
+
+Thread B timed out five times, once for each 10 ms attempt against the held lock,
+and succeeded on the sixth attempt, right after Thread A committed.
+The final `likes` value is 11, which is the value of 10 set by Thread A plus 1, which was added by Thread B on its sixth attempt,
+so no update was lost.
+
+Without `@Retry`, Thread B's single attempt will time out on the held lock and the update will fail right away,
+leaving the `likes` counter at the value of 10 because only Thread A will manage to commit.
 

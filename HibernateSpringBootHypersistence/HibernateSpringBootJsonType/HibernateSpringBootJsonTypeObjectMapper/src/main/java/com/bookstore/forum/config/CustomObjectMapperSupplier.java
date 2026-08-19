@@ -26,8 +26,8 @@ public class CustomObjectMapperSupplier implements ObjectMapperSupplier {
         return JsonMapper.builder()
             .findAndAddModules()
             .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .changeDefaultPropertyInclusion(
-                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
+            .changeDefaultPropertyInclusion(inclusion ->
+                inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
             .build();
     }
     // end::mapper[]

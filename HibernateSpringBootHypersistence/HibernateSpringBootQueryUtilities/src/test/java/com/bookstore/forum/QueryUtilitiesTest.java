@@ -73,8 +73,10 @@ class QueryUtilitiesTest {
         ));
 
         assertTrue(sql.contains("join"), () -> "Expected a join in: " + sql);
-        assertTrue(sql.contains("query_util_post_comment"), () -> "Expected the comment table in: " + sql);
-        assertTrue(sql.contains("query_util_post "), () -> "Expected the joined post table in: " + sql);
+        assertTrue(sql.contains("query_util_post_comment"),
+            () -> "Expected the comment table in: " + sql);
+        assertTrue(sql.contains("query_util_post "),
+            () -> "Expected the joined post table in: " + sql);
     }
     // end::sql-extractor[]
 

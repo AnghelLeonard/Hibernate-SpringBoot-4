@@ -50,7 +50,8 @@ class NativeArrayTypesTest {
         post.setKeywords(new String[]{"hibernate", "arrays"});
         post.setTopics(List.of("mapping", "types"));
         post.setScores(new Integer[]{5, 4, 5});
-        post.setPublicationDates(new LocalDate[]{LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)});
+        post.setPublicationDates(new LocalDate[]{
+            LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)});
         post.setEditorIds(new UUID[]{EDITOR_1, EDITOR_2});
 
         Long id = forumService.save(post).getId();
@@ -62,7 +63,8 @@ class NativeArrayTypesTest {
         assertArrayEquals(new String[]{"hibernate", "arrays"}, loaded.getKeywords());
         assertEquals(List.of("mapping", "types"), loaded.getTopics());
         assertArrayEquals(new Integer[]{5, 4, 5}, loaded.getScores());
-        assertArrayEquals(new LocalDate[]{LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)},
+        assertArrayEquals(
+            new LocalDate[]{LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1)},
             loaded.getPublicationDates());
         assertArrayEquals(new UUID[]{EDITOR_1, EDITOR_2}, loaded.getEditorIds());
         // end::fetch[]
