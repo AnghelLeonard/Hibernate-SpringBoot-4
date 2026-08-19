@@ -1,6 +1,6 @@
 ---
 
-# 📘 Summary of *Item 22: Why Use Read‑Only Entities When You Plan to Update Later*
+# 📘 Summary of Item 22: *Why Use Read‑Only Entities When You Plan to Update Later*
 
 ## 🎯 Core Idea  
 When you load an entity in one transaction and update it in a later transaction (a common pattern in web apps), it’s more efficient to load the entity **in read‑only mode** during the first step. This avoids unnecessary memory and CPU overhead in Hibernate.
