@@ -1,5 +1,4 @@
 -- Recreate database
-USE `bookstoredb`;
 DROP DATABASE IF EXISTS `bookstoredb`;
 CREATE DATABASE `bookstoredb`;
 USE `bookstoredb`;
@@ -11,5 +10,5 @@ CREATE TABLE `author` (
   `genre`  VARCHAR(255)  DEFAULT NULL,
   `name`   VARCHAR(255)  DEFAULT NULL,
   `avatar` LONGBLOB      DEFAULT NULL,
-  CONSTRAINT `author_pk` PRIMARY KEY (id)
+  CONSTRAINT `author_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
