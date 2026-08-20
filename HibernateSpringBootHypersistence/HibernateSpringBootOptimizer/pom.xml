@@ -53,6 +53,7 @@
             <modules>
                 <module>HibernateSpringBootOptimizerKickoff</module>
                 <module>HibernateSpringBootOptimizerMappingFixes</module>
+                <module>HibernateSpringBootOptimizerMySQLIdentity</module>
                 <module>HibernateSpringBootOptimizerRuntimeEvents</module>
                 <module>HibernateSpringBootOptimizerEventFilters</module>
             </modules>
@@ -67,6 +68,7 @@
             <modules>
                 <module>HibernateSpringBootOptimizerKickoff</module>
                 <module>HibernateSpringBootOptimizerMappingFixes</module>
+                <module>HibernateSpringBootOptimizerMySQLIdentity</module>
                 <module>HibernateSpringBootOptimizerRuntimeEvents</module>
                 <module>HibernateSpringBootOptimizerEventFilters</module>
             </modules>
