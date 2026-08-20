@@ -17,7 +17,7 @@ This item explains **how to lazily load large entity attributes**—such as BLOB
 ## ⚙️ How to Enable Attribute Lazy Loading
 
 ### **1. Add Hibernate Bytecode Enhancement**
-- Configure the `hibernate-maven-plugin` in `pom.xml`.
+- Configure the `Bytecode Enhancement` in `pom.xml`.
 - Enable:
   ```
   <enableLazyInitialization>true</enableLazyInitialization>
@@ -67,7 +67,7 @@ This leads to performance degradation.
   @Query("SELECT a.name, a.avatar FROM Author a WHERE a.age >= ?1")
   List<AuthorDto> findDtoByAgeGreaterThanEqual(int age);
   ```
-- Or use subentities (referenced in Item 24).
+- Or use subentities.
 
 ---
 
