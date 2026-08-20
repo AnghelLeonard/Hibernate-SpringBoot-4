@@ -1021,3 +1021,217 @@ Equality and `IN` lookups are unaffected, and MySQL stays accurate either way, t
 So for range-heavy `YearMonth` querying on PostgreSQL, `YearMonthDateType` gives the optimizer a better distribution.
 The `YearMonthOptimizerSelectivityTest` in the book's code repository reproduces these execution plans on both databases.
 
+== Spring utilities
+
+The rest of the Hypersistence Utils library is about getting the best out of Spring Data JPA,
+providing you with an efficient `JpaRepository` alternative,
+a retry aspect that knows the difference between a transient failure and a permanent one,
+and three tools for inspecting the SQL statements your application is executing.
+
+=== `BaseJpaRepository` - A better Spring Data JPA repository
+
+The vast majority of Spring Data JPA applications use the `JpaRepository` interface to create their
+application-specific data access repositories, and via the `ListCrudRepository` interface,
+they inherit the `findAll()` method, which can return an entire database table in a single call,
+as well as the `save()` method, which can trigger a `SELECT` you did not ask for and do not need.
+
+==== The `findAll()` Anti-Pattern
+
+As you can see on these StackOverflow questions
+https://stackoverflow.com/questions/48638338/spring-data-jpa-repositories-with-java-8-streams-detached-object[1],
+https://stackoverflow.com/questions/72843206/how-can-mock-repository-findall-stream-map-filter[2],
+https://stackoverflow.com/a/60613059/1025118[3],
+https://stackoverflow.com/questions/71417081/how-can-i-convert-this-java-filter-into-a-postgresql-query[4],
+https://stackoverflow.com/questions/75775470/get-database-data-in-object/75777419#75777419[5],
+there are countless cases where `findAll()` is used to fetch a large number of rows,
+only to filter them in the application memory prior to returning a subset to the client.
+
+The `findAll()` anti-pattern consists of fetching a whole database table in the application memory,
+and calling `filter`, `sorted`, `limit` and `map` on the associated Java `Stream`
+in order to extract what the client actually wanted.
+
+Imagine a forum that wants the five most-viewed posts that are also approved.
+There are 50 rows in the table, only 30 of them approved,
+and the caller simply asks for the top five through `findMostViewedAndApprovedPosts(5)`.
+A naive implementation would fetch everything and do all the processing work in memory:
+
+.The anti-pattern: fetch everything, then filter, order, limit and project in memory
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/service/AntiPatternForumService.java[tag=antipattern-findmostviewed,indent=0]
+----
+
+From the integration test, this call doesn't look problematic since it just asks for the top five posts matching the provided filtering criteria.
+In order to assert how the service method will perform, you need to look at the SQL statements it executes, and the number of records returned
+by executing those statements.
+
+The integration test injects a second service, `forumService`, which is the SQL-based version that fetches the same
+five most-viewed and approved posts.
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=findall-antipattern,indent=0]
+----
+
+If you were to compare the number of statements executed by these two services,
+you would see that both execute a single `SELECT` statement, and both return the same five posts.
+
+So why is the `findAll` version an anti-pattern?
+The `findAll()` call triggers an unrestricted `SELECT` that reads every row and every column from a database table,
+and builds N managed entities in the current persistence context, even though the caller only needs a fraction of them:
+
+[source,sql]
+----
+SELECT p1_0.id, p1_0.status, p1_0.title, p1_0.views
+FROM base_jpa_post p1_0
+----
+
+Note that the executed SQL query has no `WHERE`, no `ORDER BY`, no `LIMIT` and no projection,
+so the database returns all 50 rows and all four columns of the table.
+
+All the entities that were fetched but not needed by the client will be silently discarded,
+so they are just an overhead that impacts the performance of the service method.
+
+The four operations that shrink 50 rows down to 5, equivalent to the `WHERE`, `ORDER BY`, `LIMIT`, and the
+projection, are done in memory, even though a relational database is meant to do filtering using an index.
+During testing, we don't usually have a lot of data since we are mostly concerned with the correctness of the code,
+so the anti-pattern may pass a hasty code review.
+
+However, on a production database table, the in-memory sort and limit could take seconds,
+and that's when this anti-pattern becomes a real problem.
+
+The solution is very simple, as illustrated by the following `ForumService` method:
+
+.The recommended `ForumService`: the database filters, orders, limits and projects
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/service/ForumService.java[tag=good-findmostviewed,indent=0]
+----
+
+By calling a query method on the Spring Data JPA repository, an SQL query will be generated to query, filter, order, limit
+and project the results on the database side.
+
+That derived query pushes every Stream-like operation into one statement,
+so the database returns only the five rows with the two columns the caller needs:
+
+.The derived query
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/repository/PostJpaRepository.java[tag=db-side-query,indent=0]
+----
+
+[source,sql]
+----
+SELECT p1_0.title, p1_0.views
+FROM base_jpa_post p1_0
+WHERE p1_0.status = ?
+ORDER BY p1_0.views DESC
+LIMIT ?
+----
+
+This is exactly why the anti-pattern is so easy to slip into production.
+Both services return the same five posts and both run a single `SELECT`,
+so from the call site, and even from the statement-count assertion,
+they are indistinguishable.
+
+The difference is what passes from the database to the JDBC layer.
+The anti-pattern fetches the entire table and instantiates 50 managed entities only to keep 5,
+while the derived query transfers just 5 projected rows.
+That gap is 10x here only because the table is tiny.
+On a real table that grows constantly, the `findAll()` anti-pattern can be orders of magnitude slower than a projection query.
+
+For this very reason, the `BaseJpaRepository` provided by Hypersistence Utils as an alternative
+to the standard `JpaRepository` does not include an unbounded `findAll()` method.
+While removing this method does not guarantee that the client will never execute a full table scan,
+it makes the accidental call impossible, and pushes you toward choosing a derived query, a paginated `Page<T>`,
+or a projection that is explicit about how many rows and which columns you actually need.
+
+==== The JPA entity `save` Anti-Pattern
+
+Most Spring Data JPA applications use `JpaRepository.save()` every time they perform a write operation,
+no matter whether the entity is new or it already exists in the database.
+That may be convenient, but it comes with a hidden cost.
+
+Behind the scenes, the `save()` method can call either `persist` or `merge`
+since these are the only two operations offered by the JPA specification associated with inserting or updating an entity.
+If the entity is new, we are supposed to call `persist()`.
+If the entity has an associated record in the database, there are two ways to propagate the update:
+
+* If the entity is managed by the current persistence context, meaning it was previously loaded and has not been detached,
+we don't have to do anything since, at flush time, the dirty checking mechanism will detect the entity changes
+and schedule an `UPDATE` statement.
+* If the entity is detached, meaning it is no longer associated with the current persistence context,
+then we are supposed to call `merge()`.
+
+However, the merge operation works as follows:
+
+* It needs the state of the entity in the database to know whether an update is necessary. So, if the entity is detached, it first issues a `SELECT` to fetch the current state of the associated table row.
+* Having a newly fetched entity, it copies the changes from the detached entity onto the one we have just loaded.
+* At flush time, the dirty checking mechanism will check whether the entity has changed and issue an `UPDATE` statement in case the entity state differs from the one that was loaded from the database.
+
+Imagine you loaded a `Post` in a previous transaction, modified it, and now you want to save the changes.
+You know the row exists, and you know its current state is exactly what the associated table record should be,
+yet the `save()` method of the `JpaRepository` still issues a `SELECT` before the `UPDATE`:
+
+.The standard `save()` may execute a SELECT you did not want
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=standard-save,indent=0]
+----
+
+So why is that extra `SELECT` a problem?
+Since the service layer is not making any decision based on the loaded state,
+the read is just an overhead that adds one more database round trip to every update.
+While the extra `SELECT` might be unnoticeable when saving a single entity,
+for a batch processing tasks that modifies thousands of entities,
+each `SELECT` adds up to a significant performance penalty.
+
+The solution is to tell Hibernate exactly what you want to do, and for this reason,
+`BaseJpaRepository` does not expose a `save()` method at all.
+Instead, it gives you `persist()` for when you need to insert a new record and `update()` for when you need to modify an existing one:
+
+.The repository interface
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/repository/PostRepository.java[tag=repository,indent=0]
+----
+
+To enable it, you need to register the `BaseJpaRepositoryImpl` base class when configuring Spring Data JPA:
+
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/MainApplication.java[tag=enable,indent=0]
+----
+
+That's basically all you need to do in order to switch from `JpaRepository` to `BaseJpaRepository`.
+
+While the `persist` method just calls the underlying JPA `EntityManager.persist()`, the way the `update`
+method works depends on the Hibernate version.
+Prior to Hibernate 7, the `update` method called the `update` method of the Hibernate Session, but since that method
+was removed in Hibernate 7, the `update` method now calls the `update` method on a `StatelessSession` instead.
+
+.Executing the UPDATE without the extra SELECT
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=base-update,indent=0]
+----
+
+As you can see, the detached entity is written with a single `UPDATE`, and the extra `SELECT` is gone.
+
+The same benefit extends to batch updates.
+Both the `updateAll()` and `updateAllAndFlush()` methods remove the `SELECT` statements that `saveAll()` would have issued,
+and they also batch the `UPDATE`s into a single JDBC statement execution,
+so updating N detached entities takes one round trip instead of N + 1 as `saveAll()` would have done.
+
+.updateAll batches the detached updates without any SELECT
+[source,java]
+----
+include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=updateall-batch,indent=0]
+----
+
+Compare that with the standard `saveAll()`, which issues one `SELECT` per detached entity before flushing a single batched `UPDATE`.
+Since `updateAll()` gives you the same batched `UPDATE` without paying for those reads,
+you are better off using `updateAll()` whenever you already know the rows exist in the database.
+
+
+

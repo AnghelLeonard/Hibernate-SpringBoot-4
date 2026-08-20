@@ -21,9 +21,11 @@ import java.util.List;
  * in scope then gets the explicit persist/merge/update contract instead of the
  * standard {@code save()}/{@code findAll()} surface.
  */
+// tag::enable[]
 @SpringBootApplication
 @EnableJpaRepositories(repositoryBaseClass = BaseJpaRepositoryImpl.class)
 public class MainApplication {
+    // end::enable[]
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainApplication.class);
 

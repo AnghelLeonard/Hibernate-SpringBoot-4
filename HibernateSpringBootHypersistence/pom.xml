@@ -47,7 +47,7 @@
              Hibernate 7.3+ and Jackson 3, and is compatible with the Hibernate 7.4 line. -->
         <!-- tag::hypersistence-utils-version[] -->
         <hibernate.version>7.4.1.Final</hibernate.version>
-        <hypersistence-utils.version>3.15.4</hypersistence-utils.version>
+        <hypersistence-utils.version>3.15.5</hypersistence-utils.version>
         <!-- end::hypersistence-utils-version[] -->
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
         <datasource-proxy.version>1.11.0</datasource-proxy.version>
