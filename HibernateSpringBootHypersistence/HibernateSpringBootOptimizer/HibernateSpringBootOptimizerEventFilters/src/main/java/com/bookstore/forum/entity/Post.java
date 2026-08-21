@@ -1,14 +1,16 @@
 package com.bookstore.forum.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -57,19 +59,20 @@ public class Post {
     private PostDetails details;
 
     /**
-     * <strong>The one rule this module breaks on purpose.</strong> An eager
-     * {@code @ManyToOne} normally means a join on every read you did not ask
-     * for — but {@link PostStatus} is a five-row lookup table that every caller
-     * of a post needs anyway, so the join is cheaper than the second query the
-     * lazy version would cost.
+     * <strong>The one rule this module breaks on purpose.</strong> Mapping an
+     * enum as {@code EnumType.STRING} stores its name in a {@code VARCHAR}, which
+     * costs more space and slower comparisons than the small integer an
+     * {@code EnumType.ORDINAL} mapping would use, so Hypersistence Optimizer
+     * reports an {@code EnumTypeStringEvent} for it.
      *
-     * <p>Hypersistence Optimizer does not know that, and it should not have to
-     * guess: it reports the {@code EagerFetchingEvent} and the application
-     * <em>filters it out by name</em>, which turns an unexamined violation into
-     * a documented, reviewable decision.</p>
+     * <p>Here, though, {@code filtered_post.status} is a legacy column that other
+     * applications already read and write by name. Switching it to an ordinal
+     * would rewrite every stored value and break them, so we keep the String
+     * mapping and <em>filter the event out by name</em>, which turns an unfixable
+     * violation into a documented, reviewable decision.</p>
      */
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "status_id")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private PostStatus status;
 
     @ManyToMany

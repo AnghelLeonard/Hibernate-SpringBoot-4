@@ -3,9 +3,11 @@ package com.bookstore.forum.service;
 import com.bookstore.forum.entity.Post;
 import com.bookstore.forum.entity.PostComment;
 import com.bookstore.forum.entity.PostDetails;
+import com.bookstore.forum.entity.PostSummary;
 import com.bookstore.forum.entity.Tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +54,19 @@ public class ForumService {
         return entityManager.find(Post.class, id);
     }
 
+    /**
+     * Fetches every comment at once. With no upper bound, a query like this
+     * reports a {@code QueryResultListSizeEvent} as soon as the result set grows
+     * past {@code hypersistence.query.max_result_size}.
+     */
+    // tag::result-list[]
     @Transactional(readOnly = true)
     public List<PostComment> findComments() {
         return entityManager
             .createQuery("select c from PostComment c", PostComment.class)
             .getResultList();
     }
+    // end::result-list[]
 
     /**
      * Page 2 of <em>what</em>? Without an {@code order by}, the database is free
@@ -67,6 +76,7 @@ public class ForumService {
      *
      * @see #findPageOrdered(int, int)
      */
+    // tag::pagination[]
     @Transactional(readOnly = true)
     public List<Post> findPage(int pageNumber, int pageSize) {
         return entityManager
@@ -75,6 +85,7 @@ public class ForumService {
             .setMaxResults(pageSize)
             .getResultList();
     }
+    // end::pagination[]
 
     /**
      * The same page, made deterministic.
@@ -107,29 +118,92 @@ public class ForumService {
     /**
      * The same information, in one query.
      */
+    // tag::join-fetch[]
     @Transactional(readOnly = true)
     public List<String> findCommentAuthorsInOneQuery() {
-        return entityManager
-            .createQuery("select c from PostComment c join fetch c.post", PostComment.class)
+        return entityManager.createQuery("""
+                select c
+                from PostComment c
+                join fetch c.post
+                """, PostComment.class)
             .getResultList().stream()
             .map(comment -> comment.getPost().getTitle())
             .toList();
     }
+    // end::join-fetch[]
+
+    /**
+     * A single query that runs longer than {@code hypersistence.query.timeout_millis},
+     * so the runtime scanner reports a {@code QueryTimeoutEvent}.
+     */
+    // tag::slow-query[]
+    @Transactional(readOnly = true)
+    public void runSlowQuery() {
+        entityManager.createNativeQuery("select pg_sleep(0.2)").getSingleResult();
+    }
+    // end::slow-query[]
+
+    /**
+     * The {@code find} call already puts the {@code Post} into the persistence
+     * context, so the following {@code merge} is redundant and the runtime
+     * scanner reports an {@code EntityAlreadyManagedEvent}.
+     */
+    // tag::already-managed[]
+    @Transactional
+    public void mergeAnAlreadyManagedEntity(Long postId) {
+        Post post = entityManager.find(Post.class, postId);
+        entityManager.merge(post);
+    }
+    // end::already-managed[]
+
+    /**
+     * Loads the same table row through two different entities, so the runtime
+     * scanner reports a {@code TableRowAlreadyManagedEvent}.
+     */
+    // tag::table-row-load[]
+    @Transactional(readOnly = true)
+    public void loadSameRowAsTwoEntities(Long postId) {
+        entityManager.find(Post.class, postId);
+        entityManager.find(PostSummary.class, postId);
+    }
+    // end::table-row-load[]
+
+    /**
+     * Persists a thousand entities in one transaction, with JDBC batching turned
+     * off for this session so Hibernate sends one INSERT per entity. When the
+     * transaction commits, that single flush takes longer than
+     * {@code hypersistence.session.flush_timeout_millis}, so the runtime scanner
+     * reports a {@code SessionFlushTimeoutEvent}.
+     */
+    // tag::slow-flush[]
+    @Transactional
+    public void flushManyEntities() {
+        entityManager.unwrap(Session.class).setJdbcBatchSize(1);
+
+        for (int i = 0; i < 1_000; i++) {
+            entityManager.persist(new Tag("flush-tag-" + i));
+        }
+    }
+    // end::slow-flush[]
 
     /**
      * A transaction that holds its connection far longer than the work needs —
      * the shape of every "we only added a REST call inside the service method"
      * incident. The connection pool is the scarcest resource in the system.
      */
+    // tag::session-timeout[]
     @Transactional
     public void slowTransaction(long millis) {
-        entityManager.createQuery("select count(p) from Post p", Long.class).getSingleResult();
+        entityManager
+            .createQuery("select count(p) from Post p", Long.class)
+            .getSingleResult();
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
+    // end::session-timeout[]
 
     /**
      * Removing a single tag now deletes a single join-table row, because
