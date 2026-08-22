@@ -4,10 +4,10 @@ Vlad Mihalcea
 :sourcedir: {examplesdir}
 
 In this chapter, we are going to see how https://github.com/vladmihalcea/hypersistence-utils[Hypersistence Utils] extends both Spring and Hibernate capabilities,
-and provides you with a set of utilities that address certain shortcomings of these two frameworks.
+and provides us with a set of utilities that address certain shortcomings of these two frameworks.
 
 While Hibernate provides great support for mapping the most common SQL column types,
-and since version 6, you also have support for JSON and array columns,
+and since version 6, we also have support for JSON and array columns,
 there are still gaps that the library tries to fill.
 Some of them are non-standard column types Hibernate does not map on its own,
 such as multi-dimensional arrays, PostgreSQL ranges, intervals, and `hstore`.
@@ -19,28 +19,28 @@ it provided support for mapping JSON columns in PostgreSQL, MySQL, Oracle, and S
 While the custom Hibernate Types are still the most popular feature offered by this framework,
 it now provides many other Hibernate-related enhancements,
 such as the time-sorted pseudo-random identifiers,
-or a new `BatchSequenceGenerator` that allows you to fetch multiple sequence values in a single roundtrip from a database sequence that has an increment step of just 1.
+or a new `BatchSequenceGenerator` that allows us to fetch multiple sequence values in a single roundtrip from a database sequence that has an increment step of just 1.
 
-And Hypersistence Utils is no longer limited to enhancing Hibernate since it also provides a set of Spring utilities that can improve your data access layer,
+And Hypersistence Utils is no longer limited to enhancing Hibernate since it also provides a set of Spring utilities that can improve our data access layer,
 such as a better repository contract that removes the `SELECT` before every detached update,
 a retry aspect that can repeat a transaction only when it is worth retrying,
-and a set of query utilities that allow you to find out what SQL your application actually runs,
-and which line of your code triggered it.
+and a set of query utilities that allow us to find out what SQL our application actually runs,
+and which line of our code triggered it.
 
 Next, we are going to walk through the parts worth knowing,
 and each feature is grouped by category: enhanced **identifiers**,
 the **column types** Hibernate cannot map on its own,
 and the **Spring utilities** that improve the data access layer beyond what Spring Data JPA can offer.
 
-Every code listing you are about to read is included at build time from an actual integration test in this book's coding repository.
+Every code listing we are about to read is included at build time from an actual integration test in this book's coding repository.
 None of the code is retyped, so it cannot drift from what is actually tested,
 and the SQL statements shown next to it are captured from those same test runs.
-I've used this practice when writing the Hibernate User Guide since it is the most efficient way to be sure that the code you read is correct and works as it's supposed to.
+I've used this practice when writing the Hibernate User Guide since it is the most efficient way to be sure that the code we read is correct and works as it's supposed to.
 
 == Adding the library
 
 Hypersistence Utils ships one artifact per Hibernate line,
-and you must match the one your project is using.
+and we must match the one our project is using.
 This book uses Hibernate 7.4, and since the library has no dedicated line for it yet,
 the artifact is the most recent one, `hypersistence-utils-hibernate-73`, which is compatible with the 7.4 line.
 Its version is set once, as a Maven property, just like for the Hibernate one:
@@ -68,8 +68,8 @@ If there is no thread, there is no reason to hold any additional details.
 
 == Identifiers
 
-Every entity needs a primary key, and there are multiple options you can choose from.
-If your entity has a natural key, you can use it as the identifier, like the ISBN of a book.
+Every entity needs a primary key, and there are multiple options we can choose from.
+If our entity has a natural key, we can use it as the identifier, like the ISBN of a book.
 Among our entities, the `Tag` has a natural key, which is its name,
 so we could use that as the identifier.
 However, even for the `Tag`, we are going to use a surrogate key instead,
@@ -95,12 +95,12 @@ leaving no gaps when the sequence is used by other clients, such as ETL jobs or 
 === Identifiers that sort themselves: `@Tsid`
 
 For application-generated identifiers, UUIDs are very convenient because, at 128 bits, they are effectively unique,
-and many programming languages either offer built-in support or have popular libraries you can use to generate them.
+and many programming languages either offer built-in support or have popular libraries we can use to generate them.
 Unfortunately, the most common UUID type is version 4, which is purely random, and that's not very convenient
 because primary keys are usually indexed, and the most common option is the B+Tree index.
 Because B+Tree indexes are sorted data structures, random values will cause the index to be sparsely populated.
 For example, a PostgreSQL index node is mapped in memory on an 8 KB page that may contain hundreds of entries.
-When you insert a new row with a random UUID, the database has to find the right page to place it on,
+When we insert a new row with a random UUID, the database has to find the right page to place it on,
 and if that page is full, it splits into new nodes to keep the tree balanced,
 so the index ends up with many sparsely populated pages.
 
@@ -112,7 +112,7 @@ therefore filling the index pages continuously.
 The second part of the identifier is filled with a random number.
 Because the TSID, like the Snowflake identifier, has 64 bits, it fits in a `bigint` column, which is twice as compact as a UUID.
 
-To use a TSID as an entity identifier, you have to use the `@Tsid` annotation, as illustrated by the following example:
+To use a TSID as an entity identifier, we have to use the `@Tsid` annotation, as illustrated by the following example:
 
 .Applying a TSID to an identifier
 [source,java]
@@ -149,7 +149,7 @@ Although we saved thirty posts, there was just **one** `INSERT`, which executed 
 
 `@Tsid` is not limited to the entity identifier.
 It can also populate a `String` or a `TSID` column,
-which can be used as public-facing identifiers that you'd exchange with a client.
+which can be used as public-facing identifiers that we'd exchange with a client.
 
 .A TSID as a public identifier and as a typed column
 [source,java]
@@ -257,17 +257,17 @@ transaction rolls back.
 
 This is the gap the Hypersistence Utils library is best known for.
 Hibernate 7 maps the SQL-standard types and, increasingly, the common vendor extensions (e.g., JSON, arrays, inet).
-However, some databases, such as PostgreSQL, have a great variety of column types that are left for you to map via
-the Hibernate custom type API, and Hypersistence Utils aims to help you with this task, by providing additional
+However, some databases, such as PostgreSQL, have a great variety of column types that are left for us to map via
+the Hibernate custom type API, and Hypersistence Utils aims to help us with this task, by providing additional
 Hibernate Types for ranges, intervals, monetary amounts, or key/value maps.
 
 Even for the types that Hibernate has added support for in recent versions, such as JSON and arrays, Hypersistence Utils
 can provide some additional features. For example, the generic `JsonType` can work with PostgreSQL, Oracle, SQL Server, or MySQL,
-without you having to change the entity mapping. And the `MultiDimensionalArrayType` can handle nested arrays, which may be convenient
+without us having to change the entity mapping. And the `MultiDimensionalArrayType` can handle nested arrays, which may be convenient
 for some applications.
 
 Nevertheless, where Hibernate 7 or 6 has since caught up, we are going to mention it,
-because the honest advice is that you no longer need the library for some of the types that have been
+because the honest advice is that we no longer need the library for some of the types that have been
 traditionally offered by Hypersistence Utils.
 
 === JSON columns, portably
@@ -286,7 +286,7 @@ for storing JSON objects in a text-based storage, and a `jsonb` column in 9.4 (2
 in a binary format. MySQL added the `json` column type in 2015 with the 5.7.8 release.
 
 Having so many options to store JSON objects, the `JsonType` aims to remove this burden from the Java developer,
-and allows you to map a POJO, a `String`, a `JsonNode`, a `Map`, or a `List` to the aforementioned database-specific JSON storage types.
+and allows us to map a POJO, a `String`, a `JsonNode`, a `Map`, or a `List` to the aforementioned database-specific JSON storage types.
 
 .`JsonType` mapping example
 [source,java]
@@ -310,7 +310,7 @@ Because of these two annotations, the SQL statements captured throughout this se
 The reason we're using the `columnDefinition = "json"` on the columns annotated with `JsonType` is because
 this Hibernate Type maps to the JDBC `Types.OTHER`, which Hibernate cannot turn into a column type on its own,
 so the schema generator does not know what DDL type to emit for the column unless we tell it.
-If you leave the `columnDefinition` out, the schema generation fails with the following exception:
+If we leave the `columnDefinition` out, the schema generation fails with the following exception:
 
 [source,text]
 ----
@@ -319,7 +319,7 @@ because there is no type mapping for org.hibernate.type.SqlTypes code: 1111 (OTH
 ----
 
 This is a limitation of Hibernate's `hbm2ddl` schema generation only, and it's not as bad as it looks.
-The `hbm2ddl` tool is a prototyping aid, not something you should run in production,
+The `hbm2ddl` tool is a prototyping aid, not something we should run in production,
 where the schema is versioned and migrated by a dedicated tool like Flyway or Liquibase.
 And once the schema is created before the application bootstraps, `JsonType` no longer needs the `columnDefinition`,
 because, at runtime, it already knows how to read and write the JSON column for the underlying database.
@@ -333,7 +333,7 @@ include::{sourcedir}/HibernateSpringBootJsonType/HibernateSpringBootJsonTypePort
 ----
 
 The schema is created up front by a migration script that runs before Hibernate bootstraps,
-which is exactly what Flyway would do for you in production:
+which is exactly what Flyway would do for us in production:
 
 .The migration script that creates the JSON schema on PostgreSQL
 [source,sql]
@@ -355,9 +355,9 @@ Based on the underlying relational database, `JsonType` binds the JSON attribute
 |===
 
 Hibernate 7 has native JSON support of its own, through `@JdbcTypeCode(SqlTypes.JSON)`,
-and, most often, you are better off preferring it.
+and, most often, we are better off preferring it.
 It is dialect-aware, it needs no `columnDefinition`, and it works on all four major databases (PostgreSQL, Oracle, SQL Server, and MySQL).
-The book code repository carries both variants side by side so you can compare them.
+The book code repository carries both variants side by side so we can compare them.
 The same five columns, mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`, look like this:
 
 .Native Hibernate JSON mapping example
@@ -396,7 +396,7 @@ The following table sums up how they compare:
 | Hibernate version | 5 and newer | 6 and newer
 |===
 
-If you let Hibernate generate the schema for a plain document column, the native mapping is the simpler choice.
+If we let Hibernate generate the schema for a plain document column, the native mapping is the simpler choice.
 The one behavior that still sets `JsonType` apart is how the two mappings handle dirty checking.
 
 `JsonType` compares the *parsed* JSON content when deciding whether the entity attribute has changed,
@@ -503,12 +503,12 @@ a column backed by a `Map`, `List`, `String` or `JsonNode` has value-based equal
 
 On the other hand, `JsonType` can omit these unnecessary `UPDATE` statements, because it compares the *JSON content* rather than object identity,
 so the two instances are seen as equal and no `UPDATE` is flushed.
-If you prefer the native mapping, you are better off overriding the `equals` and `hashCode` method of the POJO class wrapping the JSON content.
+If we prefer the native mapping, we are better off overriding the `equals` and `hashCode` method of the POJO class wrapping the JSON content.
 This way, the dirty checking mechanism will detect that the object content has not changed and not trigger the extra `UPDATE` statements.
 
 ==== How to provide a custom `ObjectMapper`
 
-Both mappings serialize through Jackson, and both let you replace the default mapper with one of your own.
+Both mappings serialize through Jackson, and both let us replace the default mapper with one of our own.
 `JsonType` takes an `ObjectMapperSupplier`, wired in through a Hypersistence Utils property,
 while the native feature takes a Hibernate `FormatMapper`, wired in through a Hibernate property:
 
@@ -544,8 +544,8 @@ Before we look at each side, note what we did *not* have to configure.
 On Jackson 3, `java.time` values serialize to ISO-8601 strings out of the box,
 so an `OffsetDateTime` no longer needs the `JavaTimeModule` and the `WRITE_DATES_AS_TIMESTAMPS` tweak that Jackson 2 required.
 Reading is lenient by default, too.
-A JSON document that carries an extra key that your POJO does not map is accepted rather than rejected,
-which is exactly what you want for a column whose shape evolves over time.
+A JSON document that carries an extra key that our POJO does not map is accepted rather than rejected,
+which is exactly what we want for a column whose shape evolves over time.
 The mapper therefore configures only the two things that actually differ from the Jackson 3 defaults.
 
 ===== JsonType
@@ -698,7 +698,7 @@ and they are preferred over the Hypersistence Utils array types for many common 
 ==== Native Hibernate arrays
 
 Hibernate 7 maps the common single-dimension array and collection types natively, with no annotation and no `columnDefinition`.
-Declare the attributes as plain Java arrays or a `List`, and the dialect picks the SQL array type for you:
+Declare the attributes as plain Java arrays or a `List`, and the dialect picks the SQL array type for us:
 
 .Single-dimension arrays mapped natively
 [source,java]
@@ -845,7 +845,7 @@ Params:[(
 
 === Database-specific types
 
-Apart from JSON and arrays, PostgreSQL has a great variety of types you can use,
+Apart from JSON and arrays, PostgreSQL has a great variety of types we can use,
 such as ranges, intervals, `hstore`, `inet`, `citext`, for which JPA has no built-in support.
 
 For example, let's consider that the `PostDetails` entity needs to store the following attributes:
@@ -902,7 +902,7 @@ include::{sourcedir}/HibernateSpringBootPostgreSQLTypes/HibernateSpringBootHyper
 
 Notice the identifiers in the SQL above: the `PostDetails` row is inserted with `id = 1`, the very same value as its `Post` entity,
 with which it forms a one-to-one relationship.
-That is due to the `@MapsId` annotation, and it is the mapping you should use by default
+That is due to the `@MapsId` annotation, and it is the mapping we should use by default
 whenever a child entity is in a strict one-to-one relationship with its parent:
 
 .`@MapsId` shares the parent's identifier
@@ -936,9 +936,9 @@ so the comparison is validated by integration tests, rather than being asserted 
 annotation at all.
 
 | `citext`
-| **Half.** `columnDefinition = "citext"` gives you a case-insensitive *unique
+| **Half.** `columnDefinition = "citext"` gives us a case-insensitive *unique
 constraint*, but Hibernate binds query parameters as `varchar`, so a derived
-query is still case-**sensitive** unless you write `CAST(:name AS citext)`.
+query is still case-**sensitive** unless we write `CAST(:name AS citext)`.
 
 | `tsrange`
 | Hypersistence Utils only (`PostgreSQLRangeType`).
@@ -958,8 +958,8 @@ would never get to reach PostgreSQL.
 === `YearMonth`, on any database
 
 While `java.time.YearMonth` has no native Hibernate mapping,
-Hypersistence Utils offers two options, and which one you should use depends on
-how you plan to read the value from the database table column:
+Hypersistence Utils offers two options, and which one we should use depends on
+how we plan to read the value from the database table column:
 
 .The same `YearMonth`, stored in two ways
 [source,java]
@@ -970,7 +970,7 @@ include::{sourcedir}/HibernateSpringBootYearMonthTypes/src/main/java/com/booksto
 `YearMonthIntegerType` stores `2026-07` as the integer `202607`.
 That is compact, it sorts correctly, and it reads well in a report.
 `YearMonthDateType` stores it as the `date` `2026-07-01`,
-which is what you want if SQL date functions or a BI tool need to work with the column.
+which is what we want if SQL date functions or a BI tool need to work with the column.
 
 The following test stores a `PostDetails` with both mappings populated,
 `publishedOn` set to July 2026 and `archivedOn` to December 2026:
@@ -1024,20 +1024,20 @@ The `YearMonthOptimizerSelectivityTest` in the book's code repository reproduces
 == Spring utilities
 
 The rest of the Hypersistence Utils library is about getting the best out of Spring Data JPA,
-providing you with an efficient `JpaRepository` alternative,
+providing us with an efficient `JpaRepository` alternative,
 a retry aspect that knows the difference between a transient failure and a permanent one,
-and three tools for inspecting the SQL statements your application is executing.
+and three tools for inspecting the SQL statements our application is executing.
 
 === `BaseJpaRepository` - A better Spring Data JPA repository
 
 The vast majority of Spring Data JPA applications use the `JpaRepository` interface to create their
 application-specific data access repositories, and via the `ListCrudRepository` interface,
 they inherit the `findAll()` method, which can return an entire database table in a single call,
-as well as the `save()` method, which can trigger a `SELECT` you did not ask for and do not need.
+as well as the `save()` method, which can trigger a `SELECT` we did not ask for and do not need.
 
 ==== The `findAll()` Anti-Pattern
 
-As you can see on these StackOverflow questions
+As we can see on these StackOverflow questions
 https://stackoverflow.com/questions/48638338/spring-data-jpa-repositories-with-java-8-streams-detached-object[1],
 https://stackoverflow.com/questions/72843206/how-can-mock-repository-findall-stream-map-filter[2],
 https://stackoverflow.com/a/60613059/1025118[3],
@@ -1062,7 +1062,7 @@ include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/book
 ----
 
 From the integration test, this call doesn't look problematic since it just asks for the top five posts matching the provided filtering criteria.
-In order to assert how the service method will perform, you need to look at the SQL statements it executes, and the number of records returned
+In order to assert how the service method will perform, we need to look at the SQL statements it executes, and the number of records returned
 by executing those statements.
 
 The integration test injects a second service, `forumService`, which is the SQL-based version that fetches the same
@@ -1073,8 +1073,8 @@ five most-viewed and approved posts.
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=findall-antipattern,indent=0]
 ----
 
-If you were to compare the number of statements executed by these two services,
-you would see that both execute a single `SELECT` statement, and both return the same five posts.
+If we were to compare the number of statements executed by these two services,
+we would see that both execute a single `SELECT` statement, and both return the same five posts.
 
 So why is the `findAll` version an anti-pattern?
 The `findAll()` call triggers an unrestricted `SELECT` that reads every row and every column from a database table,
@@ -1143,8 +1143,8 @@ On a real table that grows constantly, the `findAll()` anti-pattern can be order
 For this very reason, the `BaseJpaRepository` provided by Hypersistence Utils as an alternative
 to the standard `JpaRepository` does not include an unbounded `findAll()` method.
 While removing this method does not guarantee that the client will never execute a full table scan,
-it makes the accidental call impossible, and pushes you toward choosing a derived query, a paginated `Page<T>`,
-or a projection that is explicit about how many rows and which columns you actually need.
+it makes the accidental call impossible, and pushes us toward choosing a derived query, a paginated `Page<T>`,
+or a projection that is explicit about how many rows and which columns we actually need.
 
 ==== The JPA entity `save` Anti-Pattern
 
@@ -1169,11 +1169,11 @@ However, the merge operation works as follows:
 * Having a newly fetched entity, it copies the changes from the detached entity onto the one we have just loaded.
 * At flush time, the dirty checking mechanism will check whether the entity has changed and issue an `UPDATE` statement in case the entity state differs from the one that was loaded from the database.
 
-Imagine you loaded a `Post` in a previous transaction, modified it, and now you want to save the changes.
-You know the row exists, and you know its current state is exactly what the associated table record should be,
+Imagine we loaded a `Post` in a previous transaction, modified it, and now we want to save the changes.
+We know the row exists, and we know its current state is exactly what the associated table record should be,
 yet the `save()` method of the `JpaRepository` still issues a `SELECT` before the `UPDATE`:
 
-.The standard `save()` may execute a SELECT you did not want
+.The standard `save()` may execute a SELECT we did not want
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=standard-save,indent=0]
@@ -1186,9 +1186,9 @@ While the extra `SELECT` might be unnoticeable when saving a single entity,
 for a batch processing tasks that modifies thousands of entities,
 each `SELECT` adds up to a significant performance penalty.
 
-The solution is to tell Hibernate exactly what you want to do, and for this reason,
+The solution is to tell Hibernate exactly what we want to do, and for this reason,
 `BaseJpaRepository` does not expose a `save()` method at all.
-Instead, it gives you `persist()` for when you need to insert a new record and `update()` for when you need to modify an existing one:
+Instead, it gives us `persist()` for when we need to insert a new record and `update()` for when we need to modify an existing one:
 
 .The repository interface
 [source,java]
@@ -1196,14 +1196,14 @@ Instead, it gives you `persist()` for when you need to insert a new record and `
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/repository/PostRepository.java[tag=repository,indent=0]
 ----
 
-To enable it, you need to register the `BaseJpaRepositoryImpl` base class when configuring Spring Data JPA:
+To enable it, we need to register the `BaseJpaRepositoryImpl` base class when configuring Spring Data JPA:
 
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/MainApplication.java[tag=enable,indent=0]
 ----
 
-That's basically all you need to do in order to switch from `JpaRepository` to `BaseJpaRepository`.
+That's basically all we need to do in order to switch from `JpaRepository` to `BaseJpaRepository`.
 
 While the `persist` method just calls the underlying JPA `EntityManager.persist()`, the way the `update`
 method works depends on the Hibernate version.
@@ -1216,7 +1216,7 @@ was removed in Hibernate 7, the `update` method now calls the `update` method on
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/bookstore/forum/BaseJpaRepositoryTest.java[tag=base-update,indent=0]
 ----
 
-As you can see, the detached entity is written with a single `UPDATE`, and the extra `SELECT` is gone.
+As we can see, the detached entity is written with a single `UPDATE`, and the extra `SELECT` is gone.
 
 The same benefit extends to batch updates.
 Both the `updateAll()` and `updateAllAndFlush()` methods remove the `SELECT` statements that `saveAll()` would have issued,
@@ -1230,8 +1230,8 @@ include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/book
 ----
 
 Compare that with the standard `saveAll()`, which issues one `SELECT` per detached entity before flushing a single batched `UPDATE`.
-Since `updateAll()` gives you the same batched `UPDATE` without paying for those reads,
-you are better off using `updateAll()` whenever you already know the rows exist in the database.
+Since `updateAll()` gives us the same batched `UPDATE` without paying for those reads,
+we are better off using `updateAll()` whenever we already know the rows exist in the database.
 
 === Retrying what is worth retrying
 
@@ -1246,17 +1246,17 @@ A deadlock failure, a connection acquisition failure, or a dropped connection fa
 
 And, of course, we also have non-transient failures, and retrying them is neither useful nor advisable.
 Let's take the `OptimisticLockException` since it is a common case.
-An `OptimisticLockException` tells you that in between you reading a table record and the moment you attempt
+An `OptimisticLockException` tells us that in between us reading a table record and the moment we attempt
 to change that record, some other concurrent transaction has managed to change the very same record and committed the change.
-Retrying the same business transaction would either fail with an `OptimisticLockException` if you're passing the same stale version
+Retrying the same business transaction would either fail with an `OptimisticLockException` if we're passing the same stale version
 or, even worse, proceed while silently overwriting the existing database record, therefore causing a lost update anomaly.
 
-For this reason, before adding any retry logic to your business methods,
-you have to split failures into these two categories,
+For this reason, before adding any retry logic to our business methods,
+we have to split failures into these two categories,
 and retry only the ones that are actually recoverable.
 
-Hypersistence Utils provides a generic `@Retry` annotation that you can use for this purpose.
-You put it on a service method and list the exceptions that, when caught, should trigger a new attempt:
+Hypersistence Utils provides a generic `@Retry` annotation that we can use for this purpose.
+We put it on a service method and list the exceptions that, when caught, should trigger a new attempt:
 
 .The `@Retry` method lists only the recoverable failures
 [source,java]
@@ -1376,13 +1376,13 @@ leaving the `likes` counter at the value of 10 because only Thread A will manage
 
 === Finding out what Hibernate is doing
 
-Hibernate generates the SQL statements on your behalf, which is very convenient right up until
-something runs slower than you expected, or a query you never intended to trigger shows up in the logs.
-When that happens, there are three different questions you may need to answer:
+Hibernate generates the SQL statements on our behalf, which is very convenient right up until
+something runs slower than we expected, or a query we never intended to trigger shows up in the logs.
+When that happens, there are three different questions we may need to answer:
 
 * What is the SQL that a given JPQL or Criteria API query will be translated to?
-* Which of your service methods fired a particular statement?
-* What SQL queries does your application actually run in production?
+* Which of our service methods fired a particular statement?
+* What SQL queries does our application actually run in production?
 
 For each of those questions, Hypersistence Utils provides a dedicated tool.
 
@@ -1391,7 +1391,7 @@ For each of those questions, Hypersistence Utils provides a dedicated tool.
 `SQLExtractor` answers what SQL query will result by compiling a given JPQL or Criteria API query.
 It performs the translation through the Hibernate query planner without executing the query.
 Because it never hits the database, it makes an excellent candidate for a test assertion,
-where you want to make sure that a JPQL query compiles to the join or the predicate you expected:
+where we want to make sure that a JPQL query compiles to the join or the predicate we expected:
 
 .Asserting on the SQL that a JPQL query is translated to
 [source,java]
@@ -1405,14 +1405,14 @@ and it does so without ever running the statement against the database.
 
 ==== Finding the method behind a query with `QueryStackTraceLogger`
 
-`QueryStackTraceLogger` answers which of your methods fired a given query.
-You provide it with your application base package, and whenever Hibernate executes a statement,
+`QueryStackTraceLogger` answers which of our methods fired a given query.
+We provide it with our application base package, and whenever Hibernate executes a statement,
 it will log the application stack frame responsible for triggering that particular query.
-This is the fastest way to track down the origin of a query you did not expect,
-because the log line points straight at the method in your own code,
-rather than at some deep Hibernate internal frame that tells you nothing about your application.
+This is the fastest way to track down the origin of a query we did not expect,
+because the log line points straight at the method in our own code,
+rather than at some deep Hibernate internal frame that tells us nothing about our application.
 
-To configure the `QueryStackTraceLogger`, you have to construct the instance and register it with Hibernate via the `statement_inspector` setting.
+To configure the `QueryStackTraceLogger`, we have to construct the instance and register it with Hibernate via the `statement_inspector` setting.
 For the retry example, this can be done using the following `@Configuration` class:
 
 .Registering a `QueryStackTraceLogger` for the `com.bookstore.forum` base package
@@ -1433,10 +1433,10 @@ whose `@Transactional` method finally issues the `SELECT ... FOR UPDATE` that re
 include::{sourcedir}/HibernateSpringBootRetry/src/test/java/com/bookstore/forum/QueryStackTraceLoggerTest.java[tag=stacktrace-test,indent=0]
 ----
 
-When you run it, the logger prints the SQL statement together with the stack trace that produced it.
-Because the trace is walked only up to the first frame that belongs to your base package,
-you see the Hibernate frames that generated the query,
-and then the trace stops precisely at the method in your own code that triggered this stacktrace:
+When we run it, the logger prints the SQL statement together with the stack trace that produced it.
+Because the trace is walked only up to the first frame that belongs to our base package,
+we see the Hibernate frames that generated the query,
+and then the trace stops precisely at the method in our own code that triggered this stacktrace:
 
 [source,text]
 ----
@@ -1452,28 +1452,28 @@ was generated by Hibernate like this: [
 ]
 ----
 
-As you can see, in spite of the `@Retry` AOP Aspect, the `EntityManager`,
+As we can see, in spite of the `@Retry` AOP Aspect, the `EntityManager`,
 and the entire Hibernate loading mechanism that sits in between,
 the last frame names the exact method and line, `PostService.incrementLikes`, that started this stacktrace.
 
-This is precisely what you want when a slow or unexpected statement shows up in production
-and you need to find the code path that triggered it.
+This is precisely what we want when a slow or unexpected statement shows up in production
+and we need to find the code path that triggered it.
 
 ==== Recording queries as JFR events with `JfrQueryLogger`
 
-`JfrQueryLogger` answers what your application actually ran,
+`JfrQueryLogger` answers what our application actually ran,
 which is especially useful in production.
 It emits a JDK Flight Recorder event for every query,
 so the SQL statements show up in a JFR recording right next to the garbage collection,
 thread, and allocation data that Flight Recorder already captures.
 Therefore, instead of grepping the application log to capture the auto-generated SQL queries,
-you can open the recording and see the queries on the same timeline as the rest of the JVM activity.
+we can open the recording and see the queries on the same timeline as the rest of the JVM activity.
 
-You register it exactly like the previous tool, through a `HibernatePropertiesCustomizer` bean,
-except that this time the instance you supply is a `new JfrQueryLogger()`.
-Since a JFR event is just data, you capture the queries the same way you would capture any other Flight Recorder event,
+We register it exactly like the previous tool, through a `HibernatePropertiesCustomizer` bean,
+except that this time the instance we supply is a `new JfrQueryLogger()`.
+Since a JFR event is just data, we capture the queries the same way we would capture any other Flight Recorder event,
 such as garbage-collection pauses or virtual-thread pinning:
-you start a `Recording` that enables the query event, run the code under test, stop the recording, and read the events back.
+we start a `Recording` that enables the query event, run the code under test, stop the recording, and read the events back.
 Reusing the retry example once more, the test records the statements fired while `incrementLikes` runs,
 and then reads the SQL back out of the recording, where `QUERY_EVENT` is the fully qualified name of the
 `JfrQueryLogger` query event, `io.hypersistence.utils.hibernate.query.JfrQueryLogger$QueryEvent`:
@@ -1496,7 +1496,7 @@ select p1_0.id,p1_0.likes,p1_0.title
 update retry_post set likes=?,title=? where id=?
 ----
 
-In a real application you would not read the recording back from a test,
+In a real application we would not read the recording back from a test,
 but rather open the `.jfr` file in a tool such as JDK Mission Control,
 where the query events appear on the same timeline as the GC pauses, allocations, and thread activity,
 which makes it easy to see exactly which SQL statement ran when, and how long it took.
@@ -1504,10 +1504,10 @@ which makes it easy to see exactly which SQL statement ran when, and how long it
 ==== Running several inspectors with a composite
 
 `QueryStackTraceLogger` and `JfrQueryLogger` are both `StatementInspector` implementations,
-and this is where you have to be careful, because Hibernate accepts only a single `StatementInspector` per `SessionFactory`.
-So, if you register one of them directly, there is no room left for the other.
-For this reason, when you want to run several inspectors at once,
-you are better off wrapping them in a small composite that implements `StatementInspector` itself
+and this is where we have to be careful, because Hibernate accepts only a single `StatementInspector` per `SessionFactory`.
+So, if we register one of them directly, there is no room left for the other.
+For this reason, when we want to run several inspectors at once,
+we are better off wrapping them in a small composite that implements `StatementInspector` itself
 and simply delegates to each of the underlying inspectors in turn:
 
 .A no-argument composite that runs several `StatementInspector` delegates
@@ -1522,7 +1522,7 @@ which is how a `StatementInspector` signals that the statement should be passed 
 This composite also solves the registration problem we ran into earlier with `QueryStackTraceLogger`.
 On its own, `QueryStackTraceLogger` cannot be registered by class name, because it has no no-argument constructor,
 but the composite does, and it constructs the `QueryStackTraceLogger` with the `com.bookstore.forum` base package internally,
-as you can see in the field initializer above.
+as we can see in the field initializer above.
 Therefore, the composite can be registered purely through configuration, without any programmatic customizer:
 
 .Registering the composite inspector and enabling the stack-trace logger
@@ -1542,28 +1542,28 @@ because, unlike `JfrQueryLogger`, which emits its JFR events regardless of any l
 == Summary
 
 Hypersistence Utils is a collection of utilities that aim to address various Hibernate and Spring shortcomings,
-and to make your application faster, more robust, and easier to maintain.
+and to make our application faster, more robust, and easier to maintain.
 Its features can be categorized into three groups.
 
-The first group is about identifiers, which are the primary keys you put on your entities.
-The `@Tsid` generator gives you identifiers that are sortable, batch-friendly, and non-guessable, all within 64 bits,
-while `BatchSequenceGenerator` speeds up bulk imports without turning your database sequence into something that only Hibernate
+The first group is about identifiers, which are the primary keys we put on our entities.
+The `@Tsid` generator gives us identifiers that are sortable, batch-friendly, and non-guessable, all within 64 bits,
+while `BatchSequenceGenerator` speeds up bulk imports without turning our database sequence into something that only Hibernate
 knows how to use efficiently.
 
-The second group is about Hibernate types, which allow you to get the best out of database-specific column types.
+The second group is about Hibernate types, which allow us to get the best out of database-specific column types.
 There is a great variety of types, such as `JsonType`, multiple array types, and types for ranges, intervals, `hstore`, and `citext`,
-as well as the `YearMonthIntegerType` and `YearMonthDateType` that let you store a `YearMonth` using standard database column types.
+as well as the `YearMonthIntegerType` and `YearMonthDateType` that let us store a `YearMonth` using standard database column types.
 However, Hibernate 7 has since caught up on plain JSON, simple arrays, `interval`, and `inet`,
-so you are better off checking what Hibernate ORM already maps natively before reaching for the alternatives provided by this library.
+so we are better off checking what Hibernate ORM already maps natively before reaching for the alternatives provided by this library.
 
 The third group is about optimizing the Spring data access layer.
 The `BaseJpaRepository` replaces `save()` with `persist()` and `update()`,
 so the redundant `SELECT` that a standard `save()` triggers before every detached update can be omitted.
-The `@Retry` annotation retries only the failures that are transient, based on the exception list you provide,
+The `@Retry` annotation retries only the failures that are transient, based on the exception list we provide,
 and it sits on a non-transactional method that delegates to a transactional one,
 so that every attempt runs in a brand-new transaction.
-Finally, `SQLExtractor`, `QueryStackTraceLogger`, and `JfrQueryLogger` tell you what SQL a query will be translated to,
-which of your methods fired a given statement, and what SQL your application actually ran.
+Finally, `SQLExtractor`, `QueryStackTraceLogger`, and `JfrQueryLogger` tell us what SQL a query will be translated to,
+which of our methods fired a given statement, and what SQL our application actually ran.
 
 Every claim we made in this chapter is backed by a test in this book's repository,
 so if any of them ever stops being true, the build will fail.
