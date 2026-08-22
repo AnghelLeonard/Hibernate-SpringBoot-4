@@ -19,7 +19,7 @@ it provided support for mapping JSON columns in PostgreSQL, MySQL, Oracle, and S
 While the custom Hibernate Types are still the most popular feature offered by this framework,
 it now provides many other Hibernate-related enhancements,
 such as the time-sorted pseudo-random identifiers,
-or a new `BatchSequenceGenerator` that allows us to fetch multiple sequence values in a single roundtrip from a database sequence that has an increment step of just 1.
+or a new `@BatchSequence` generator that allows us to fetch multiple sequence values in a single round trip from a database sequence that has an increment step of just 1.
 
 And Hypersistence Utils is no longer limited to enhancing Hibernate since it also provides a set of Spring utilities that can improve our data access layer,
 such as a better repository contract that removes the `SELECT` before every detached update,
@@ -89,7 +89,7 @@ the Hypersistence Utils library provides alternatives that can be more efficient
 inspired by the https://en.wikipedia.org/wiki/Snowflake_ID[Snowflake identifier] that https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake[Twitter] used to overcome the fact that Cassandra didn't have a sequential identifier generator.
 * A bulk-fetch sequence identifier generator that,
 unlike the Hibernate `pooled` and `pooled-lo` identifier generators,
-can use a database sequence that has an increment size of one,
+can use a database sequence that has an increment size of 1,
 leaving no gaps when the sequence is used by other clients, such as ETL jobs or database triggers.
 
 === Identifiers that sort themselves: `@Tsid`
@@ -143,7 +143,7 @@ Params:[
 ]
 ----
 
-Although we saved thirty posts, there was just **one** `INSERT`, which executed in a single JDBC batch.
+Although we saved 30 posts, there was just **one** `INSERT`, which executed in a single JDBC batch.
 
 ==== Using TSID for external identifiers
 
@@ -168,10 +168,10 @@ When the sequence generator runs out of values, it calls the sequence, and then 
 N entity identifiers in memory (N is the sequence increment step).
 
 While this strategy works fine for Hibernate, any other client (e.g., an ETL job, a `psql` script, or a trigger)
-that calls `nextval` on the same database sequence will take one identifier and throw away forty-nine identifier values,
+that calls `nextval` on the same database sequence will take one identifier and throw away 49 identifier values,
 because the pooling optimizer lives in the application, not in the database.
 
-`BatchSequenceGenerator` addresses this shortcoming by *fetching* the actual sequence values from the database
+The `@BatchSequence` generator addresses this shortcoming by *fetching* the actual sequence values from the database
 using a recursive CTE, or `generate_series` on PostgreSQL, to draw N values in one statement:
 
 .Two mappings of one table, sharing one sequence
@@ -186,7 +186,7 @@ include::{sourcedir}/HibernateSpringBootBatchSequenceGenerator/src/main/java/com
 ----
 
 Both the `Post` and the `BatchedPost` entities fetch the identifier values from the `batch_seq_post_seq` sequence, but the OLTP `Post` mapping takes one value at a time,
-while the `BatchedPost` entity fetches ten per roundtrip:
+while the `BatchedPost` entity fetches 10 per round trip:
 
 [source,java]
 ----
@@ -212,7 +212,7 @@ Params:[
 ]
 ----
 
-And, with the `BatchSequenceGenerator` in place,
+And, with the `@BatchSequence` generator in place,
 a script that knows nothing about Hibernate can still interleave with the application:
 
 [source,java]
@@ -358,7 +358,7 @@ Hibernate 7 has native JSON support of its own, through `@JdbcTypeCode(SqlTypes.
 and, most often, we are better off preferring it.
 It is dialect-aware, it needs no `columnDefinition`, and it works on all four major databases (PostgreSQL, Oracle, SQL Server, and MySQL).
 The book code repository carries both variants side by side so we can compare them.
-The same five columns, mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`, look like this:
+The same 5 columns, mapped with `@JdbcTypeCode(SqlTypes.JSON)` instead of `@Type(JsonType.class)`, look like this:
 
 .Native Hibernate JSON mapping example
 [source,java]
@@ -499,11 +499,11 @@ The entity JSON attribute is a different object instance from the loaded value t
 
 Thanks to `@DynamicUpdate`, the redundant `UPDATE` is narrowed to the `properties` column alone,
 which is the one JSON attribute mapped to a POJO that lacks an `equals`;
-a column backed by a `Map`, `List`, `String` or `JsonNode` has value-based equality, so it would be spared even if it were populated.
+a column backed by a `Map`, `List`, `String`, or `JsonNode` has value-based equality, so it would be spared even if it were populated.
 
 On the other hand, `JsonType` can omit these unnecessary `UPDATE` statements, because it compares the *JSON content* rather than object identity,
 so the two instances are seen as equal and no `UPDATE` is flushed.
-If we prefer the native mapping, we are better off overriding the `equals` and `hashCode` method of the POJO class wrapping the JSON content.
+If we prefer the native mapping, we are better off overriding the `equals` and `hashCode` methods of the POJO class wrapping the JSON content.
 This way, the dirty checking mechanism will detect that the object content has not changed and not trigger the extra `UPDATE` statements.
 
 ==== How to provide a custom `ObjectMapper`
@@ -689,7 +689,7 @@ So, right from the start, PostgreSQL provided support for variable-length multi-
 
 Just like PostgreSQL, Hypersistence Utils also offered support for PostgreSQL arrays from the very beginning in 2017,
 and with time, the library added support for `String[]`, `int[]` or other numerical arrays, `List<String>`, `LocalDate[]`, `UUID[]`,
-enum arrays and even multidimensional arrays.
+enum arrays, and even multidimensional arrays.
 
 On the other hand, Hibernate added support for arrays in version 6.0, which was released in 2022.
 Just like with JSON, the native array types of Hibernate provide better integration with the `hbm2ddl` schema generation tool,
@@ -708,7 +708,7 @@ include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootNativeArra
 
 On PostgreSQL, these map to a `varchar(255) array` for the `String[]` and the `List<String>`,
 an `integer array` for the `Integer[]`, a `date array` for the `LocalDate[]`, and a `uuid array` for the `UUID[]`.
-The test persists a `Post` carrying all five attributes:
+The test persists a `Post` carrying all 5 attributes:
 
 .Persisting a Post with natively-mapped arrays
 [source,java]
@@ -783,7 +783,7 @@ include::{sourcedir}/HibernateSpringBootArrayTypes/HibernateSpringBootHypersiste
 ----
 
 Because the `Post` entity is annotated with `@DynamicInsert`, the statement lists only the columns we actually set,
-rather than all nine, so the `status_history` array stands out, bound as a native enum literal and not as an ordinal `smallint[]`:
+rather than all 9, so the `status_history` array stands out, bound as a native enum literal and not as an ordinal `smallint[]`:
 
 .The SQL statement the enum array mapping executes
 [source,sql]
@@ -807,7 +807,7 @@ we are going to get a _"Nested arrays (with the exception of byte[][]) are not s
 
 Yet a multidimensional numeric array is a natural fit for AI workloads.
 For example, we could persist a small tensor of embedding vectors next to a document,
-ready to feed a RAG pipeline or an MCP server without a round-trip to a separate vector store.
+ready to feed a RAG pipeline or an MCP server without a round trip to a separate vector store.
 
 The `MultiDimensionalArrayType` from Hypersistence Utils addresses this mapping requirement,
 allowing us to map a `double[][]` array to a PostgreSQL `float8[][]` column type.
@@ -952,7 +952,7 @@ query is still case-**sensitive** unless we write `CAST(:name AS citext)`.
 When querying an `hstore` column,
 use the function form `exist(attributes, :key)` rather than the `?` operator
 because JDBC interprets the `?` symbol as a bind parameter placeholder and the prepared statement
-would never get to reach PostgreSQL.
+would never reach PostgreSQL.
 ====
 
 === `YearMonth`, on any database
@@ -1035,7 +1035,7 @@ application-specific data access repositories, and via the `ListCrudRepository` 
 they inherit the `findAll()` method, which can return an entire database table in a single call,
 as well as the `save()` method, which can trigger a `SELECT` we did not ask for and do not need.
 
-==== The `findAll()` Anti-Pattern
+==== The `findAll()` anti-pattern
 
 As we can see on these StackOverflow questions
 https://stackoverflow.com/questions/48638338/spring-data-jpa-repositories-with-java-8-streams-detached-object[1],
@@ -1047,26 +1047,26 @@ there are countless cases where `findAll()` is used to fetch a large number of r
 only to filter them in the application memory prior to returning a subset to the client.
 
 The `findAll()` anti-pattern consists of fetching a whole database table in the application memory,
-and calling `filter`, `sorted`, `limit` and `map` on the associated Java `Stream`
+and calling `filter`, `sorted`, `limit`, and `map` on the associated Java `Stream`
 in order to extract what the client actually wanted.
 
-Imagine a forum that wants the five most-viewed posts that are also approved.
+Imagine a forum that wants the 5 most-viewed posts that are also approved.
 There are 50 rows in the table, only 30 of them approved,
-and the caller simply asks for the top five through `findMostViewedAndApprovedPosts(5)`.
+and the caller simply asks for the top 5 through `findMostViewedAndApprovedPosts(5)`.
 A naive implementation would fetch everything and do all the processing work in memory:
 
-.The anti-pattern: fetch everything, then filter, order, limit and project in memory
+.The anti-pattern: fetch everything, then filter, order, limit, and project in memory
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/service/AntiPatternForumService.java[tag=antipattern-findmostviewed,indent=0]
 ----
 
-From the integration test, this call doesn't look problematic since it just asks for the top five posts matching the provided filtering criteria.
+From the integration test, this call doesn't look problematic since it just asks for the top 5 posts matching the provided filtering criteria.
 In order to assert how the service method will perform, we need to look at the SQL statements it executes, and the number of records returned
 by executing those statements.
 
 The integration test injects a second service, `forumService`, which is the SQL-based version that fetches the same
-five most-viewed and approved posts.
+5 most-viewed and approved posts.
 
 [source,java]
 ----
@@ -1074,7 +1074,7 @@ include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/test/java/com/book
 ----
 
 If we were to compare the number of statements executed by these two services,
-we would see that both execute a single `SELECT` statement, and both return the same five posts.
+we would see that both execute a single `SELECT` statement, and both return the same 5 posts.
 
 So why is the `findAll` version an anti-pattern?
 The `findAll()` call triggers an unrestricted `SELECT` that reads every row and every column from a database table,
@@ -1087,7 +1087,7 @@ FROM base_jpa_post p1_0
 ----
 
 Note that the executed SQL query has no `WHERE`, no `ORDER BY`, no `LIMIT` and no projection,
-so the database returns all 50 rows and all four columns of the table.
+so the database returns all 50 rows and all 4 columns of the table.
 
 All the entities that were fetched but not needed by the client will be silently discarded,
 so they are just an overhead that impacts the performance of the service method.
@@ -1102,17 +1102,17 @@ and that's when this anti-pattern becomes a real problem.
 
 The solution is very simple, as illustrated by the following `ForumService` method:
 
-.The recommended `ForumService`: the database filters, orders, limits and projects
+.The recommended `ForumService`: the database filters, orders, limits, and projects
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootBaseJpaRepository/src/main/java/com/bookstore/forum/service/ForumService.java[tag=good-findmostviewed,indent=0]
 ----
 
-By calling a query method on the Spring Data JPA repository, an SQL query will be generated to query, filter, order, limit
+By calling a query method on the Spring Data JPA repository, an SQL query will be generated to query, filter, order, limit,
 and project the results on the database side.
 
 That derived query pushes every Stream-like operation into one statement,
-so the database returns only the five rows with the two columns the caller needs:
+so the database returns only the 5 rows with the 2 columns the caller needs:
 
 .The derived query
 [source,java]
@@ -1130,7 +1130,7 @@ LIMIT ?
 ----
 
 This is exactly why the anti-pattern is so easy to slip into production.
-Both services return the same five posts and both run a single `SELECT`,
+Both services return the same 5 posts and both run a single `SELECT`,
 so from the call site, and even from the statement-count assertion,
 they are indistinguishable.
 
@@ -1146,7 +1146,7 @@ While removing this method does not guarantee that the client will never execute
 it makes the accidental call impossible, and pushes us toward choosing a derived query, a paginated `Page<T>`,
 or a projection that is explicit about how many rows and which columns we actually need.
 
-==== The JPA entity `save` Anti-Pattern
+==== The JPA entity `save` anti-pattern
 
 Most Spring Data JPA applications use `JpaRepository.save()` every time they perform a write operation,
 no matter whether the entity is new or it already exists in the database.
@@ -1183,7 +1183,7 @@ So why is that extra `SELECT` a problem?
 Since the service layer is not making any decision based on the loaded state,
 the read is just an overhead that adds one more database round trip to every update.
 While the extra `SELECT` might be unnoticeable when saving a single entity,
-for a batch processing tasks that modifies thousands of entities,
+for a batch processing task that modifies thousands of entities,
 each `SELECT` adds up to a significant performance penalty.
 
 The solution is to tell Hibernate exactly what we want to do, and for this reason,
@@ -1366,7 +1366,7 @@ Reading those log lines from top to bottom gives us the following sequence diagr
 .Thread B keeps retrying the 10 ms lock acquisition until Thread A commits and releases the lock
 image::../images/retry-sequence.svg[Retry lock-acquisition sequence diagram,align=center,pdfwidth=100%]
 
-Thread B timed out five times, once for each 10 ms attempt against the held lock,
+Thread B timed out 5 times, once for each 10 ms attempt against the held lock,
 and succeeded on the sixth attempt, right after Thread A committed.
 The final `likes` value is 11, which is the value of 10 set by Thread A plus 1, which was added by Thread B on its sixth attempt,
 so no update was lost.
@@ -1436,7 +1436,7 @@ include::{sourcedir}/HibernateSpringBootRetry/src/test/java/com/bookstore/forum/
 When we run it, the logger prints the SQL statement together with the stack trace that produced it.
 Because the trace is walked only up to the first frame that belongs to our base package,
 we see the Hibernate frames that generated the query,
-and then the trace stops precisely at the method in our own code that triggered this stacktrace:
+and then the trace stops precisely at the method in our own code that triggered this query:
 
 [source,text]
 ----
@@ -1454,7 +1454,7 @@ was generated by Hibernate like this: [
 
 As we can see, in spite of the `@Retry` AOP Aspect, the `EntityManager`,
 and the entire Hibernate loading mechanism that sits in between,
-the last frame names the exact method and line, `PostService.incrementLikes`, that started this stacktrace.
+the last frame names the exact method and line, `PostService.incrementLikes`, where this stack trace starts.
 
 This is precisely what we want when a slow or unexpected statement shows up in production
 and we need to find the code path that triggered it.
@@ -1485,7 +1485,7 @@ include::{sourcedir}/HibernateSpringBootRetry/src/test/java/com/bookstore/forum/
 ----
 
 Every statement that Hibernate ran inside `incrementLikes` is now an event in the recording,
-so reading them back gives us the three SQL statements the method issued,
+so reading them back gives us the 3 SQL statements the method issued,
 including the pessimistic `SELECT` we were interested in:
 
 [source,text]
@@ -1547,7 +1547,7 @@ Its features can be categorized into three groups.
 
 The first group is about identifiers, which are the primary keys we put on our entities.
 The `@Tsid` generator gives us identifiers that are sortable, batch-friendly, and non-guessable, all within 64 bits,
-while `BatchSequenceGenerator` speeds up bulk imports without turning our database sequence into something that only Hibernate
+while the `@BatchSequence` generator speeds up bulk imports without turning our database sequence into something that only Hibernate
 knows how to use efficiently.
 
 The second group is about Hibernate types, which allow us to get the best out of database-specific column types.

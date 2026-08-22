@@ -93,23 +93,23 @@ which costs an extra column, an extra sequence, and a unique index.
 Second, `@OneToOne` defaults to the `EAGER` fetching strategy,
 so loading the details entity will always load the associated post, whether or not we actually need it.
 
-When we boot the application, the Optimizer reports **fourteen** issues in total,
-of which six come from the entity mappings,
+When we boot the application, the Optimizer reports **14** issues in total,
+of which 6 come from the entity mappings,
 as illustrated by the following `OptimizerKickoffTest`:
 
-.The six mapping issues reported by the scan
+.The 6 mapping issues reported by the scan
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerKickoff/src/test/java/com/bookstore/forum/OptimizerKickoffTest.java[tag=mapping-events,indent=0]
 ----
 
-The other eight issues come from the configuration, and we are going to look at them in the next section.
+The other 8 issues come from the configuration, and we are going to look at them in the next section.
 
 [TIP]
 ====
 The examples run on PostgreSQL, where `@GeneratedValue` resolves to a sequence generator.
 
-On MySQL, the same model reports four `TableGeneratorEvent`s as well,
+On MySQL, the same model reports 4 `TableGeneratorEvent`s as well,
 because MySQL has no sequences, so `@GeneratedValue` has to fall back to a table generator.
 
 The Optimizer recommends `IDENTITY` in that case, although `IDENTITY` disables JDBC batch inserts.
@@ -152,7 +152,7 @@ For example, let's investigate the configuration-related events that the `Hibern
 
 === Eight configuration defaults working against us
 
-The other eight findings from that first scan come straight from the Hibernate configuration:
+The other 8 findings from that first scan come straight from the Hibernate configuration:
 
 [cols="1,3", options="header"]
 |===
@@ -195,12 +195,12 @@ so we can make sure that we are always up to date with performance-related setti
 
 === Reaching zero Optimizer events at bootstrap time
 
-Clearing the eight configuration events is a matter of adding the right settings
+Clearing the 8 configuration events is a matter of adding the right settings
 to the `application.properties` or `application.yml` Spring configuration file.
 Instead of listing them in the order the scan reports them,
 let's group them by the performance concern that each one addresses:
 
-.The configuration settings that clear the eight events, grouped by concern
+.The configuration settings that clear the 8 events, grouped by concern
 [source,properties]
 ----
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerMappingFixes/src/main/resources/application.properties[tag=config,indent=0]
@@ -259,7 +259,7 @@ collection into an error and clears the `QueryPaginationCollectionFetchingEvent`
 
 The `in_clause_parameter_padding` pads the `IN` clause parameters to the closest higher power of two.
 With this setting in place, the `IN` clause can generate the following series of placeholders:
-1, 2, 4, 8, 16, 32, 64, 128, 256 and so on.
+1, 2, 4, 8, 16, 32, 64, 128, 256, and so on.
 If the `List` of parameter values we're providing to the `IN` clause is smaller than the next power of two,
 Hibernate will repeat the last parameter until it reaches the next power of two.
 This padding trick allows Hibernate to use fewer SQL statements, instead of generating a new SQL statement
@@ -286,7 +286,7 @@ With the mappings and the configuration settings in place, the Optimizer scan co
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerMappingFixes/src/test/java/com/bookstore/forum/OptimizerMappingFixesTest.java[tag=clean-scan,indent=0]
 ----
 
-So, the forum went from fourteen issues down to zero: six mapping events and eight configuration events, all gone.
+So, the forum went from 14 issues down to zero: 6 mapping events and 8 configuration events, all gone.
 
 === The end goal: a test that fails on any event
 
@@ -317,7 +317,7 @@ with each identifier declared as `IDENTITY`:
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerMySQLIdentity/src/main/java/com/bookstore/forum/entity/Post.java[tag=identity,indent=0]
 ----
 
-Scanning this model reports three `IdentityGeneratorEvent`s,
+Scanning this model reports 3 `IdentityGeneratorEvent`s,
 one for `Post`, one for `PostComment`, and one for `Tag`,
 while the `PostDetails` entity shares its identifier through `@MapsId`, so it has no generator of its own.
 Since we cannot remove them, what we can do instead is skip them with an `EventFilter`:
@@ -412,10 +412,10 @@ The Optimizer catches it in two different ways, once for each lazily resolved pa
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerRuntimeEvents/src/test/java/com/bookstore/forum/OptimizerRuntimeEventsTest.java[tag=n-plus-one-test,indent=0]
 ----
 
-Fetching ten comments associated with five posts produces five `SecondaryQueryEntityFetchingEvent` instances,
+Fetching 10 comments associated with 5 posts produces 5 `SecondaryQueryEntityFetchingEvent` instances,
 each one telling us that a row was loaded by a query of its own,
 and one `NPlusOneQueryEntityFetchingEvent`,
-telling us that the `Post` entity was fetched five times in the same `Session`.
+telling us that the `Post` entity was fetched 5 times in the same `Session`.
 Replacing the loop with a `join fetch` fixes both of these events,
 and the second half of that test asserts exactly that.
 The `findCommentAuthorsInOneQuery` method returns the same authors,
@@ -452,7 +452,7 @@ Let's consider we have the following `findComments` method that loads all the co
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerRuntimeEvents/src/main/java/com/bookstore/forum/service/ForumService.java[tag=result-list,indent=0]
 ----
 
-When we call the `findComments` method in our test, we can see that it returns 10 comments, which is more than the five-row limit we set in the configuration, so we get a `QueryResultListSizeEvent` for it:
+When we call the `findComments` method in our test, we can see that it returns 10 comments, which is more than the 5-row limit we set in the configuration, so we get a `QueryResultListSizeEvent` for it:
 
 .Fetching a larger result set
 [source,java]
@@ -537,12 +537,12 @@ The `SessionFlushTimeoutEvent` occurs when a session flush runs longer than `hyp
 A flush has to dirty-check every managed entity and execute the pending DML statements,
 so its cost grows with the size of the persistence context.
 
-Let's consider we have the following `flushManyEntities` method that persists a thousand entities in one transaction,
+Let's consider we have the following `flushManyEntities` method that persists 1,000 entities in one transaction,
 with JDBC batching turned off for this session so Hibernate sends one `INSERT` per entity.
 When the transaction commits, Hibernate flushes them all at once,
 and that single flush easily exceeds the 100 ms limit we configured:
 
-.Persisting a thousand entities in one transaction
+.Persisting 1,000 entities in one transaction
 [source,java]
 ----
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerRuntimeEvents/src/main/java/com/bookstore/forum/service/ForumService.java[tag=slow-flush,indent=0]
@@ -679,7 +679,7 @@ so we cannot switch it to the more compact `EnumType.ORDINAL` without rewriting 
 include::{sourcedir}/HibernateSpringBootOptimizer/HibernateSpringBootOptimizerEventFilters/src/main/java/com/bookstore/forum/config/HypersistenceConfiguration.java[tag=filter,indent=0]
 ----
 
-The event filter above identifies an **entity and an attribute**, not just a generic event type, as we've done in the MySQL example.
+Unlike the MySQL example, where we had to skip an entire event type, the filter above names a specific **entity and attribute**.
 If we suppressed the entire `EnumTypeStringEvent` type,
 we would also hide the next enum that somebody maps as a String by accident,
 which is precisely the one we wanted to catch in the future.
@@ -724,7 +724,7 @@ and the Optimizer reports each of them the moment the mapping is wrong.
 The second group is about the Hibernate configuration.
 Settings such as `ddl-auto`, the JDBC batch size, autocommit handling, and the query plan cache
 can cost us on every query and every flush our application performs.
-Once both the mappings and the configuration are addressed, the forum's fourteen findings drop to zero.
+Once both the mappings and the configuration are addressed, the forum's 14 findings drop to zero.
 
 The third group is about the runtime behavior of our data access layer.
 The runtime scanner catches the N+1 problem that lives in our application code rather than in our annotations,
