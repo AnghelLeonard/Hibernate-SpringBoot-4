@@ -66,13 +66,15 @@ public class HypersistenceConfiguration {
 
     // tag::handlers[]
     @Bean
-    public HypersistenceOptimizer hypersistenceOptimizer(EntityManagerFactory entityManagerFactory,
-                                                         ListEventHandler listEventHandler) {
+    public HypersistenceOptimizer hypersistenceOptimizer(
+            EntityManagerFactory entityManagerFactory,
+            ListEventHandler listEventHandler) {
         return new HypersistenceOptimizer(
             new JpaConfig(entityManagerFactory)
                 .setEventFilter(ACCEPTED_TRADE_OFFS)
                 .setEventHandler(new ChainEventHandler(
-                    List.of(listEventHandler, new LogEventHandler())))
+                    List.of(listEventHandler, new LogEventHandler()))
+                )
         );
     }
     // end::handlers[]
