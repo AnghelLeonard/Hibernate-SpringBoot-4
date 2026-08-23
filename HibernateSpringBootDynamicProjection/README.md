@@ -1,4 +1,4 @@
-# 📘 Summary of **Item 25: How to Fetch DTO via Spring Projections**
+# 📘 Summary of Item 25: *How to Fetch DTO via Spring Projections*
 ---
 
 ## 🧩 Core Idea
