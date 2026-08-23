@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>java.modern.challenge</groupId>
-    <artifactId>HibernateSpringBootDtoSpringProjectionOrmXmlNamedNativeQuery</artifactId>
+    <artifactId>HibernateSpringBootJacksonViews</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootDtoSpringProjectionOrmXmlNamedNativeQuery</name>
+    <name>HibernateSpringBootJacksonViews</name>
     <description>Hibernate - Spring Boot 4</description>
 
     <parent>
