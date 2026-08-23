@@ -1,53 +1,41 @@
----
-
 # 📘 Summary of Item 25: *How to Fetch DTO via Spring Projections*
+---
 
-## 🎯 Core Idea
-The item explains why and how to fetch **DTOs (Data Transfer Objects)** efficiently in Spring/Hibernate applications using **Spring Projections**, instead of loading full entities when only read‑only data is needed.
+## 🧩 Core Idea
+**Don’t fetch full Hibernate entities when you only need read‑only data.  
+Use DTOs or Spring Projections instead.**  
+Fetching entities triggers hydration, dirty checking, optimistic locking, and caching — all unnecessary overhead when no modifications are planned.
 
 ---
 
-# 🧠 Why Not Always Fetch Entities?
+## 🏗️ Why Entities Are Expensive
+Hibernate fetches data into the **Persistence Context** as a hydrated state (Object[] / EntityEntry).  
+This hydrated state powers:
+- Dirty checking  
+- Versionless optimistic locking  
+- Second‑level cache population  
 
-### Hibernate’s Default Behavior
-- Hibernate loads data into the **Persistence Context** (first-level cache) as a **hydrated state**.
-- This hydrated state supports:
-  - Dirty checking  
-  - Optimistic locking  
-  - Second-level cache population  
+If you fetch entities in **read‑write mode**, Hibernate keeps all this machinery active → **memory + CPU cost**.
 
-### Problem
-If you fetch entities **only to read them**, Hibernate still:
-- Stores hydrated state in memory  
-- Performs dirty checking  
-- Consumes CPU cycles  
-
-➡️ **Unnecessary overhead** when no modifications are planned.
-
-### Alternatives
-- **Read-only mode** (`@Transactional(readOnly = true)`) reduces overhead but still loads entities.
-- **DTOs** are the best choice for pure read-only data.
+Even **read‑only mode** still builds entities, just without hydration storage.
 
 ---
 
-# 🧩 DTOs vs Spring Projections
+## 🎯 When to Use DTOs or Projections
+Use DTOs / projections when:
+- You need **read‑only** data  
+- You want **only a subset of columns**  
+- You want **better performance**  
+- You want **no entity lifecycle overhead**
 
-| Aspect | DTO | Spring Projection |
-|-------|-----|-------------------|
-| Structure | Class with constructor + getters/setters | Interface with getters |
-| Instantiation | Manual mapping or constructor-based | Spring auto-generates proxy |
-| Use case | Flexible, can include logic | Lightweight, ideal for simple read-only views |
-
-Spring also supports **class-based projections**, which behave like DTOs but are still managed by Spring.
+DTOs = classes with constructors  
+Projections = interfaces (Spring auto‑generates proxies)
 
 ---
 
-# 🧱 Example: Interface-Based Projection
+## 🧪 Interface‑Based Closed Projections
+Example:
 
-### Entity
-`Author(id, age, name, genre)`
-
-### Projection
 ```java
 public interface AuthorNameAge {
     String getName();
@@ -55,45 +43,52 @@ public interface AuthorNameAge {
 }
 ```
 
-### Repository
+Spring generates a proxy and fetches only the required columns.
+
+Repository:
+
 ```java
 List<AuthorNameAge> findFirst2ByGenre(String genre);
 ```
 
-Spring generates SQL like:
+Generated SQL:
+
 ```
-SELECT name, age FROM author WHERE genre=? LIMIT 2
+SELECT name, age FROM author WHERE genre=? LIMIT ?
 ```
 
 ---
 
-# 🧰 Using Projections with JPQL or Native SQL
+## 📦 Using LIMIT with Spring Data
+Spring Data 3.2 introduces `Limit`:
+
+```java
+List<AuthorNameAge> findByGenre(String genre, Limit limit);
+```
+
+Call:
+
+```java
+authorRepository.findByGenre("Anthology", Limit.of(2));
+```
+
+---
+
+## 🧬 Native SQL & JPQL Projections
 You can use projections with:
-- Spring Data query methods  
-- JPQL queries  
-- Native SQL queries  
+- Spring Query Builder  
+- JPQL  
+- Native SQL  
+- Named queries (`@NamedQuery`, `@NamedNativeQuery`)  
+- Properties‑based named queries  
+- orm.xml named queries  
 
-Column aliases (`AS name`) ensure correct mapping when DB column names differ from entity fields.
-
----
-
-# 🏷️ Using Named Queries with Projections
-The document shows how to combine:
-- `@NamedQuery`
-- `@NamedNativeQuery`
-- `orm.xml`
-- `jpa-named-queries.properties`
-
-All can return:
-- Scalar values (e.g., `List<String>`)
-- Projection interfaces (e.g., `List<AuthorNameAge>`)
-
-Spring automatically maps results to projections.
+All can map directly into projection interfaces.
 
 ---
 
-# 🏗️ Class-Based Projections
-Instead of an interface:
+## 🏛️ Class‑Based Projections
+DTO-style projection:
 
 ```java
 public class AuthorNameAge {
@@ -107,8 +102,8 @@ Constructor argument names must match entity property names.
 
 ---
 
-# 🔁 Reusing a Projection
-When an entity has many fields, instead of creating many projections, define one “maximal” projection:
+## 🔁 Reusing a Single Projection
+Define a “heavy” projection:
 
 ```java
 public interface AuthorDto {
@@ -120,41 +115,67 @@ public interface AuthorDto {
 }
 ```
 
-Then reuse it in multiple queries that fetch different subsets of fields.  
-Use:
+Then reuse it for multiple queries that fetch different subsets.
+
+To avoid nulls in JSON:
 
 ```
 spring.jackson.default-property-inclusion=NON_NULL
 ```
 
-to avoid serializing nulls.
+---
+
+## 👁️ Using @JsonView (Alternative)
+Define hierarchical views:
+
+```java
+public class Views {
+    interface NameEmail {}
+    interface NameEmailAgeGenre extends NameEmail {}
+    interface All extends NameEmailAgeGenre {}
+}
+```
+
+DTO:
+
+```java
+public record AuthorDto(
+    @JsonView(Views.NameEmail.class) String name,
+    @JsonView(Views.NameEmail.class) String email,
+    @JsonView(Views.NameEmailAgeGenre.class) Integer age,
+    @JsonView(Views.NameEmailAgeGenre.class) String genre,
+    @JsonView(Views.All.class) String address
+) {}
+```
+
+But: **@JsonView is inefficient** because the SQL still fetches *all columns*.
 
 ---
 
-# 🔄 Dynamic Projections
-Spring allows returning different projection types from the same query method:
+## ⚡ Dynamic Projections
+Define one method:
 
 ```java
 <T> T findByName(String name, Class<T> type);
 ```
 
-Usage:
-```java
-Author a = repo.findByName("Joana", Author.class);
-AuthorGenreDto g = repo.findByName("Joana", AuthorGenreDto.class);
-AuthorNameEmailDto e = repo.findByName("Joana", AuthorNameEmailDto.class);
-```
+Depending on `type`, Spring fetches only the required columns:
 
-This avoids writing multiple methods for the same query.
+- `Author.class` → fetches all columns  
+- `AuthorGenreDto.class` → fetches only `genre`  
+- `AuthorNameEmailDto.class` → fetches only `name`, `email`
+
+This is **the most efficient** approach.
 
 ---
 
-# ✅ Key Takeaways
-- Use **DTOs or projections** for read-only data to avoid Hibernate overhead.
-- **Interface-based projections** are lightweight and auto-mapped.
-- **Class-based projections** allow constructors and custom logic.
-- **Dynamic projections** let one method return multiple types.
-- Projections work with **query methods**, **JPQL**, **native SQL**, and **named queries**.
-- Reusable projections reduce duplication when entities have many fields.
+## 🏁 Final Takeaways
+- Avoid fetching entities for read‑only use cases.  
+- Use DTOs or projections to reduce memory, CPU, and SQL load.  
+- Interface‑based projections are simple and powerful.  
+- Class‑based projections allow constructors and equals/hashCode.  
+- Reusable projections + `NON_NULL` help avoid cluttered JSON.  
+- @JsonView is flexible but **not efficient**.  
+- **Dynamic projections** are an elegant and performant solution.
 
 ---
