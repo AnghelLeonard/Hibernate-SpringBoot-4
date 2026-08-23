@@ -238,7 +238,8 @@ class BaseJpaRepositoryTest {
         // (antiPatternForumService) fetches everything with findAll() and filters
         // in memory; the good one (forumService) filters in SQL.
         SQLStatementCountValidator.reset();
-        List<PostSummary> inMemory = antiPatternForumService.findMostViewedAndApprovedPosts(5);
+        List<PostSummary> inMemory =
+            antiPatternForumService.findMostViewedAndApprovedPosts(5);
         SQLStatementCountValidator.assertSelectCount(1);
 
         SQLStatementCountValidator.reset();

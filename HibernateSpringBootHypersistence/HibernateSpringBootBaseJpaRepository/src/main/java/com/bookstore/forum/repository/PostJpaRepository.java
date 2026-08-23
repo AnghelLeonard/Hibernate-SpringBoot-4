@@ -25,6 +25,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
 
     // tag::db-side-query[]
     // WHERE status = ?  ORDER BY views DESC  LIMIT ?, projected to (title, views)
-    List<PostSummary> findByStatusOrderByViewsDesc(PostStatus status, Pageable pageable);
+    List<PostSummary> findByStatusOrderByViewsDesc(
+        PostStatus status, Pageable pageable);
     // end::db-side-query[]
 }

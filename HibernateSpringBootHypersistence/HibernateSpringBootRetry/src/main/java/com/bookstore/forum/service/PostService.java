@@ -5,6 +5,8 @@ import com.bookstore.forum.repository.PostRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,23 @@ import java.util.concurrent.CountDownLatch;
  */
 @Service
 public class PostService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
+
+    /**
+     * How long Thread A keeps the {@code PESSIMISTIC_WRITE} lock while it
+     * simulates a slow downstream service call. Its transaction stays open for
+     * this long, so the row stays locked.
+     */
+    public static final long SLOW_SERVICE_MILLIS = 1000;
+
+    /**
+     * PostgreSQL {@code lock_timeout} in milliseconds. Thread B waits at most
+     * this long for the contended lock before failing with a recoverable
+     * timeout &mdash; a value MySQL cannot express, since its
+     * {@code innodb_lock_wait_timeout} floor is one second.
+     */
+    public static final int LOCK_TIMEOUT_MILLIS = 10;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -35,39 +54,56 @@ public class PostService {
     }
 
     /**
-     * Locks the post with {@code PESSIMISTIC_WRITE} and bumps {@code likes}. A
-     * short {@code innodb_lock_wait_timeout} makes a contended lock fail fast
-     * with a recoverable timeout instead of blocking for the default 50s.
+     * Thread B's write. It sets a 10&nbsp;ms {@code lock_timeout} so that a
+     * contended lock fails fast with a recoverable timeout instead of blocking,
+     * then tries to acquire the {@code PESSIMISTIC_WRITE} lock and bump
+     * {@code likes}.
      */
+    // tag::increment-likes[]
     @Transactional
     public void incrementLikes(Long id, int delta) {
-        entityManager.createNativeQuery("SET SESSION innodb_lock_wait_timeout = 1").executeUpdate();
+        entityManager.createNativeQuery(
+            "SET LOCAL lock_timeout = " + LOCK_TIMEOUT_MILLIS).executeUpdate();
+        LOGGER.info("Trying to acquire the lock (lock_timeout={}ms)",
+            LOCK_TIMEOUT_MILLIS);
+
         Post post = entityManager.find(Post.class, id, LockModeType.PESSIMISTIC_WRITE);
-        post.setLikes(post.getLikes() + delta);
+
+        int oldLikes = post.getLikes();
+        post.setLikes(oldLikes + delta);
         entityManager.flush();
+        LOGGER.info("Lock acquired, likes {} -> {}, committing",
+            oldLikes, oldLikes + delta);
     }
+    // end::increment-likes[]
 
     /**
-     * Acquires the {@code PESSIMISTIC_WRITE} lock, bumps {@code likes}, signals
-     * {@code lockAcquired}, and then holds the lock (keeping the transaction
-     * open) until {@code releaseLock} is counted down &mdash; a controllable
-     * blocker for the second thread.
+     * Thread A's write. It acquires the {@code PESSIMISTIC_WRITE} lock, bumps
+     * {@code likes}, signals {@code lockAcquired}, and then holds the lock by
+     * keeping the transaction open while it simulates a slow service call. The
+     * lock is released when this method returns and the transaction commits.
      */
+    // tag::lock-and-hold[]
     @Transactional
-    public void lockAndHold(Long id, int delta, CountDownLatch lockAcquired, CountDownLatch releaseLock) {
+    public void lockAndHold(Long id, int delta, CountDownLatch lockAcquired) {
+        LOGGER.info("Acquiring the PESSIMISTIC_WRITE lock");
         Post post = entityManager.find(Post.class, id, LockModeType.PESSIMISTIC_WRITE);
-        post.setLikes(post.getLikes() + delta);
+        int oldLikes = post.getLikes();
+        post.setLikes(oldLikes + delta);
         entityManager.flush();
+        LOGGER.info("Lock acquired, likes {} -> {}", oldLikes, oldLikes + delta);
 
-        lockAcquired.countDown();
-        try {
-            releaseLock.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while holding the lock", e);
-        }
+        lockAcquired.countDown(); // let Thread B start contending for the lock
+
+        LOGGER.info(
+            "Holding the lock for {}ms (simulating a slow service call)",
+            SLOW_SERVICE_MILLIS
+        );
+        sleep(SLOW_SERVICE_MILLIS);
+        LOGGER.info("Slow service finished, committing and releasing the lock");
         // Transaction commits here, releasing the lock.
     }
+    // end::lock-and-hold[]
 
     @Transactional(readOnly = true)
     public int getLikes(Long id) {
@@ -77,5 +113,14 @@ public class PostService {
     @Transactional
     public void deleteAll() {
         postRepository.deleteAllInBatch();
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while holding the lock", e);
+        }
     }
 }

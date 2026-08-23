@@ -6,24 +6,13 @@ create sequence if not exists filtered_post_seq start with 1 increment by 50;
 create sequence if not exists filtered_post_comment_seq start with 1 increment by 50;
 create sequence if not exists filtered_tag_seq start with 1 increment by 50;
 
-create sequence if not exists filtered_post_status_seq start with 1 increment by 50;
-
-create table if not exists filtered_post_status (
-    id bigint not null,
-    name varchar(255),
-    primary key (id)
-);
-
-insert into filtered_post_status (id, name)
-select * from (values (1, 'DRAFT'), (2, 'PUBLISHED'), (3, 'ARCHIVED')) as seed(id, name)
-where not exists (select 1 from filtered_post_status);
-
+-- The status column is a legacy VARCHAR that other applications read and write
+-- by name, so the PostStatus enum is mapped as EnumType.STRING to match it.
 create table if not exists filtered_post (
     id bigint not null,
     title varchar(255),
-    status_id bigint,
-    primary key (id),
-    constraint fk_post_status foreign key (status_id) references filtered_post_status
+    status varchar(255),
+    primary key (id)
 );
 
 -- No surrogate key: the details share the post identifier (@MapsId), so the

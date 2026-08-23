@@ -33,11 +33,12 @@ public class AntiPatternForumService extends ForumService {
     @Override
     @Transactional(readOnly = true)
     public List<PostSummary> findMostViewedAndApprovedPosts(int limit) {
-        return postJpaRepository.findAll().stream()                   // SELECT every row
-            .filter(post -> post.getStatus() == PostStatus.APPROVED)     // WHERE, in Java
-            .sorted(Comparator.comparingLong(Post::getViews).reversed()) // ORDER BY, in Java
-            .limit(limit)                                                // LIMIT, in Java
-            .map(post -> new PostSummary(post.getTitle(), post.getViews())) // projection, in Java
+        return postJpaRepository.findAll().stream() // SELECT every row
+            .filter(post -> post.getStatus() == PostStatus.APPROVED) // WHERE
+            .sorted(Comparator.comparingLong(Post::getViews).reversed()) // ORDER BY
+            .limit(limit) // LIMIT
+            .map(post ->
+                new PostSummary(post.getTitle(), post.getViews())) // projection
             .toList();
     }
     // end::antipattern-findmostviewed[]

@@ -64,7 +64,8 @@ public class Post {
     // tag::enum-array[]
     @Type(
         value = EnumArrayType.class,
-        parameters = @Parameter(name = EnumArrayType.SQL_ARRAY_TYPE, value = "post_status")
+        parameters = @Parameter(
+            name = EnumArrayType.SQL_ARRAY_TYPE, value = "post_status")
     )
     @Column(name = "status_history", columnDefinition = "post_status[]")
     private PostStatus[] statusHistory;

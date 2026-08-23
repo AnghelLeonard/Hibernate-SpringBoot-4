@@ -64,8 +64,10 @@ class PostgreSQLTypesTest {
         // tag::fetch[]
         PostDetails loaded = forumService.findDetails(id);
 
-        assertEquals(LocalDateTime.of(2026, 1, 1, 0, 0, 0), loaded.getAvailabilityPeriod().lower());
-        assertEquals(LocalDateTime.of(2026, 12, 31, 0, 0, 0), loaded.getAvailabilityPeriod().upper());
+        assertEquals(LocalDateTime.of(2026, 1, 1, 0, 0, 0),
+            loaded.getAvailabilityPeriod().lower());
+        assertEquals(LocalDateTime.of(2026, 12, 31, 0, 0, 0),
+            loaded.getAvailabilityPeriod().upper());
         assertEquals(Duration.ofMinutes(8).plusSeconds(30), loaded.getReadTimeBudget());
         assertEquals("advanced", loaded.getAttributes().get("difficulty"));
         assertEquals("en", loaded.getAttributes().get("language"));

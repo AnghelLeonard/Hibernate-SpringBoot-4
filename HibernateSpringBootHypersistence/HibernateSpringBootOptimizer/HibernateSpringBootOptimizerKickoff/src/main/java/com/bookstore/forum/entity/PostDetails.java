@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
  *       {@code EagerFetchingEvent}.</li>
  * </ul>
  */
+// tag::no-mapsid[]
 @Entity
 @Table(name = "kickoff_post_details")
 public class PostDetails {
@@ -31,14 +32,17 @@ public class PostDetails {
     @GeneratedValue
     private Long id;
 
+    // end::no-mapsid[]
     @Column(name = "created_on")
     private LocalDateTime createdOn = LocalDateTime.now();
 
     @Column(name = "created_by")
     private String createdBy;
 
+    // tag::no-mapsid[]
     @OneToOne
     private Post post;
+    // end::no-mapsid[]
 
     public PostDetails() {
     }
@@ -70,4 +74,6 @@ public class PostDetails {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+    // tag::no-mapsid[]
 }
+// end::no-mapsid[]

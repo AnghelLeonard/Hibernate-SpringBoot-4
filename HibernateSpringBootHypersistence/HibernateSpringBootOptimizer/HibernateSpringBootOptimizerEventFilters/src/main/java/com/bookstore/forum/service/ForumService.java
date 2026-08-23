@@ -28,24 +28,13 @@ public class ForumService {
     @Transactional
     public Post createPost(String title, String createdBy, List<String> tagNames, List<String> reviews) {
         Post post = new Post(title);
-        post.setStatus(findStatus("DRAFT"));
+        post.setStatus(PostStatus.DRAFT);
         post.addPostDetails(new PostDetails(createdBy));
         reviews.forEach(review -> post.addPostComment(new PostComment(review)));
         findTags(tagNames).forEach(post::addTag);
 
         entityManager.persist(post);
         return post;
-    }
-
-    /**
-     * The lookup rows are seeded by the schema script, so this is a read.
-     */
-    @Transactional(readOnly = true)
-    public PostStatus findStatus(String name) {
-        return entityManager
-            .createQuery("select s from PostStatus s where s.name = :name", PostStatus.class)
-            .setParameter("name", name)
-            .getSingleResult();
     }
 
     @Transactional(readOnly = true)

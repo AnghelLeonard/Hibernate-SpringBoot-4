@@ -8,7 +8,7 @@ import io.hypersistence.optimizer.core.event.EventFilter;
 import io.hypersistence.optimizer.core.event.ListEventHandler;
 import io.hypersistence.optimizer.core.event.LogEventHandler;
 import io.hypersistence.optimizer.hibernate.event.mapping.EntityAttributeMappingEvent;
-import io.hypersistence.optimizer.hibernate.event.mapping.association.fetching.EagerFetchingEvent;
+import io.hypersistence.optimizer.hibernate.event.mapping.basic.EnumTypeStringEvent;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,25 +29,29 @@ import java.util.List;
  * </ul>
  *
  * <p>The filter is deliberately narrow: it names an entity and an attribute,
- * not an event type. Suppressing {@code EagerFetchingEvent} wholesale would
- * hide the next eager association somebody adds by accident — which is the one
+ * not an event type. Suppressing {@code EnumTypeStringEvent} wholesale would
+ * hide the next enum somebody maps as a String by accident — which is the one
  * you actually wanted to catch.</p>
  */
 @Configuration
 public class HypersistenceConfiguration {
 
     /**
-     * {@code Post.status} is an eager {@code @ManyToOne} to a five-row lookup
-     * table. Reviewed, justified, and accepted — see {@link Post#getStatus()}.
+     * {@code Post.status} is an {@code EnumType.STRING} mapping over a legacy
+     * {@code VARCHAR} column that other applications share, so it cannot become
+     * an ordinal. Reviewed, justified, and accepted — see {@link Post#getStatus()}.
      */
     // tag::filter[]
     private static final EventFilter ACCEPTED_TRADE_OFFS = event ->
-        !(event instanceof EagerFetchingEvent eagerFetching
-            && isAttribute(eagerFetching, Post.class, "status"));
+        !(event instanceof EnumTypeStringEvent enumTypeString &&
+          isAttribute(enumTypeString, Post.class, "status"));
 
-    private static boolean isAttribute(EntityAttributeMappingEvent event, Class<?> entityClass, String attribute) {
-        return entityClass.equals(event.getEntityClass())
-            && attribute.equals(event.getEntityAttribute());
+    private static boolean isAttribute(
+            EntityAttributeMappingEvent event,
+            Class<?> entityClass,
+            String attribute) {
+        return entityClass.equals(event.getEntityClass()) &&
+               attribute.equals(event.getEntityAttribute());
     }
     // end::filter[]
 
@@ -62,13 +66,15 @@ public class HypersistenceConfiguration {
 
     // tag::handlers[]
     @Bean
-    public HypersistenceOptimizer hypersistenceOptimizer(EntityManagerFactory entityManagerFactory,
-                                                         ListEventHandler listEventHandler) {
+    public HypersistenceOptimizer hypersistenceOptimizer(
+            EntityManagerFactory entityManagerFactory,
+            ListEventHandler listEventHandler) {
         return new HypersistenceOptimizer(
             new JpaConfig(entityManagerFactory)
                 .setEventFilter(ACCEPTED_TRADE_OFFS)
                 .setEventHandler(new ChainEventHandler(
-                    List.of(listEventHandler, new LogEventHandler())))
+                    List.of(listEventHandler, new LogEventHandler()))
+                )
         );
     }
     // end::handlers[]

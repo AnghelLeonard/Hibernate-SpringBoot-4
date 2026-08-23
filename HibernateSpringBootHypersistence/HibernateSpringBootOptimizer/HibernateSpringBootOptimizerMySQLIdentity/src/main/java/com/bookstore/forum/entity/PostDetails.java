@@ -12,39 +12,27 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 /**
- * Fixed: the details row now <em>shares</em> the post's identifier instead of
- * carrying a surrogate key of its own.
- *
- * <ul>
- *   <li><strong>{@code OneToOneWithoutMapsIdEvent}</strong> — {@code @MapsId}
- *       makes {@code id} both the primary key and the foreign key, so the extra
- *       column, its sequence and its unique index all disappear, and finding the
- *       details by post identifier needs no join.</li>
- *   <li><strong>{@code EagerFetchingEvent}</strong> — {@code @OneToOne} defaults
- *       to {@code EAGER}; declared {@code LAZY} here.</li>
- * </ul>
+ * Shares the post's identifier through {@code @MapsId}, so it has no generator
+ * of its own and therefore reports no {@code IdentityGeneratorEvent} — only the
+ * entities that actually own an {@code IDENTITY} column do.
  */
-// tag::mapsid[]
 @Entity
-@Table(name = "fixed_post_details")
+@Table(name = "identity_post_details")
 public class PostDetails {
 
     @Id
     private Long id;
 
-    // end::mapsid[]
     @Column(name = "created_on")
     private LocalDateTime createdOn = LocalDateTime.now();
 
     @Column(name = "created_by")
     private String createdBy;
 
-    // tag::mapsid[]
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
     private Post post;
-    // end::mapsid[]
 
     public PostDetails() {
     }
@@ -76,6 +64,4 @@ public class PostDetails {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
-    // tag::mapsid[]
 }
-// end::mapsid[]

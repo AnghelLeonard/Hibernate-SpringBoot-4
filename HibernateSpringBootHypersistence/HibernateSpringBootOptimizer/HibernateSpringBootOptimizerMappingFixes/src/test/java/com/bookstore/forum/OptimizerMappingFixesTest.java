@@ -77,10 +77,13 @@ class OptimizerMappingFixesTest {
     public void reportsNoIssuesAtAll() {
         List<Event> events = hypersistenceOptimizer.getEvents();
 
-        assertTrue(events.isEmpty(),
-            () -> "Expected a clean scan, but got: " + events.stream()
-                .map(event -> event.getClass().getSimpleName() + " — " + event.getDescription())
-                .toList());
+        assertTrue(events.isEmpty(), () ->
+            "Expected a clean scan, but got: " + events.stream()
+                .map(event ->
+                    event.getClass().getSimpleName() + " — " + event.getDescription()
+                )
+                .toList()
+        );
     }
     // end::clean-scan[]
 

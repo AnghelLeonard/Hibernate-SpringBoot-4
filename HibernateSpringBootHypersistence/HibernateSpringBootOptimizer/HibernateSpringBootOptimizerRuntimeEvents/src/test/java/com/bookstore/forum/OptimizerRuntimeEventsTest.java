@@ -6,14 +6,17 @@ import com.bookstore.forum.service.ForumService;
 import io.hypersistence.optimizer.HypersistenceOptimizer;
 import io.hypersistence.optimizer.core.event.Event;
 import io.hypersistence.optimizer.hibernate.event.query.PaginationWithoutOrderByEvent;
+import io.hypersistence.optimizer.hibernate.event.query.QueryResultListSizeEvent;
+import io.hypersistence.optimizer.hibernate.event.query.QueryTimeoutEvent;
+import io.hypersistence.optimizer.hibernate.event.session.EntityAlreadyManagedEvent;
 import io.hypersistence.optimizer.hibernate.event.session.NPlusOneQueryEntityFetchingEvent;
 import io.hypersistence.optimizer.hibernate.event.session.SecondaryQueryEntityFetchingEvent;
+import io.hypersistence.optimizer.hibernate.event.session.SessionFlushTimeoutEvent;
 import io.hypersistence.optimizer.hibernate.event.session.SessionTimeoutEvent;
+import io.hypersistence.optimizer.hibernate.event.session.TableRowAlreadyManagedEvent;
 import io.hypersistence.utils.test.providers.AbstractContainerDataSourceProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,6 +26,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The mapping is the fixed one from the previous item, so the startup scan is
@@ -34,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @EnabledIfDatabaseAvailable(DatabaseType.POSTGRESQL)
 @ActiveProfiles("test")
 class OptimizerRuntimeEventsTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OptimizerRuntimeEventsTest.class);
 
     @DynamicPropertySource
     static void dataSourceProperties(DynamicPropertyRegistry registry) {
@@ -66,21 +68,83 @@ class OptimizerRuntimeEventsTest {
     }
 
     @Test
+    public void aLargeResultListIsReported() {
+        // tag::result-list-test[]
+        forumService.findComments();
+        assertEventTriggered(1, QueryResultListSizeEvent.class);
+        QueryResultListSizeEvent event =
+            triggeredEvent(QueryResultListSizeEvent.class);
+        assertEquals(10, event.getResultListSize(), "Unexpected result list size");
+        // end::result-list-test[]
+    }
+
+    @Test
+    public void aSlowQueryIsReported() {
+        // tag::slow-query-test[]
+        forumService.runSlowQuery();
+        assertEventTriggered(1, QueryTimeoutEvent.class);
+        QueryTimeoutEvent event = triggeredEvent(QueryTimeoutEvent.class);
+        assertTrue(event.getQueryTimeMillis() >= 100, "Query time under the limit");
+        // end::slow-query-test[]
+    }
+
+    @Test
+    public void aSessionThatOutstaysItsWelcomeIsReported() {
+        // tag::session-timeout-test[]
+        forumService.slowTransaction(200);
+        assertEventTriggered(1, SessionTimeoutEvent.class);
+        SessionTimeoutEvent event = triggeredEvent(SessionTimeoutEvent.class);
+        assertTrue(event.getSessionTimeMillis() >= 100, "Session time under the limit");
+        // end::session-timeout-test[]
+    }
+
+    @Test
+    public void aSlowFlushIsReported() {
+        // tag::slow-flush-test[]
+        forumService.flushManyEntities();
+        assertEventTriggered(1, SessionFlushTimeoutEvent.class);
+        SessionFlushTimeoutEvent event =
+            triggeredEvent(SessionFlushTimeoutEvent.class);
+        assertTrue(event.getFlushTimeMillis() >= 100, "Flush time under the limit");
+        // end::slow-flush-test[]
+    }
+
+    @Test
     public void paginationWithoutAnOrderByIsReported() {
+        // tag::pagination-test[]
         forumService.findPage(0, 2);
-        logEvents();
         assertEventTriggered(1, PaginationWithoutOrderByEvent.class);
 
         hypersistenceOptimizer.getEvents().clear();
         forumService.findPageOrdered(0, 2);
         assertEventTriggered(0, PaginationWithoutOrderByEvent.class);
+        // end::pagination-test[]
     }
 
     @Test
-    public void aSessionThatOutstaysItsWelcomeIsReported() {
-        forumService.slowTransaction(200);
-        logEvents();
-        assertEventTriggered(1, SessionTimeoutEvent.class);
+    public void mergingAnAlreadyManagedEntityIsReported() {
+        Long postId = forumService.findPageOrdered(0, 1).get(0).getId();
+        hypersistenceOptimizer.getEvents().clear();
+
+        // tag::already-managed-test[]
+        forumService.mergeAnAlreadyManagedEntity(postId);
+        assertEventTriggered(1, EntityAlreadyManagedEvent.class);
+        EntityAlreadyManagedEvent event =
+            triggeredEvent(EntityAlreadyManagedEvent.class);
+        assertEquals("merge", event.getEntityStateTransitionMethodName(),
+            "Unexpected state transition method");
+        // end::already-managed-test[]
+    }
+
+    @Test
+    public void loadingOneRowAsTwoEntitiesIsReported() {
+        Long postId = forumService.findPageOrdered(0, 1).get(0).getId();
+        hypersistenceOptimizer.getEvents().clear();
+
+        // tag::table-row-test[]
+        forumService.loadSameRowAsTwoEntities(postId);
+        assertEventTriggered(1, TableRowAlreadyManagedEvent.class);
+        // end::table-row-test[]
     }
 
     /**
@@ -94,13 +158,11 @@ class OptimizerRuntimeEventsTest {
     @Test
     public void theNPlusOneQueryHidingInApplicationCodeIsReported() {
         forumService.findCommentAuthorsOneByOne();
-        logEvents();
         assertEventTriggered(5, SecondaryQueryEntityFetchingEvent.class);
         assertEventTriggered(1, NPlusOneQueryEntityFetchingEvent.class);
 
         hypersistenceOptimizer.getEvents().clear();
         forumService.findCommentAuthorsInOneQuery();
-        logEvents();
         assertEventTriggered(0, SecondaryQueryEntityFetchingEvent.class);
         assertEventTriggered(0, NPlusOneQueryEntityFetchingEvent.class);
     }
@@ -114,10 +176,11 @@ class OptimizerRuntimeEventsTest {
         assertEquals(expectedCount, count, () -> "Unexpected number of " + eventClass.getSimpleName());
     }
 
-    private void logEvents() {
-        for (Event event : hypersistenceOptimizer.getEvents()) {
-            LOGGER.info("[{}] {} — {}",
-                event.getPriority(), event.getClass().getName(), event.getDescription());
-        }
+    private <T extends Event> T triggeredEvent(Class<T> eventClass) {
+        return hypersistenceOptimizer.getEvents().stream()
+            .filter(event -> event.getClass().equals(eventClass))
+            .map(eventClass::cast)
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("No event of type " + eventClass.getSimpleName() + " was triggered"));
     }
 }

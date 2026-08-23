@@ -31,8 +31,8 @@ public class CustomJsonFormatMapper implements FormatMapper {
         JsonMapper jsonMapper = JsonMapper.builder()
             .findAndAddModules()
             .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .changeDefaultPropertyInclusion(
-                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
+            .changeDefaultPropertyInclusion(inclusion ->
+                inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
             .build();
         this.delegate = new Jackson3JsonFormatMapper(jsonMapper);
     }

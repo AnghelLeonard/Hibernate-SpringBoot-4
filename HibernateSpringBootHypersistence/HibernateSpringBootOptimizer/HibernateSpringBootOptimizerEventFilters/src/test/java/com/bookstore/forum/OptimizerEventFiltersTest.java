@@ -8,7 +8,7 @@ import io.hypersistence.optimizer.core.config.JpaConfig;
 import io.hypersistence.optimizer.core.event.Event;
 import io.hypersistence.optimizer.core.event.ListEventHandler;
 import io.hypersistence.optimizer.hibernate.event.mapping.EntityAttributeMappingEvent;
-import io.hypersistence.optimizer.hibernate.event.mapping.association.fetching.EagerFetchingEvent;
+import io.hypersistence.optimizer.hibernate.event.mapping.basic.EnumTypeStringEvent;
 import io.hypersistence.utils.test.providers.AbstractContainerDataSourceProvider;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,26 +51,40 @@ class OptimizerEventFiltersTest {
     private EntityManagerFactory entityManagerFactory;
 
     /**
-     * Nine lines, no setup, and it guards every mapping in the module.
+     * A handful of lines, no setup, and it guards every mapping in the module.
+     * The message building is factored out so the test itself stays a one-liner.
      */
     // tag::ci-test[]
     @Test
     public void theMappingsAreClean() {
         List<Event> events = listEventHandler.getEvents();
 
-        assertTrue(events.isEmpty(),
-            () -> "Hypersistence Optimizer reported issues that nobody has accepted:\n" + events.stream()
-                .map(event -> "  [" + event.getPriority() + "] "
-                    + event.getClass().getSimpleName() + " — " + event.getDescription())
-                .reduce("", (a, b) -> a + b + "\n"));
+        assertTrue(events.isEmpty(), () -> unacceptedIssuesMessage(events));
     }
     // end::ci-test[]
+
+    private static String unacceptedIssuesMessage(List<Event> events) {
+        String issues = events.stream()
+            .map(OptimizerEventFiltersTest::formatEvent)
+            .collect(Collectors.joining("\n"));
+
+        return String.format(
+            "Hypersistence Optimizer reported issues that nobody has accepted:%n%s",
+            issues
+        );
+    }
+
+    private static String formatEvent(Event event) {
+        return String.format("  [%s] %s — %s",
+            event.getPriority(), event.getClass().getSimpleName(), event.getDescription());
+    }
 
     /**
      * A filter that suppresses nothing is a filter you will forget to remove.
      * Scanning the same {@code EntityManagerFactory} <em>without</em> the filter
-     * proves the accepted trade-off is real, and that exactly one issue is being
-     * waived — not a category of them.
+     * proves the accepted trade-off is real, and that exactly one issue — the
+     * String-mapped {@code Post.status} enum — is being waived, not a category
+     * of them.
      */
     // tag::waiver-test[]
     @Test
@@ -82,7 +97,7 @@ class OptimizerEventFiltersTest {
                 .map(event -> event.getClass().getSimpleName()).toList());
 
         Event waived = unfiltered.get(0);
-        assertTrue(waived instanceof EagerFetchingEvent, "Expected an EagerFetchingEvent");
+        assertTrue(waived instanceof EnumTypeStringEvent, "Expected an EnumTypeStringEvent");
         assertEquals(Post.class, ((EntityAttributeMappingEvent) waived).getEntityClass());
         assertEquals("status", ((EntityAttributeMappingEvent) waived).getEntityAttribute());
     }
