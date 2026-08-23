@@ -1,5 +1,4 @@
-Summary of **Item 25: How to Fetch DTO via Spring Projections**
-
+# 📘 Summary of **Item 25: How to Fetch DTO via Spring Projections**
 ---
 
 ## 🧩 Core Idea
@@ -153,7 +152,7 @@ But: **@JsonView is inefficient** because the SQL still fetches *all columns*.
 
 ---
 
-## ⚡ Dynamic Projections (Best Technique)
+## ⚡ Dynamic Projections
 Define one method:
 
 ```java
@@ -177,6 +176,6 @@ This is **the most efficient** approach.
 - Class‑based projections allow constructors and equals/hashCode.  
 - Reusable projections + `NON_NULL` help avoid cluttered JSON.  
 - @JsonView is flexible but **not efficient**.  
-- **Dynamic projections** are the most elegant and performant solution.
+- **Dynamic projections** are an elegant and performant solution.
 
 ---
