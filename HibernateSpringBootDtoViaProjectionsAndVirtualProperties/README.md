@@ -1,6 +1,6 @@
 ---
 
-# ✨ Summary of *Item 27: How to Enrich Spring Projections with Virtual Properties*
+# ✨ Summary of Item 27: *How to Enrich Spring Projections with Virtual Properties*
 
 ## 🎯 Core Idea
 Spring Data projections can be enhanced with **virtual properties**—fields that **do not exist in the underlying Domain Model** but are computed at runtime. These are typically implemented using **interface-based open projections** combined with **Spring Expression Language (SpEL)**.
