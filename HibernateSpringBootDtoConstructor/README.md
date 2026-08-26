@@ -1,6 +1,6 @@
 ---
 
-## 📝 Summary of Item 31: *How to Fetch DTO via Constructor Expression*
+# 📝 Summary of Item 31: *How to Fetch DTO via Constructor Expression*
 
 ### 🎯 Goal
 Fetch only **specific fields** (name and age) of `Author` entities that share the same genre, using **DTOs** or **Java records** instead of returning full entities.
@@ -17,7 +17,7 @@ The example uses a simple `Author` JPA entity with fields:
 ---
 
 ## 📌 2. DTO / Record Definition
-To fetch partial data, the PDF defines two options:
+To fetch partial data, we have here two options:
 
 ### **DTO class**
 ```java
