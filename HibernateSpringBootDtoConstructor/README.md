@@ -1,45 +1,80 @@
 ---
 
-## 📘 Summary of *Item 31: How to Fetch DTO via Constructor Expression*  
+## 📝 Summary of Item 31: *How to Fetch DTO via Constructor Expression*
 
-This item explains how to fetch partial data from a JPA entity into a custom DTO (Data Transfer Object) using two approaches **Spring Data Query Builder** and **JPQL Constructor Expressions**.
+### 🎯 Goal
+Fetch only **specific fields** (name and age) of `Author` entities that share the same genre, using **DTOs** or **Java records** instead of returning full entities.
 
-### 🔹 1. The Goal  
-Retrieve only **name** and **age** of authors who share a given **genre**, without loading the entire `Author` entity.
+---
 
-### 🔹 2. DTO-Based Projection  
-A simple DTO (`AuthorDto`) is created with:
-- `final` fields (`name`, `age`)
-- A constructor matching the selected fields
-- Only getters (no setters needed)
+## 📌 1. The Entity
+The example uses a simple `Author` JPA entity with fields:
+- `id`
+- `age`
+- `name`
+- `genre`
 
-### 🔹 3. Approach A — Spring Data Query Builder  
-Define a repository method:
+---
+
+## 📌 2. DTO / Record Definition
+To fetch partial data, the PDF defines two options:
+
+### **DTO class**
+```java
+public class AuthorDto {
+    private final String name;
+    private final int age;
+    public AuthorDto(String name, int age) { ... }
+    public String getName() { ... }
+    public int getAge() { ... }
+}
+```
+
+### **Java record**
+```java
+public record AuthorRecord(String name, int age) {}
+```
+
+Both represent lightweight projections of the entity.
+
+---
+
+## 📌 3. Fetching DTOs via Spring Data Query Builder
+Spring Data can automatically map query results to DTOs:
 
 ```java
 List<AuthorDto> findByGenre(String genre);
 ```
 
-Spring Data automatically:
-- Generates SQL selecting only the required columns  
-- Maps results into `AuthorDto` instances
+This generates SQL like:
+```
+SELECT name, age FROM author WHERE genre = ?
+```
 
-**Generated SQL example:**  
-`SELECT name, age FROM author WHERE genre = ?`
+---
 
-This is the simplest and most idiomatic approach when Spring Data can derive the query.
-
-### 🔹 4. Approach B — JPQL Constructor Expression  
-If Query Builder is insufficient, you can explicitly use JPQL:
+## 📌 4. Fetching DTOs via JPQL Constructor Expression
+If Spring Data’s query builder is insufficient, JPQL can explicitly construct DTOs:
 
 ```java
 @Query("SELECT new com.bookstore.dto.AuthorDto(a.name, a.age) FROM Author a")
-List<AuthorDto> fetchAuthors();
+List<AuthorDto> fetchAuthorsDto();
 ```
 
-JPQL uses the DTO constructor to instantiate objects directly from query results.
+Or using records:
+```java
+@Query("SELECT new com.bookstore.dto.AuthorRecord(a.name, a.age) FROM Author a")
+List<AuthorRecord> fetchAuthorsRecord();
+```
 
-### 🔹 5. Approach C — EntityManager  
+Generated SQL:
+```
+SELECT name, age FROM author
+```
+
+---
+
+## 📌 5. Fetching DTOs via EntityManager
 For full manual control:
 
 ```java
@@ -50,10 +85,14 @@ Query query = entityManager.createQuery(
 List<AuthorDto> authors = query.getResultList();
 ```
 
-### 🔹 6. Key Takeaways  
-- DTO projections improve performance by selecting only needed fields.  
-- Spring Data’s derived queries are easiest but limited.  
-- JPQL constructor expressions offer flexibility and explicit control.  
-- EntityManager provides the lowest-level option when needed.
+Same pattern applies for records.
+
+---
+
+## ⭐ Key Takeaways
+- DTOs and records allow **partial data fetching**, improving performance and reducing unnecessary data transfer.
+- Spring Data can automatically map results to DTOs if constructor signatures match.
+- JPQL constructor expressions provide more flexibility when Spring Data’s query builder is not enough.
+- EntityManager offers the most manual control but requires more boilerplate.
 
 ---
