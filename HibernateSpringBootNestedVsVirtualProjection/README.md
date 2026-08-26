@@ -1,9 +1,9 @@
 ---
 
-# 📘 Summary of Item 28: Efficiently Fetching Spring Projections with *-to-One Associations
+# 📘 Summary of Item 28: *Efficiently Fetching Spring Projections with *-to-One Associations*
 
 This item analyzes **four different ways** to fetch DTO-style data in Spring Data JPA when dealing with a `@ManyToOne` (or generally *-to-one) 
-association—specifically `Book` → `Author`.  The goal is to fetch **book title + author name + author genre** efficiently.
+association—specifically `Book` → `Author`.  The goal is to fetch **book title + book rank + author name + author genre** efficiently.
 
 ---
 
@@ -14,6 +14,7 @@ association—specifically `Book` → `Author`.  The goal is to fetch **book tit
 ```java
 public interface BookDto {
   String getTitle();
+  Integer getRank();
   AuthorDto getAuthor();
   interface AuthorDto {
     String getName();
@@ -42,6 +43,7 @@ Fetches unnecessary columns → inefficient.
 ```java
 public interface SimpleBookDto {
   String getTitle();
+  Integer getRank();
   String getName();
   String getGenre();
 }
@@ -86,6 +88,7 @@ This is the **performance winner**, but least convenient.
 ```java
 public interface VirtualBookDto {
   String getTitle();
+  Integer getRank();
   @Value("#{ @authorMapper.buildAuthorDto(target.name, target.genre) }")
   AuthorClassDto getAuthor();
 }
@@ -98,26 +101,6 @@ public interface VirtualBookDto {
 
 **Cons**
 - Requires extra mapper class  
-- **Slowest** approach due to SpEL + reflection overhead
-
----
-
-## 📊 Performance Ranking (Fast → Slow)
-
-1. **Raw data (`Object[]`)**  
-2. **Simple closed projection**  
-3. **Nested closed projection**  
-4. **Open projection (SpEL)** ← slowest
-
-Benchmarking was done using JMH on MySQL, Windows 11, i7 CPU.
-
----
-
-## 🧠 Key Takeaways
-
-- If you want **maximum performance**, use **raw data** or **simple closed projections**.  
-- If you need **nested structure**, prefer **nested closed projections** over open projections.  
-- Avoid open projections unless you absolutely need virtual properties—they are the slowest.  
-- Nested closed projections are convenient but fetch unnecessary columns and load entities into the Persistence Context.
+- SpEL + reflection overhead may be slow
 
 ---
