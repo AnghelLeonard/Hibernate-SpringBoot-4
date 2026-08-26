@@ -1,6 +1,6 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.AuthorRecord;
 import java.util.List;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
@@ -14,8 +14,8 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<AuthorDto> fetchByGenre() {
+    public List<AuthorRecord> fetchByGenre() { //  List<AuthorDto>
 
         return authorRepository.findByGenre("Anthology");
-    }        
+    }                       
 }

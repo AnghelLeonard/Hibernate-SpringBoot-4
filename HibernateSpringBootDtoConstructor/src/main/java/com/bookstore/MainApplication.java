@@ -1,6 +1,6 @@
 package com.bookstore;
 
-import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.AuthorRecord;
 import java.util.List;
 import com.bookstore.service.BookstoreService;
 import org.springframework.boot.ApplicationRunner;
@@ -23,16 +23,16 @@ public class MainApplication {
 
     @Bean
     public ApplicationRunner init() {
-        return args -> {
-
-            List<AuthorDto> authors = bookstoreService.fetchByGenre();
+        return args -> {          
+            
+            List<AuthorRecord> authors = bookstoreService.fetchByGenre();           
 
             System.out.println("Number of authors:" + authors.size());
 
-            for (AuthorDto author : authors) {
-                System.out.println("Author name: " + author.getName()
-                        + " | Age: " + author.getAge());
-            }                      
+            for (AuthorRecord author : authors) {
+                System.out.println("Author name: " + author.name()
+                        + " | Age: " + author.age());
+            }
         };
     }
 }
