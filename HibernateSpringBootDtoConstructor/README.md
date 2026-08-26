@@ -40,10 +40,11 @@ Both represent lightweight projections of the entity.
 ---
 
 ## 📌 3. Fetching DTOs via Spring Data Query Builder
-Spring Data can automatically map query results to DTOs:
+Spring Data can automatically map query results to DTOs/records:
 
 ```java
 List<AuthorDto> findByGenre(String genre);
+List<AuthorRecord> findByGenre(String genre);
 ```
 
 This generates SQL like:
