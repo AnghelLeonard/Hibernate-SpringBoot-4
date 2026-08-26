@@ -7,11 +7,11 @@ INSERT INTO `author` (`age`, `name`, `genre`, `id`) VALUES
 ON DUPLICATE KEY UPDATE `id`=`id`;
 
 -- insert books
-INSERT INTO `book` (`isbn`, `title`, `author_id`, `id`) VALUES 
-  ("001-JN", "A History of Ancient Prague", 4, 1),
-  ("002-JN", "A People's History", 4, 2),
-  ("003-JN", "History Now", 4, 3),
-  ("001-MJ", "The Beatles Anthology", 1, 4),
-  ("001-OG", "Carrie", 2, 5),
- ("002-OG", "Nightmare Of A Day", 2, 6)
+INSERT INTO `book` (`isbn`, `title`, `rank`, `author_id`, `id`) VALUES 
+  ("001-JN", "A History of Ancient Prague", 1, 4, 1),
+  ("002-JN", "A People's History", 5, 4, 2),
+  ("003-JN", "History Now", 6, 4, 3),
+  ("001-MJ", "The Beatles Anthology", 2, 1, 4),
+  ("001-OG", "Carrie", 3, 2, 5),
+ ("002-OG", "Nightmare Of A Day", 4, 2, 6)
 ON DUPLICATE KEY UPDATE `id`=`id`;

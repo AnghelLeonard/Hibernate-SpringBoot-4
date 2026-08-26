@@ -40,5 +40,5 @@ public class BookstoreController {
     @GetMapping("/booksAndauthors/5")
     public List<Object[]> fetchBooksWithAuthorsViaArrayOfObjects() {
         return bookstoreService.fetchBooksWithAuthorsViaArrayOfObjects();
-    }
+    }       
 }

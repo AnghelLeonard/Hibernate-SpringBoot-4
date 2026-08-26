@@ -30,7 +30,7 @@ public class BookstoreService {
 
     @Transactional(readOnly = true)
     public List<BookDto> fetchBooksWithAuthorsQueryBuilderMechanism() {
-        List<BookDto> books = bookRepository.findBy();
+        List<BookDto> books = bookRepository.findByOrderByRankAsc();
 
         System.out.println("\nResult set:");
         books.forEach(b -> System.out.println(b.getTitle() + ", "
@@ -90,7 +90,7 @@ public class BookstoreService {
         briefOverviewOfPersistentContextContent();
 
         return books;
-    }
+    }        
 
     private void briefOverviewOfPersistentContextContent() {
         org.hibernate.engine.spi.PersistenceContext persistenceContext = getPersistenceContext();

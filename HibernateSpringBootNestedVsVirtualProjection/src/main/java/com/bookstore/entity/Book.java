@@ -20,6 +20,7 @@ public class Book implements Serializable {
 
     private String title;
     private String isbn;
+    private int rank;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", referencedColumnName = "id")
@@ -57,6 +58,14 @@ public class Book implements Serializable {
         this.author = author;
     }
 
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }    
+    
     @Override
     public boolean equals(Object obj) {
      

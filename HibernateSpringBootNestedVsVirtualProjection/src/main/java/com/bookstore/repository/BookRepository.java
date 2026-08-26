@@ -12,29 +12,28 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    List<BookDto> findBy();
+    List<BookDto> findByOrderByRankAsc();
     
-    @Query("SELECT b.title AS title, a AS author FROM Book b LEFT JOIN b.author a")
+    @Query("SELECT b.title AS title, b.rank AS rank, a AS author FROM Book b LEFT JOIN b.author a")
     // or as a INNER JOIN
-    // @Query("SELECT b.title AS title, b.author AS author FROM Book b")
+    // @Query("SELECT b.title AS title, b.rank AS rank, b.author AS author FROM Book b")
     List<BookDto> findByViaQuery();
-
-    // fastest
+   
     @Query("""
-           SELECT b.title AS title, a.name AS name, a.genre AS genre 
+           SELECT b.title AS title, b.rank AS rank, a.name AS name, a.genre AS genre 
            FROM Book b LEFT JOIN b.author a
            """)
     List<SimpleBookDto> findByViaQuerySimpleDto();
      
     @Query("""
-           SELECT b.title AS title, a.name AS name, a.genre AS genre
+           SELECT b.title AS title, b.rank AS rank, a.name AS name, a.genre AS genre
            FROM Book b LEFT JOIN b.author a
            """)
     List<VirtualBookDto> findByViaQueryVirtualDto();
     
     @Query("""
-           SELECT b.title AS title, a.name AS name, a.genre AS genre
+           SELECT b.title AS title, b.rank AS rank, a.name AS name, a.genre AS genre
            FROM Book b LEFT JOIN b.author a
            """)
-    List<Object[]> findByViaQueryArrayOfObjects();
+    List<Object[]> findByViaQueryArrayOfObjects();        
 }
