@@ -5,7 +5,6 @@ import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
-import com.bookstore.dto.Views.NameEmail;
 
 @Service
 public class BookstoreService {
