@@ -1,6 +1,6 @@
 package com.bookstore.service;
 
-import com.bookstore.jdbcTemplate.dto.AuthorExtractor;
+import com.bookstore.jdbc.template.dto.AuthorExtractor;
 import com.bookstore.spring.dto.AuthorDto;
 import com.bookstore.spring.dto.SimpleAuthorDto;
 import com.bookstore.repository.AuthorRepository;
@@ -124,9 +124,9 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<com.bookstore.jdbcTemplate.dto.AuthorDto> fetchAuthorsWithBooksViaJdbcTemplateToDto() {
+    public List<com.bookstore.jdbc.template.dto.AuthorDto> fetchAuthorsWithBooksViaJdbcTemplateToDto() {
 
-        List<com.bookstore.jdbcTemplate.dto.AuthorDto> authors = authorExtractor.extract();
+        List<com.bookstore.jdbc.template.dto.AuthorDto> authors = authorExtractor.extract();
         
         System.out.println("\nResult set:");
         authors.forEach(a -> {

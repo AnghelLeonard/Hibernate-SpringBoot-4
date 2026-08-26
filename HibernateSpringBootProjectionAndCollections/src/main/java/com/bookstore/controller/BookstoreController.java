@@ -48,7 +48,7 @@ public class BookstoreController {
     }
     
     @GetMapping("/authorsAndbooks/7")
-    public List<com.bookstore.jdbcTemplate.dto.AuthorDto> fetchAuthorsWithBooksViaJdbcTemplateToDto() {
+    public List<com.bookstore.jdbc.template.dto.AuthorDto> fetchAuthorsWithBooksViaJdbcTemplateToDto() {
         return bookstoreService.fetchAuthorsWithBooksViaJdbcTemplateToDto();
     }
 }

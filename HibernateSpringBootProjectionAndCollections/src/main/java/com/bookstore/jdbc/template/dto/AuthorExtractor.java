@@ -1,4 +1,4 @@
-package com.bookstore.jdbcTemplate.dto;
+package com.bookstore.jdbc.template.dto;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
