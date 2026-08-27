@@ -1,6 +1,6 @@
 ---
 
-## 📘 Summary of Item 32: *Fetching Entities in a DTO via Constructor Expression*
+# 📘 Summary of Item 32: *Fetching Entities in a DTO via Constructor Expression*
 
 This item explains how to fetch data from two unrelated entities—**Author** and **Book**—that share a common attribute (**genre**) but have **no materialized association** in JPA.
 
