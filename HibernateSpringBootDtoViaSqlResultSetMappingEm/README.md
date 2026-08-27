@@ -39,6 +39,7 @@ Native queries **cannot** use JPQL constructor expressions, so `ConstructorResul
 
 **DTO(Java record) example:**
 A simple immutable class with `name` and `age` fields and a matching constructor.
+
 ---
 
 ## **3. Entity Mapping (EntityResult)**
