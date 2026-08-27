@@ -1,11 +1,11 @@
 ---
 
-## Summary of Item 34 — *Fetching DTOs with @SqlResultSetMapping and @NamedNativeQuery*
+# Summary of Item 34 — *Fetching DTOs with @SqlResultSetMapping and @NamedNativeQuery*
 
 ### **Purpose of the Item**
 This item explains how to use **JPA’s @SqlResultSetMapping** together with **@NamedNativeQuery** to fetch
 - Scalar values  
-- DTOs via constructor mapping  
+- DTOs (Java records) via constructor mapping  
 - Entities via entity mapping  
 
 ---
@@ -26,7 +26,7 @@ Mapping only the `name` column and returning a list of names.
 
 ## **2. Constructor Mapping (DTO Projection)**
 
-**Goal:** Fetch only selected fields (e.g., `name` and `age`) into a DTO (`AuthorDto`).
+**Goal:** Fetch only selected fields (e.g., `name` and `age`) into a DTO (`AuthorDto`) or a Java record (`AuthorRecord`).
 
 **Why:**  
 Native queries **cannot** use JPQL constructor expressions, so `ConstructorResult` is required.
@@ -40,6 +40,8 @@ Native queries **cannot** use JPQL constructor expressions, so `ConstructorResul
 **DTO example:**  
 A simple immutable class with `name` and `age` fields and a matching constructor.
 
+**Java record example:**  
+A Java record with `name` and `age` properties.
 ---
 
 ## **3. Entity Mapping (EntityResult)**
@@ -64,7 +66,7 @@ A simple immutable class with `name` and `age` fields and a matching constructor
 ## **Core Takeaway**
 **@SqlResultSetMapping + @NamedNativeQuery** gives you full control over how native SQL results are mapped:
 - **ColumnResult** → scalar values  
-- **ConstructorResult** → DTOs  
+- **ConstructorResult** → DTOs/Java records  
 - **EntityResult** → entities  
 
 This is essential when working with native SQL in Spring Boot + JPA, especially for performance‑optimized projections.
