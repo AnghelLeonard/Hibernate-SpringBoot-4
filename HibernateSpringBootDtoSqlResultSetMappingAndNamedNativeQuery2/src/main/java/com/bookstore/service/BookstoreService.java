@@ -14,7 +14,7 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<AuthorDto> fetchAuthorsNamesAndAges() {
+    public List<AuthorDto> fetchAuthorsNamesAndAges() { // or, AuthorRecord
 
         return authorRepository.fetchNameAndAge();
     }
@@ -22,5 +22,5 @@ public class BookstoreService {
     public List<String> fetchAuthorsNames() {
 
         return authorRepository.fetchName();
-    }
+    }       
 }

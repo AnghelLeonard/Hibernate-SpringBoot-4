@@ -33,7 +33,7 @@ import java.io.Serializable;
 @SqlResultSetMapping(
         name = "AuthorDtoMapping",
         classes = @ConstructorResult(
-                targetClass = AuthorDto.class,
+                targetClass = AuthorDto.class, // or, AuthorRecord.class
                 columns = {
                     @ColumnResult(name = "name"),
                     @ColumnResult(name = "age")
