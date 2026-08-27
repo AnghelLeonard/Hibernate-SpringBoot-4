@@ -3,6 +3,7 @@ package com.bookstore.service;
 import com.bookstore.dao.Dao;
 import com.bookstore.dto.AuthorDtoNoSetters;
 import com.bookstore.dto.AuthorDtoWithSetters;
+import com.bookstore.dto.AuthorRecord;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +24,10 @@ public class BookstoreService {
     public List<AuthorDtoWithSetters> fetchAuthorsWithSetters() {
 
         return dao.fetchAuthorsWithSetters();
+    }
+    
+    public List<AuthorRecord> fetchAuthorsRecord() {
+
+        return dao.fetchAuthorsRecord();
     }
 }

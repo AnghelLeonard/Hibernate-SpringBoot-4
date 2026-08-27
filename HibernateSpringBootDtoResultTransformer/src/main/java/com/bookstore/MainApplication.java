@@ -2,6 +2,7 @@ package com.bookstore;
 
 import com.bookstore.dto.AuthorDtoNoSetters;
 import com.bookstore.dto.AuthorDtoWithSetters;
+import com.bookstore.dto.AuthorRecord;
 import java.util.List;
 import com.bookstore.service.BookstoreService;
 import org.springframework.boot.ApplicationRunner;
@@ -42,6 +43,15 @@ public class MainApplication {
             for (AuthorDtoNoSetters author : authors2) {
                 System.out.println("Author name: " + author.getName()
                         + " | Age: " + author.getAge());
+            }
+            
+            System.out.println("\nFetch authors via Java record:");
+
+            List<AuthorRecord> authors3 = bookstoreService.fetchAuthorsRecord();
+
+            for (AuthorRecord author : authors3) {
+                System.out.println("Author name: " + author.name()
+                        + " | Age: " + author.age());
             }
         };
     }

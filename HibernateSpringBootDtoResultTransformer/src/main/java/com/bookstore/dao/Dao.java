@@ -2,6 +2,7 @@ package com.bookstore.dao;
 
 import com.bookstore.dto.AuthorDtoNoSetters;
 import com.bookstore.dto.AuthorDtoWithSetters;
+import com.bookstore.dto.AuthorRecord;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
@@ -41,6 +42,21 @@ public class Dao implements AuthorDao {
                     authorDTO.setName((String) tuples[0]);
                     authorDTO.setAge((int) tuples[1]);
 
+                    return authorDTO;
+                }).getResultList();
+
+        return authors;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<AuthorRecord> fetchAuthorsRecord() {
+        List<AuthorRecord> authors = entityManager
+                .createNativeQuery("SELECT name, age FROM author")
+                .unwrap(org.hibernate.query.NativeQuery.class)
+                .setTupleTransformer((tuples, aliases) -> {
+                    AuthorRecord authorDTO = new AuthorRecord((String) tuples[0], (int) tuples[1]);
+                
                     return authorDTO;
                 }).getResultList();
 

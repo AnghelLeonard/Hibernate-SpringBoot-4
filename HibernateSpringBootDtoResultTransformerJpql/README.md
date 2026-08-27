@@ -1,6 +1,6 @@
 ---
 
-## Summary of Item 35 – *Fetching DTOs via Hibernate Transformers*
+# Summary of Item 35 – *Fetching DTOs via Hibernate Transformers*
 
 ### **Purpose**
 Thi item explains how to use **Hibernate result transformers**—specifically **TupleTransformer**—to map query results directly into **DTOs (Data Transfer Objects)** instead of returning entities. This is useful when you want only a subset of fields (e.g., name + age) and want to avoid exposing full entities.
@@ -29,12 +29,14 @@ The example uses an `Author` entity with fields:
 
 ## **3. DTO Approaches**
 
-### **A. DTO with Constructor (No Setters)**
+### **A. DTO with Constructor (No Setters) or a Java Record**
 ```java
 public class AuthorDtoNoSetters {
     private final String name;
     private final int age;
 }
+
+public record AuthorRecord(String name, int age) {}
 ```
 
 **Mapping logic:**
