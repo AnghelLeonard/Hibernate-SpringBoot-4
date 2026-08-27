@@ -37,8 +37,9 @@ Native queries **cannot** use JPQL constructor expressions, so `ConstructorResul
 - Define a `@NamedNativeQuery` selecting only the required fields.
 - Repository returns `List<AuthorDto>`.
 
-**DTO/Java record example:**  
+**DTO(Java record) example:**
 A simple immutable class with `name` and `age` fields and a matching constructor.
+
 ---
 
 ## **3. Entity Mapping (EntityResult)**
