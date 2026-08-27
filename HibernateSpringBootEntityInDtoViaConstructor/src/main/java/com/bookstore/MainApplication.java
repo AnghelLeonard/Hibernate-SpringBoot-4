@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import com.bookstore.dto.BookstoreDto;
+import com.bookstore.dto.BookstoreRecord;
 
 @SpringBootApplication
 public class MainApplication {
@@ -25,9 +26,13 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            List<BookstoreDto> authors = bookstoreService.fetchAuthors();
-            authors.forEach(a -> System.out.println(a.getAuthor()
+            List<BookstoreDto> authors1 = bookstoreService.fetchAuthorsDto();
+            authors1.forEach(a -> System.out.println(a.getAuthor()
                     + ", Title: " + a.getTitle()));
+            
+            List<BookstoreRecord> authors2 = bookstoreService.fetchAuthorsRecord();
+            authors2.forEach(a -> System.out.println(a.author()
+                    + ", Title: " + a.title()));
         };
     }
 }

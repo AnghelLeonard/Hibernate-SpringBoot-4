@@ -15,6 +15,12 @@ A simple DTO (`BookstoreDto`) is created with:
 - `String title`
 - A constructor accepting both fields
 
+Or,a Java record:
+
+```java
+public record BookstoreRecord(Author author, String title) {}
+```
+
 ### 🧠 JPQL Query
 A constructor expression is used to populate the DTO:
 
