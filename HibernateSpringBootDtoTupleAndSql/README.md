@@ -46,7 +46,7 @@ SELECT a1_0.id, a1_0.name, a1_0.age FROM author a1_0
 
 ### **Native SQL version**
 ```java
-@Query(value = "SELECT name, age FROM author", nativeQuery = true)
+@NativeQuery(value = "SELECT name, age FROM author")
 List<Tuple> fetchAuthors();
 ```
 Generated SQL:
