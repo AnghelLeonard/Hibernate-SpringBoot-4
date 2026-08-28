@@ -1,4 +1,4 @@
-## **Summary of Item 38 — Fetching DTOs with Blaze-Persistence Entity Views**
+# Summary of Item 38 — *Fetching DTOs with Blaze-Persistence Entity Views*
 
 ### **Purpose**
 This item explains how to fetch lightweight DTO-like projections in a Spring Boot + JPA/Hibernate application using **Blaze-Persistence Entity Views**, focusing on retrieving only selected fields (e.g., author name and age) instead of full entities.
