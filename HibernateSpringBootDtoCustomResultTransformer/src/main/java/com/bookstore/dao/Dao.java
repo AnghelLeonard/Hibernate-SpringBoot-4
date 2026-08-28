@@ -18,13 +18,16 @@ public class Dao implements AuthorDao {
     @Override
     @Transactional(readOnly = true)
     public List<AuthorDto> fetchAuthorWithBook() {
-        
+
         AuthorBookTransformer abt = new AuthorBookTransformer();
         Query query = entityManager
-                .createNativeQuery(
-                        "SELECT a.id AS author_id, a.name AS name, a.age AS age, "
-                        + "b.id AS book_id, b.title AS title "
-                        + "FROM author a JOIN book b ON a.id=b.author_id")
+                .createNativeQuery("""
+                                   SELECT 
+                                     a.id AS author_id, a.name AS name, a.age AS age, 
+                                     b.id AS book_id, b.title AS title 
+                                   FROM author a 
+                                   JOIN book b ON a.id=b.author_id
+                                   """)
                 .unwrap(org.hibernate.query.NativeQuery.class)
                 .setTupleTransformer(abt)
                 .setResultListTransformer(abt);
