@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import com.bookstore.projection.AuthorNameBookTitle;
+import org.springframework.data.jpa.repository.NativeQuery;
 
 @Repository
 @Transactional(readOnly = true)
@@ -24,14 +25,14 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     // Fetch all authors and books (SQL)    
     // will remove duplicates (use UNION ALL to keep duplicates)
-    @Query(value = """
+    @NativeQuery(value = """
                    (SELECT b.title AS title, a.name AS name FROM author a 
                    LEFT JOIN book b ON a.id = b.author_id)
-                   UNION 
-                   (SELECT b.title AS title, a.name AS name FROM author a
-                   RIGHT JOIN book b ON a.id = b.author_id
-                   WHERE a.id IS NULL)
-                   """,
-            nativeQuery = true)
+                   UNION (
+                     SELECT b.title AS title, a.name AS name FROM author a
+                     RIGHT JOIN book b ON a.id = b.author_id
+                     WHERE a.id IS NULL
+                   )
+                   """)
     List<AuthorNameBookTitle> findAuthorsAndBooksSql();
 }
