@@ -1,4 +1,4 @@
-## 🔍 **Summary: JOIN vs JOIN FETCH in JPA/Hibernate**
+# Summary of Item 40 : *JOIN vs JOIN FETCH in JPA/Hibernate*
 
 ### **1. Context**
 This item explains when to use **JOIN** and when to use **JOIN FETCH** in JPA/Hibernate, using the classic `Author` ↔ `Book` bidirectional association (`@OneToMany` / `@ManyToOne`, lazy-loaded).
