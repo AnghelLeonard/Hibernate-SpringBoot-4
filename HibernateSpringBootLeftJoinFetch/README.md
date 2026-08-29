@@ -1,4 +1,4 @@
-## **Summary of Item 41: How to Fetch All Left Entities**
+# Summary of Item 41: *How to Fetch All Left Entities*
 
 **Core idea:**  
 When you have a **bidirectional lazy `@OneToMany` association** (e.g., `Author` → `Book`), you often want to fetch **all left-side entities** (all Authors) **and** their associated collections (Books) **in a single query** — without losing left-side rows that have no children.
