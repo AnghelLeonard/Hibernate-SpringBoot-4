@@ -1,4 +1,4 @@
-## **Summary of Item 43 — How to Write JOIN Statements**
+# Summary of Item 43: *How to Write JOIN Statements*
 
 ### **1. Overview of SQL/JPQL JOIN Types**
 This item explains the three major JOIN categories:
