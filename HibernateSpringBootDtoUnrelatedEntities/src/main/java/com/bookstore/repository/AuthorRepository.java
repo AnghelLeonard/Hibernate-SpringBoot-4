@@ -14,9 +14,11 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     // Query all author names and their titles with the given price
     
     @Transactional(readOnly = true)    
-    @Query(value = "SELECT a.name AS name, b.title AS title "
-            + "FROM Author a INNER JOIN Book b ON a.name = b.name "
-            + "WHERE b.price = ?1")
+    @Query(value = """
+                   SELECT a.name AS name, b.title AS title
+                   FROM Author a INNER JOIN Book b ON a.name = b.name
+                   WHERE b.price = ?1
+                   """)
     List<BookstoreDto> fetchAuthorNameBookTitleWithPrice(int price);
 
 }

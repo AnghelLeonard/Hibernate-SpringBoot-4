@@ -1,4 +1,4 @@
-## **Summary of Item 42: How to Fetch DTO from Unrelated Entities**  
+# Summary of Item 42: *How to Fetch DTO from Unrelated Entities*
 
 
 ### **Core Idea**
