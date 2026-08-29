@@ -1,4 +1,4 @@
-## **Summary of Item 39 — How to Effectively Fetch Parent and Association in One SELECT**
+# Summary of Item 39 — *How to Effectively Fetch Parent and Association in One SELECT*
 
 ### **Core Problem**
 You have two entities — `Author` and `Book` — in a **bidirectional lazy @OneToMany / @ManyToOne** association.  
