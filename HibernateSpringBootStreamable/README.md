@@ -1,64 +1,95 @@
 ---
 
-## ⭐ **Item 1 Summary — Shaping an Effective `@OneToMany` Association**
+# ⭐ Summary of Item 45: *How to Stream the Result Set (MySQL) & Use Streamable Utility*
 
-Item 1 explains how to correctly design and optimize a **bidirectional `@OneToMany` / `@ManyToOne`** relationship in JPA/Hibernate, using the classic **Author → Book** example. The goal is to avoid unnecessary SQL operations, maintain consistency, and ensure good performance.
-
-### **Key Best Practices**
-
-### **1. Prefer Bidirectional Over Unidirectional**
-- A bidirectional mapping (`Author` ↔ `Book`) avoids the inefficiencies of a unidirectional `@OneToMany`.
-- The `@ManyToOne` side controls the foreign key, making operations cheaper.
-
-### **2. Cascade Only From Parent to Child**
-- Use cascading on the parent (`Author`) side:
-  - `@OneToMany(cascade = CascadeType.ALL)`
-- **Never** cascade from child to parent (`@ManyToOne`), as it signals poor domain design.
-
-### **3. Always Set `mappedBy` on the Parent**
-- `mappedBy = "author"` tells Hibernate that the `Book.author` field owns the relationship.
-- Prevents Hibernate from creating a join table.
-
-### **4. Use `orphanRemoval = true`**
-- Automatically deletes child entities removed from the parent’s collection.
-- Ensures no “orphan” rows remain in the database.
-
-### **5. Keep Both Sides in Sync**
-Use helper methods on the parent:
-
-```java
-public void addBook(Book book) {
-    books.add(book);
-    book.setAuthor(this);
-}
-```
-
-This prevents inconsistent state in the persistence context.
-
-### **6. Override `equals()` and `hashCode()` on the Child**
-- Implement these methods in the child (`Book`) using the identifier.
-- Ensures correct behavior in collections and during state transitions.
-
-### **7. Use Lazy Fetching**
-- `@OneToMany` is lazy by default.
-- Explicitly set `@ManyToOne(fetch = FetchType.LAZY)` to avoid unnecessary eager loads.
-
-### **8. Be Careful With `toString()`**
-- Avoid referencing lazy-loaded associations inside `toString()`.
-- Doing so triggers extra SQL queries.
+### 🎯 Core Idea
+This item explains **how streaming works in Spring Data JPA/MySQL**, when it helps, when it hurts performance, and how to correctly use **Streamable**—a Spring Data utility that behaves like an enhanced Iterable. It also warns about common performance pitfalls and shows how to build **custom Streamable wrapper types**.
 
 ---
 
-## **Overall Takeaway**
-A well‑designed bidirectional `@OneToMany` association:
+## 📌 1. Streaming Result Sets in MySQL
 
-- avoids extra tables,
-- minimizes SQL operations,
-- keeps the domain model consistent,
-- and performs significantly better than a unidirectional `@OneToMany`.
+### ✔ What streaming is
+Spring Data JPA supports returning a **Java Stream** from queries.  
+But **MySQL, PostgreSQL, SQL Server** fetch the entire result set in one round trip, so streaming can **hurt performance** for large datasets.
 
-Item 1 provides a complete template for implementing this pattern correctly.
------------------------------------------------------------------------------------------------------------------------
+### ✔ How to reduce penalties
+- Use **forward-only** result sets (default).
+- Use **read-only** transactions: `@Transactional(readOnly = true)`
+- Set **fetch-size** (e.g., 30).
+- For MySQL:
+  - Set fetch-size to `Integer.MIN_VALUE`, **or**
+  - Use `useCursorFetch=true` in JDBC URL + set fetch size.
 
------------------------------------------------------------------------------------------------------------------------    
+### ⚠ Key warning
+> Response time grows *exponentially* with result size.  
+> For large datasets, **pagination or batching** is usually better.
 
+---
+
+## 📌 2. Stream vs. Streamable (Important Distinction)
+
+### ✔ Stream
+- Java 8 Stream returned directly from JPA.
+- Requires careful resource handling (try-with-resources).
+- Can be expensive with large result sets.
+
+### ✔ Streamable
+- A Spring Data utility type.
+- Behaves like an Iterable with extra methods:
+  - `filter()`, `map()`, `flatMap()`, `and()`
+- Can combine multiple Streamables.
+
+### ⚠ Performance pitfalls
+Using Streamable incorrectly can cause major inefficiencies:
+
+#### ❌ Don’t fetch more columns than needed
+Example: fetching full Author entities then mapping to names.
+
+#### ❌ Don’t fetch more rows than needed
+Example: fetching all authors of a genre then filtering by age.
+
+#### ✔ Correct approach
+Write proper JPQL or use projections to fetch **only** needed columns/rows.
+
+---
+
+## 📌 3. Concatenating Streamables
+
+Using `.and()` concatenates results **in memory**, but **each Streamable triggers its own SQL SELECT**.
+
+This means:
+- Two Streamables = two SQL queries.
+- If an author matches both conditions, they appear **twice** in the final result.
+
+✔ Use a single SELECT when possible.
+
+---
+
+## 📌 4. Custom Streamable Wrapper Types
+
+You can return custom types that implement Streamable, enabling richer APIs.
+
+Example: `Books` wrapper with methods:
+- `partitionByPrice()`
+- `sumPrices()`
+- `toBookDto()`
+
+Requirements:
+- Class implements **Streamable**
+- Has constructor or static factory method accepting a Streamable
+
+This allows:
+- Cleaner service-layer code
+- Multiple derived results from one query execution
+
+---
+
+## 🧠 Key Takeaways
+- Streaming in MySQL is **not always beneficial**; benchmark before using.
+- Prefer **pagination** for large datasets.
+- Streamable is powerful but easy to misuse—avoid filtering/mapping large fetched sets.
+- Concatenating Streamables triggers **multiple queries**.
+- Custom Streamable wrappers can produce elegant, reusable APIs.
+
+---
