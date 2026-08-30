@@ -5,7 +5,7 @@ Here’s a clear, structured summary of **Item 45** based on the content in your
 # ⭐ Summary of Item 45: *How to Stream the Result Set (MySQL) & Use Streamable Utility*
 
 ### 🎯 Core Idea
-The chapter explains **how streaming works in Spring Data JPA/MySQL**, when it helps, when it hurts performance, and how to correctly use **Streamable**—a Spring Data utility that behaves like an enhanced Iterable. It also warns about common performance pitfalls and shows how to build **custom Streamable wrapper types**.
+This item explains **how streaming works in Spring Data JPA/MySQL**, when it helps, when it hurts performance, and how to correctly use **Streamable**—a Spring Data utility that behaves like an enhanced Iterable. It also warns about common performance pitfalls and shows how to build **custom Streamable wrapper types**.
 
 ---
 
