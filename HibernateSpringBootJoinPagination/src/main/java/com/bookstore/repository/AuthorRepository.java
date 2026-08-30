@@ -1,9 +1,9 @@
 package com.bookstore.repository;
 
-import com.bookstore.dto.Answer;
 import com.bookstore.dto.AuthorBookDto;
 import com.bookstore.entity.Author;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -21,7 +21,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
                    FROM Author a 
                    LEFT JOIN a.books b WHERE a.genre = ?1
                    """)
-    Page<Answer> fetchPageOfDto(String genre, Pageable pageable);
+    Page<Map<String, Object>> fetchPageOfDto(String genre, Pageable pageable);
 
     @Query(value = """
                    SELECT a.name AS name, a.age AS age, b.title AS title, b.isbn AS isbn

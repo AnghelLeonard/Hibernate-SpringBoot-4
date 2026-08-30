@@ -1,11 +1,9 @@
 package com.bookstore.controller;
 
-import com.bookstore.dto.Answer;
 import com.bookstore.dto.AuthorBookDto;
-import com.bookstore.dto.Views;
 import com.bookstore.service.BookstoreService;
-import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +19,8 @@ public class BookstoreController {
         this.bookstoreService = bookstoreService;
     }
 
-    @GetMapping("/page/{page}/{size}")   
-    @JsonView(Views.Summary.class)
-    public Page<Answer> fetchPageOfAuthorsWithBooksDtoByGenre(
+    @GetMapping("/page/{page}/{size}")      
+    public Page<Map<String, Object>> fetchPageOfAuthorsWithBooksDtoByGenre(
             @PathVariable int page, @PathVariable int size) {
       
         return bookstoreService.fetchPageOfAuthorsWithBooksDtoByGenre(page, size);

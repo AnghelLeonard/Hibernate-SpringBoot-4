@@ -4,11 +4,10 @@
  */
 package com.bookstore;
 
-import com.bookstore.dto.PageSerializer;
+import com.bookstore.dto.TupleBackedMapSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.PageImpl;
-import tools.jackson.core.Version;
+import org.springframework.data.jpa.util.TupleBackedMap;
 
 import tools.jackson.databind.module.SimpleModule;
 
@@ -22,11 +21,11 @@ public class SpringApplicationConfiguration {
 
 
 	// @see http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-customize-the-jackson-objectmapper
-	@Bean
-	public SimpleModule jacksonPageWithJsonViewModule() {
-		SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
-		module.addSerializer(PageImpl.class, new PageSerializer());
-		return module;
-	}
+	/*@Bean
+    public SimpleModule tupleBackedMapModule() {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(TupleBackedMap.class, new TupleBackedMapSerializer());
+        return module;
+    }*/
 	
 }
