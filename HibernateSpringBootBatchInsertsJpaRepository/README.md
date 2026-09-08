@@ -1,11 +1,12 @@
 ---
-# ⭐ Summary of Item 46 - *How to Batch Inserts in Spring Boot Style*
+
+# ⭐ Summary of Item 46: *How to Batch Inserts in Spring Boot Style*
 
 ### **Why batching matters**
 Batching groups multiple INSERT/UPDATE/DELETE statements into fewer database round trips.  
 Example: 1,000 inserts →  
-- **Without batching - ** 1,000 round trips  
-- **With batch size 30 - ** 34 round trips
+- **Without batching: ** 1,000 round trips  
+- **With batch size 30: ** 34 round trips
 
 This dramatically improves performance, especially for large data loads.
 
