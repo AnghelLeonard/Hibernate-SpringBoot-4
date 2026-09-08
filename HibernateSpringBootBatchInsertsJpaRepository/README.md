@@ -1,6 +1,6 @@
 ---
 
-# ⭐ Summary of Item 46: *Batch Inserts in Spring Boot + Hibernate (MySQL Focus)*
+# ⭐ Summary of Item 46 - *How to Batch Inserts in Spring Boot Style*
 
 ### **Why batching matters**
 Batching groups multiple INSERT/UPDATE/DELETE statements into fewer database round trips.  
