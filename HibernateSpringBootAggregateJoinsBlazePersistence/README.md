@@ -1,121 +1,56 @@
-# Summary of Item 38 — *Fetching DTOs with Blaze-Persistence Entity Views*
+---
 
-### **Purpose**
-This item explains how to fetch lightweight DTO-like projections in a Spring Boot + JPA/Hibernate application using **Blaze-Persistence Entity Views**, focusing on retrieving only selected fields (e.g., author name and age) instead of full entities.
+# 🧩 Summary of Item 10: *How to handle a huge Cartesian Product  via aggregated joins*
+
+### ⭐ Core Problem  
+A large native SQL query joining **Author**, **Book**, **Tag**, **Publisher**, **Review**, and **Reviewer** produces a **massive Cartesian Product** returning flat `List<Object[]>` results with no hierarchical structure.
 
 ---
 
-## **Key Concepts**
+## 🚀 Proposed Solution: Split the Query into Multiple JOIN FETCH Queries  
+Instead of one huge native SQL query, we can **split the workload into several SELECT statements**—each using `JOIN FETCH`— may dramatically improves performance and preserves hierarchy.
 
-### **1. Blaze-Persistence Entity Views**
-- Blaze-Persistence is an external library that provides a **rich Criteria API** and **Entity Views** for efficient DTO projection.
-- Entity Views allow you to define interfaces that map to specific parts of an entity, avoiding loading unnecessary fields.
+### 1. **Fetch Authors + Books**  
+One-to-many association.
 
-### **2. Example Entity**
-The example uses an `Author` entity with fields:
-- `id`
-- `age`
-- `name`
-- `genre`
+### 2. **Fetch Authors + Tags**  
+Many-to-many association.
 
-The goal: fetch **only `name` and `age`** for all authors.
+### 3. **Fetch Books + Publishers + Reviews**  
+Many-to-one + one-to-many.
 
----
+### 4. **Fetch Reviews + Reviewers**  
+Many-to-many.
 
-## **3. Required Dependencies**
-Two Maven dependencies must be added:
-- `blaze-persistence-integration-spring-data-4.0`
-- `blaze-persistence-integration-hibernate-7.2`
+All queries run inside the **same Persistence Context** and **read-only transaction**, allowing Hibernate proxies to progressively populate the full object graph.
 
-Both at version **1.6.18**.
+### ⏱ Performance sample 
+- **Native SQL:** ~8757 ms  
+- **Hibernate/JPA JOIN FETCH approach:** **200–300 ms**  
+- **Blaze Persistence MULTISET:** ~600–700 ms  
 
----
-
-## **4. Configuration**
-A Spring `@Configuration` class sets up:
-- `CriteriaBuilderFactory`
-- `EntityViewManager`
-
-These are created as Spring beans and wired using the `LocalContainerEntityManagerFactoryBean`.
-
-Annotations used:
-- `@EnableBlazeRepositories("com.bookstore")`
-- `@EnableEntityViews("com.bookstore")`
+Hibernate/JPA is the fastest in this example.
 
 ---
 
-## **5. Creating an Entity View**
-To fetch only name and age, define:
-
-```java
-@EntityView(Author.class)
-public interface AuthorView {
-    String getName();
-    int getAge();
-}
-```
-
-This interface acts as a DTO projection.
+## 🧠 Why It Works  
+- Avoids Cartesian Products  
+- Preserves hierarchical structure  
+- Uses Hibernate’s lazy proxies to merge data from multiple queries  
+- No need for custom mappers  
+- Still read-only, so Persistence Context overhead is minimal
 
 ---
 
-## **6. Repository Setup**
-Create a repository extending Blaze-Persistence’s `EntityViewRepository`:
-
-```java
-public interface AuthorViewRepository
-    extends EntityViewRepository<AuthorView, Long> { }
-```
-
-This behaves like any Spring Data repository.
+## 🔧 Alternative Approaches  
+- **Blaze Persistence MULTISET** (maintains hierarchy, slower than JPA here)  
+- **jOOQ MULTISET** (recommended via “jOOQ Masterclass”)  
+- **JPA Entity Graphs** (another option, example available on GitHub, if you prefer entity graphs)
 
 ---
 
-## **7. Fetching Data**
-A service calls:
-
-```java
-authorViewRepository.findAll();
-```
-
-This generates SQL selecting only the required columns:
-
-```
-SELECT a1_0.age, a1_0.name FROM author a1_0
-```
-
----
-
-## **8. Complex Views (Nested Collections)**
-Blaze-Persistence supports nested views, e.g., fetching authors and their books:
-
-```java
-@EntityView(Author.class)
-public interface AuthorBookView {
-    @IdMapping Long getId();
-    String getName();
-    Integer getAge();
-    Set<BookView> getBooks();
-
-    @EntityView(Book.class)
-    interface BookView {
-        @IdMapping Long getId();
-        String getTitle();
-    }
-}
-```
-
-This fetches:
-- Author: id, name, age  
-- Books: id, title  
-
----
-
-## **In Short**
-Blaze-Persistence Entity Views provide a powerful, efficient way to fetch DTO-like projections in Spring Boot applications. They:
-- Reduce data loading
-- Integrate smoothly with Spring Data
-- Support nested projections
-- Generate optimized SQL automatically
+## 📌 Final Takeaway  
+Splitting large hierarchical loads into multiple `JOIN FETCH` queries inside a single read-only Persistence Context can **dramatically outperform** a single native SQL query.  
+However, this is **not universally true**—benchmarking is essential because results depend on schema size, cardinality, database, and hardware.
 
 ---
