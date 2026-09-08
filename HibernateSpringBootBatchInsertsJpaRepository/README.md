@@ -1,41 +1,109 @@
-## **Summary of Item 41: How to Fetch All Left Entities**
+---
 
-**Core idea:**  
-When you have a **bidirectional lazy `@OneToMany` association** (e.g., `Author` → `Book`), you often want to fetch **all left-side entities** (all Authors) **and** their associated collections (Books) **in a single query** — without losing left-side rows that have no children.
+# ⭐ Summary of Item 46: *Batch Inserts in Spring Boot + Hibernate (MySQL Focus)*
 
-### **Why JOIN FETCH alone is not enough**
-- `JOIN FETCH` becomes an **INNER JOIN**, so it **excludes** left-side entities that have no associated children.
-- Example: Authors with zero books would be missing.
+### **Why batching matters**
+Batching groups multiple INSERT/UPDATE/DELETE statements into fewer database round trips.  
+Example: 1,000 inserts →  
+- **Without batching:** 1,000 round trips  
+- **With batch size 30:** 34 round trips
 
-### **Why LEFT JOIN alone is not enough**
-- `LEFT JOIN` keeps all left-side rows, but **does not fetch collections** in the same SELECT when using JPA/Hibernate.
+This dramatically improves performance, especially for large data loads.
 
-### **The solution: `LEFT JOIN FETCH`**
-This combines the benefits of both:
-- Keeps **all left-side entities** (like `LEFT JOIN`)
-- Fetches **lazy collections** in the same query (like `JOIN FETCH`)
+---
 
-### **Repository examples**
+## ⚙️ **How to enable batching**
 
-#### **AuthorRepository**
-```java
-@Query("SELECT a FROM Author a LEFT JOIN FETCH a.books")
-List<Author> fetchAuthorWithBooks();
+### **1. Set Hibernate batch size**
+Recommended: **5–30**
+
 ```
-Generated SQL includes:
-```
-LEFT JOIN book b1_0 ON a1_0.id=b1_0.author_id
+spring.jpa.properties.hibernate.jdbc.batch_size=30
 ```
 
-#### **BookRepository**
-```java
-@Query("SELECT b FROM Book b LEFT JOIN FETCH b.author")
-List<Book> fetchBookWithAuthor();
-```
-Also produces a `LEFT OUTER JOIN`.
+Do **not** confuse with `hibernate.jdbc.fetch_size` (generally avoid for MySQL/PostgreSQL).
 
-### **Outcome**
-- You can fetch **all Authors**, including those without Books, **with their collections initialized**.
-- Same applies in reverse for Books → Author.
+---
+
+## 🐬 **MySQL-specific optimizations**
+
+Add these JDBC URL flags:
+
+- **rewriteBatchedStatements=true**  
+  Rewrites multiple INSERTs into a single multi-value INSERT.
+
+- **cachePrepStmts=true**  
+  Enables client-side prepared statement caching.
+
+- **useServerPrepStmts=true**  
+  Enables server-side prepared statements.
+
+Final JDBC URL example:
+
+```
+jdbc:mysql://localhost:3306/bookstoredb?
+cachePrepStmts=true
+&useServerPrepStmts=true
+&rewriteBatchedStatements=true
+```
+
+---
+
+## 🧱 **Entity requirements**
+
+To allow batching:
+
+- **Avoid `GenerationType.IDENTITY`**  
+  (MySQL AUTO_INCREMENT disables batching)
+
+Use instead:
+
+- `GenerationType.AUTO`
+- Or manually assigned IDs
+
+Avoid UUIDs for performance reasons.
+
+---
+
+## ⚠️ **Problems with Spring Data `saveAll()`**
+
+`saveAll()` is convenient but **not ideal for batching**:
+
+- Accumulates too many entities in Persistence Context → memory + performance issues  
+- Uses `merge()` → triggers SELECTs before INSERTs  
+- Creates unnecessary lists of persisted entities  
+- Only flushes once at transaction commit
+
+---
+
+## 🛠️ **Recommended: Custom batching implementation**
+
+A custom `saveInBatch()` method gives full control:
+
+### **Key best practices**
+- Commit **after each batch**
+- Use **persist()** instead of merge()
+- Avoid long-running transactions (better for MVCC)
+- After each batch:
+  - `flush`
+  - `clear`
+  - Begin new transaction
+
+### **Architecture**
+- Create `BatchRepository` interface  
+- Implement via `BatchRepositoryImpl` extending `SimpleJpaRepository`  
+- Use a `BatchExecutor` component that:
+  - Manages EntityManager
+  - Controls begin/commit cycles
+  - Persists entities in batches
+
+### **Example behavior**
+Processing 1,000 entities with batch size 30 → **34 batches + 34 flushes**.
+
+---
+
+## 🔍 **Final advice**
+Batching can be silently disabled by misconfiguration.  
+Use tools like **DataSource-Proxy** to verify actual batch execution.
 
 ---

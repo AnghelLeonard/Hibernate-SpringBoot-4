@@ -4,17 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>java.modern.challenge</groupId>
-    <artifactId>HibernateSpringBootBatchInsertsJpaRepository</artifactId>
+    <artifactId>HibernateSpringBootBatchInsertsSpringStyleBatchPerTransaction</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootBatchInsertsJpaRepository</name>
+    <name>HibernateSpringBootBatchInsertsSpringStyleBatchPerTransaction</name>
     <description>Hibernate - Spring Boot 4</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
