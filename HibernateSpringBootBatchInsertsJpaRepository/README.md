@@ -86,8 +86,8 @@ A custom `saveInBatch()` method gives full control:
 - Use **persist()** instead of merge()
 - Avoid long-running transactions (better for MVCC)
 - After each batch:
-  - Flush and clear Persistence Context
-  - Begin new transaction or control begin/commit cycles in a single transaction
+  - Flush and clear the entity manager
+  - Begin new transaction
 
 ### **Architecture**
 - Create `BatchRepository` interface  
