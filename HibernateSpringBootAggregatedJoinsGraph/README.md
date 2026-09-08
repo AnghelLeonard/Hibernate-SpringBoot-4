@@ -1,14 +1,14 @@
 ---
 
-# 🧩 Summary of Item 10: *Handling Huge Cartesian Products with Aggregated Joins in JPA/Hibernate*
+# 🧩 Summary of Item 10: *How to handle a huge Cartesian Product  via aggregated joins*
 
 ### ⭐ Core Problem  
-A large native SQL query joining **Author**, **Book**, **Tag**, **Publisher**, **Review**, and **Reviewer** produces a **massive Cartesian Product**, taking **~8–9 seconds** to execute and returning flat `List<Object[]>` results with no hierarchical structure.
+A large native SQL query joining **Author**, **Book**, **Tag**, **Publisher**, **Review**, and **Reviewer** produces a **massive Cartesian Product** returning flat `List<Object[]>` results with no hierarchical structure.
 
 ---
 
 ## 🚀 Proposed Solution: Split the Query into Multiple JOIN FETCH Queries  
-Instead of one huge native SQL query, the author demonstrates that **splitting the workload into four SELECT statements**—each using `JOIN FETCH`—dramatically improves performance and preserves hierarchy.
+Instead of one huge native SQL query, we can **split the workload into several SELECT statements**—each using `JOIN FETCH`— may dramatically improves performance and preserves hierarchy.
 
 ### 1. **Fetch Authors + Books**  
 One-to-many association.
@@ -24,7 +24,7 @@ Many-to-many.
 
 All queries run inside the **same Persistence Context** and **read-only transaction**, allowing Hibernate proxies to progressively populate the full object graph.
 
-### ⏱ Performance  
+### ⏱ Performance sample 
 - **Native SQL:** ~8757 ms  
 - **Hibernate/JPA JOIN FETCH approach:** **200–300 ms**  
 - **Blaze Persistence MULTISET:** ~600–700 ms  
@@ -45,7 +45,7 @@ Hibernate/JPA is the fastest in this example.
 ## 🔧 Alternative Approaches  
 - **Blaze Persistence MULTISET** (maintains hierarchy, slower than JPA here)  
 - **jOOQ MULTISET** (recommended via “jOOQ Masterclass”)  
-- **JPA Entity Graphs** (another option, example available on GitHub)
+- **JPA Entity Graphs** (another option, example available on GitHub, if you prefer entity graphs)
 
 ---
 
