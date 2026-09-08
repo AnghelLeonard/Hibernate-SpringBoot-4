@@ -88,7 +88,7 @@ A custom `saveInBatch()` method gives full control:
 - After each batch:
   - `flush`
   - `clear`
-  - Begin new transaction
+  - Begin new transaction or control begin/commit cycles in a single transaction
 
 ### **Architecture**
 - Create `BatchRepository` interface  
