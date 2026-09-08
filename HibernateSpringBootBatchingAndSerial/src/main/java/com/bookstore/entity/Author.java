@@ -14,12 +14,13 @@ public class Author implements Serializable {
     // This will disable insert batching - AVOID IT!
     // @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    // This will work, but better use the below solution to reduce database roundtrips
-    // @GeneratedValue(strategy = GenerationType.AUTO)
+    // This will go for the SEQUENCE generator which uses the
+    // pooled(hi/lo) algorithm which generated in-memory identifiers  
+    // @GeneratedValue(strategy = GenerationType.AUTO)    
+    //@GeneratedValue(strategy = GenerationType.SEQUENCE) // works as AUTO   
     
-    // This will allow insert batching and optimizes the identifiers
-    // generation via the hi/lo algorithm which generated in-memory identifiers      
-    @AuthorId    
+    // This will go for a custom hi/lo algorithm which uses an increment size of 100
+    @AuthorId
     private Long id;
 
     private int age;

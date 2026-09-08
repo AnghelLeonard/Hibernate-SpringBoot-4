@@ -15,11 +15,8 @@ public class CustomIdGenerator extends SequenceStyleGenerator {
         parameters.put(SEQUENCE_PARAM, "hilo_sequence");                        // "sequence_name"
         parameters.put(INITIAL_PARAM, 1);                                       // "initial_value"
         parameters.put(INCREMENT_PARAM, 100);                                   // "increment_size"
-        parameters.put(OPT_PARAM, "org.hibernate.id.enhanced.HiLoOptimizer"); // "optimizer"
+        parameters.put(OPT_PARAM, "org.hibernate.id.enhanced.HiLoOptimizer");   // "optimizer"
               
         super.configure(creationContext, parameters);
-    }
-    
-    
-    
+    }            
 }

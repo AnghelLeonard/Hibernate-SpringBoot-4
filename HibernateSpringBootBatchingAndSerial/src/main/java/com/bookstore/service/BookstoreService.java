@@ -2,7 +2,7 @@ package com.bookstore.service;
 
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -16,38 +16,20 @@ public class BookstoreService {
     }
 
     public void authorBatchInserts() {
-        Author jn = new Author();
-        jn.setName("Joana Nimar");
-        jn.setGenre("History");
-        jn.setAge(34);
-        
-        Author mj = new Author();
-        mj.setName("Mark Janel");
-        mj.setGenre("Anthology");
-        mj.setAge(23);
-        
-        Author og = new Author();
-        og.setName("Olivia Goy");
-        og.setGenre("Horror");
-        og.setAge(43);
-        
-        Author qy = new Author();
-        qy.setName("Quartis Young");
-        qy.setGenre("Anthology");
-        qy.setAge(51);
-        
-        Author at = new Author();
-        at.setName("Alicia Tom");
-        at.setGenre("Anthology");
-        at.setAge(38);
-        
-        Author kl = new Author();
-        kl.setName("Katy Loin");
-        kl.setGenre("Anthology");
-        kl.setAge(56);
-        
-        List<Author> authors = Arrays.asList(jn, mj, og, qy, at, kl);
-        
+
+        List authors = new ArrayList<>();
+
+        for (int i = 0; i < 1000; i++) {
+
+            Author author = new Author();
+
+            author.setAge(0);
+            author.setGenre("Genre_" + i);
+            author.setName("Name_" + i);
+
+            authors.add(author);
+        }
+
         authorRepository.saveAll(authors);
     }
 }
