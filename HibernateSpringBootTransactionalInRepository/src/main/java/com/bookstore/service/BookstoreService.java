@@ -12,7 +12,7 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }
+    }    
 
     @Transactional
     public void longRunningServiceMethod() throws InterruptedException {
