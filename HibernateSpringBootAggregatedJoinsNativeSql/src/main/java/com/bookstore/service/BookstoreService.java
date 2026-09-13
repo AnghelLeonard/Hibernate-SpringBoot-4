@@ -28,7 +28,7 @@ public class BookstoreService {
     }
 
     @Transactional
-    public void insertTestData() {
+    public void insertTestData() { // programmatic insert data (default, we use data-mysql.sql)
 
         Set<Reviewer> rws = new HashSet<>();
         List<Review> rs = new ArrayList<>();

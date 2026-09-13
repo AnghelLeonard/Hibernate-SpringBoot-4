@@ -14,7 +14,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("""
            SELECT b FROM Book b             
              LEFT JOIN FETCH b.publisher
-             LEFT JOIN FETCH b.reviews
+             LEFT JOIN FETCH b.reviews    
+             JOIN FETCH b.author                       
            """)
     List<Book> findBooksAndPublishersAndReviews();
 }

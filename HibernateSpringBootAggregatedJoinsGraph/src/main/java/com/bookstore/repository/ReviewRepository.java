@@ -14,6 +14,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @EntityGraph(attributePaths = {"reviewers"},
             type = EntityGraph.EntityGraphType.FETCH)
-    @Query("SELECT r FROM Review r")
+    @Query("SELECT r FROM Review r JOIN FETCH r.book")
     List<Review> findReviewsAndReviewers();
 }

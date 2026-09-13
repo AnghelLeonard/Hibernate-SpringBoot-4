@@ -24,7 +24,7 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
             
-            bookstoreService.insertTestData();
+            // bookstoreService.insertTestData();
             
             long start = System.nanoTime();
             

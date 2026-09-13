@@ -37,12 +37,12 @@ public interface AuthorView {
 
         String getTitle();
         String getIsbn();
-
-        @Mapping(fetch = MULTISET)
-        List<ReviewView> getReviews();
-
+        
         @Mapping(fetch = MULTISET)
         PublisherView getPublisher();
+
+        @Mapping(fetch = MULTISET)
+        List<ReviewView> getReviews();        
 
         @EntityView(Review.class)
         interface ReviewView {

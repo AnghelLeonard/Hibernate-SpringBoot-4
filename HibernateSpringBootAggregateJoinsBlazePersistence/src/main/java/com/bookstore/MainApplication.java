@@ -25,7 +25,7 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {                        
-            bookstoreService.insertTestData();
+            // bookstoreService.insertTestData();
             
             long start = System.nanoTime();
             

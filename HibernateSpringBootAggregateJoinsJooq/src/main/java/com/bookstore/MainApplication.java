@@ -1,7 +1,7 @@
 package com.bookstore;
 
-import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
+import com.bookstore.view.AuthorView;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.springframework.boot.ApplicationRunner;
@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class MainApplication {
-    
+
     private final BookstoreService bookstoreService;
 
     public MainApplication(BookstoreService bookstoreService) {
         this.bookstoreService = bookstoreService;
-    }        
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(MainApplication.class, args);
@@ -25,11 +25,10 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {
-            //bookstoreService.insertTestData();
             
             long start = System.nanoTime();
             
-            List<Author> authors = bookstoreService.fetchAuthorsBooksTagsPublishersReviewersReviews();
+            List<AuthorView> authors = bookstoreService.fetchAuthorsBooksTagsPublishersReviewersReviews();
             
             long end = System.nanoTime();
                        

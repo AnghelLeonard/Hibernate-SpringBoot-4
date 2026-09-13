@@ -13,7 +13,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     
     @Query("""
            SELECT r FROM Review r
-             LEFT JOIN FETCH r.reviewers                                              
+             LEFT JOIN FETCH r.reviewers  
+             JOIN FETCH r.book                                                    
            """)
     List<Review> findReviewsAndReviewers();
 }
