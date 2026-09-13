@@ -1,5 +1,4 @@
 -- Recreate database
-USE `bookstoredb`;
 DROP DATABASE IF EXISTS `bookstoredb`;
 CREATE DATABASE `bookstoredb`;
 USE `bookstoredb`;
