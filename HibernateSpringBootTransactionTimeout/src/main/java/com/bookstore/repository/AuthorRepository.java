@@ -2,7 +2,7 @@ package com.bookstore.repository;
 
 import com.bookstore.entity.Author;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +13,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
         // @QueryHint(name = "org.hibernate.timeout", value = "10"),               // Hibernate timeout in seconds
         // @QueryHint(name = "jakarta.persistence.query.timeout", value = "10000") // JPA timeout in milliseconds
     })
-    @Query(value = "SELECT SLEEP(15)", nativeQuery = true)
+    @NativeQuery(value = "SELECT SLEEP(15)")
     public void sleepQuery();
 }
