@@ -26,9 +26,9 @@ public class Book implements Serializable {
     @Column(nullable = false, updatable = false, unique = true, length = 50)
     private String isbn;    
 
-    // @NaturalId(mutable = false)
-    // @Column(nullable = false, updatable = false, unique = true)
-    // private Long sku;
+     @NaturalId(mutable = false)
+     @Column(nullable = false, updatable = false, unique = true)
+     private Long sku;
 
     public Long getId() {
         return id;
@@ -61,8 +61,7 @@ public class Book implements Serializable {
     public void setPrice(int price) {
         this.price = price;
     }
-
-    /*
+    
     public Long getSku() {
         return sku;
     }
@@ -70,8 +69,7 @@ public class Book implements Serializable {
     public void setSku(Long sku) {
         this.sku = sku;
     }
-    */
-
+    
     @Override
     public boolean equals(Object o) {
 
@@ -84,24 +82,21 @@ public class Book implements Serializable {
         }
         
         Book other = (Book) o;
-        return Objects.equals(isbn, other.getIsbn());
-        // including sku 
-        // return Objects.equals(isbn, other.getIsbn())
-        //        && Objects.equals(sku, other.getSku());
+       
+         return Objects.equals(isbn, other.getIsbn())
+                && Objects.equals(sku, other.getSku());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(isbn);
-        // including sku
-        // return Objects.hash(isbn, sku);
+        
+         return Objects.hash(isbn, sku);
     }
 
     @Override
     public String toString() {
-        return "Book{" + "id=" + id + ", title=" + title + ", isbn=" + isbn + ", price=" + price + '}';
-        // including sku
-        //return "Book{" + "id=" + id + ", title=" + title 
-        //         + ", isbn=" + isbn + ", price=" + price + ", sku=" + sku + '}';
+       
+        return "Book{" + "id=" + id + ", title=" + title 
+                 + ", isbn=" + isbn + ", price=" + price + ", sku=" + sku + '}';
     }
 }

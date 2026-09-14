@@ -4,17 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>java.modern.challenge</groupId>
-    <artifactId>HibernateSpringBootNaturalIdImpl</artifactId>
+    <artifactId>HibernateSpringBootNaturalIdSimpleImpl</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootNaturalIdImpl</name>
+    <name>HibernateSpringBootNaturalIdSimpleImpl</name>
     <description>Hibernate - Spring Boot 4</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 

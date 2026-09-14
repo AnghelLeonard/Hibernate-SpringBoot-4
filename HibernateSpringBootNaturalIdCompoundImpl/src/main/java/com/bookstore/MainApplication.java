@@ -1,7 +1,7 @@
 package com.bookstore;
 
 import com.bookstore.entity.Book;
-import com.bookstore.naturalid.NaturalRepositoryImpl;
+import com.bookstore.naturalid.NaturalIdRepositoryImpl;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +10,7 @@ import com.bookstore.service.BookstoreService;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories(repositoryBaseClass = NaturalRepositoryImpl.class)
+@EnableJpaRepositories(repositoryBaseClass = NaturalIdRepositoryImpl.class)
 public class MainApplication {
 
     private final BookstoreService bookstoreService;
