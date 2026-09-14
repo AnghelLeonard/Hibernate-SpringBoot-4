@@ -1,0 +1,38 @@
+<config xmlns="http://www.ehcache.org/v3">
+    
+    <!-- Default Cache Template -->
+    <cache-template name="default-template">
+        <expiry>
+            <ttl unit="seconds">600</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">2000</heap>
+        </resources>
+    </cache-template>
+    
+    <cache alias="Book" uses-template="default-template">        
+        <!-- Optional overrides can go here -->  
+    </cache>    
+
+    <cache alias="BookIsbn" uses-template="default-template">        
+        <!-- Optional overrides can go here -->    
+    </cache> 
+
+    <!-- Hibernate 6/7 query-results region (the old StandardQueryCache name was Hibernate 5) -->
+    <cache alias="default-query-results-region">
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">200</heap>
+        </resources>
+    </cache>
+    <cache alias="default-update-timestamps-region">
+        <expiry>
+            <none/>
+        </expiry>
+        <resources>
+            <heap unit="entries">5000</heap>
+        </resources>
+    </cache>
+</config>
