@@ -24,7 +24,8 @@ public class Book implements Serializable {
     private double price;
 
     @Generated(event = {INSERT, UPDATE})
-    @Column(insertable = false, updatable = false /* , columnDefinition = "DOUBLE AS (price - price * 0.25)" */ )
+    @Column(insertable = false, updatable = false /* no longer recommended -> , 
+                                                  columnDefinition = "DOUBLE AS (price - price * 0.25)" */ )
     private double discounted;
 
     public Long getId() {
