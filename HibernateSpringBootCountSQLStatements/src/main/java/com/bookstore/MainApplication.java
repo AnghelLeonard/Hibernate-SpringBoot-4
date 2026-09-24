@@ -1,11 +1,11 @@
 package com.bookstore;
 
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertSelectCount;
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertUpdateCount;
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertDeleteCount;
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.assertInsertCount;
+import static io.hypersistence.utils.jdbc.validator.SQLStatementCountValidator.reset;
 import com.bookstore.service.BookstoreService;
-import com.vladmihalcea.sql.SQLStatementCountValidator;
-import static com.vladmihalcea.sql.SQLStatementCountValidator.assertDeleteCount;
-import static com.vladmihalcea.sql.SQLStatementCountValidator.assertInsertCount;
-import static com.vladmihalcea.sql.SQLStatementCountValidator.assertSelectCount;
-import static com.vladmihalcea.sql.SQLStatementCountValidator.assertUpdateCount;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,7 +28,7 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            SQLStatementCountValidator.reset();
+            reset();
             bookstoreService.updateAuthorWithoutTransactional();
             // at this point there is no transaction running
             // there are 3 statements         
@@ -37,7 +37,7 @@ public class MainApplication {
             assertInsertCount(0);
             assertDeleteCount(0);
 
-            SQLStatementCountValidator.reset();
+            reset();
             bookstoreService.updateAuthorWithTransactional();
             // allow the transaction to commit
             // there are 2 statements instead of 3

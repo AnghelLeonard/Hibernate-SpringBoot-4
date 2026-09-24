@@ -23,7 +23,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>26</java.version>
         <maven.compiler.release>26</maven.compiler.release>
-        <datasource-proxy.version>1.11.0</datasource-proxy.version>
+        <datasource-proxy.version>1.11.0</datasource-proxy.version>        
+        <hypersistence-utils.version>3.15.5</hypersistence-utils.version>
         <db-util.version>1.0.7</db-util.version>
     </properties>
 
@@ -55,11 +56,18 @@
             <artifactId>datasource-proxy</artifactId>
             <version>${datasource-proxy.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.vladmihalcea</groupId>
             <artifactId>db-util</artifactId>
             <version>${db-util.version}</version>
         </dependency>
+        -->
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-73</artifactId>
+            <version>${hypersistence-utils.version}</version>
+        </dependency>        
     </dependencies>
 
     <build>
