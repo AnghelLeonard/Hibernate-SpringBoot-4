@@ -4,18 +4,19 @@ import com.bookstore.dto.AuthorDto;
 import com.bookstore.entity.Author;
 import java.util.List;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {
+@Transactional(readOnly = true)
+public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {    
 
-    @Query(value = "SELECT name, age, COUNT(*) OVER() AS total FROM author ORDER BY age LIMIT ?1, ?2",
-            nativeQuery = true)
+    @NativeQuery(value = "SELECT name, age, COUNT(*) OVER() AS total FROM author ORDER BY age LIMIT ?1, ?2")
     List<AuthorDto> fetchAll(int page, int size);
     
-    @Query(value = "SELECT a.name AS name, a.age AS age, COUNT(*) OVER() AS total FROM Author a")
+    @Query(value = "SELECT a.name AS name, a.age AS age, COUNT(*) OVER() AS total FROM Author a ORDER BY age")
     List<AuthorDto> fetchAllLimit(Limit size);
-
 }
