@@ -1,10 +1,4 @@
 package com.bookstore.dto;
 
-public interface AuthorDto {
-
-    public String getName();
-
-    public int getAge();
-    
-    public long getTotal();
-}
+// we don't use a Spring interface because we want to get rid of TupleBackedMap in JSON serialization
+public record AuthorDto(String name, int age, long total) {}
