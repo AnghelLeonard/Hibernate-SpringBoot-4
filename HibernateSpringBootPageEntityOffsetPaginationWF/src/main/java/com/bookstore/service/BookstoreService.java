@@ -28,5 +28,16 @@ public class BookstoreService {
                 authors.isEmpty() ? 0 : authors.get(0).getTotal());
 
         return pageOfAuthors;
-    }        
+    } 
+    
+    public Page<Author> fetchNextPageJpql(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age"));
+
+        List<Author> authors = authorRepository.fetchAllJpql(pageable);
+        Page<Author> pageOfAuthors = new PageImpl(authors, pageable,
+                authors.isEmpty() ? 0 : authors.get(0).getTotal());
+
+        return pageOfAuthors;
+    } 
 }

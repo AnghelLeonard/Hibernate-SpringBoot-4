@@ -22,4 +22,15 @@ public class BookstoreController {
         return bookstoreService.fetchNextPage(page, size);
     }
 
+    @GetMapping("/authors/jpql/{page}/{size}")
+    public List<Author> fetchAuthorsJpql(@PathVariable int page, @PathVariable int size) {
+
+        return bookstoreService.fetchNextPageJpql(page, size);
+    }
+    
+    @GetMapping("/authors/ansi/{page}/{size}")
+    public List<Author> fetchAuthorsJpqlAnsi(@PathVariable int page, @PathVariable int size) {
+
+        return bookstoreService.fetchNextPageJpqlAnsi(page, size);
+    }
 }

@@ -1,12 +1,13 @@
 package com.bookstore.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.io.Serializable;
+import org.hibernate.annotations.Formula;
+
 
 @Entity
 public class Author implements Serializable {
@@ -21,8 +22,8 @@ public class Author implements Serializable {
     private String name;
     private String genre;
 
-    @JsonIgnore
-    @Column(insertable = false, updatable = false)
+    @JsonIgnore    
+    @Formula("COUNT(*) OVER()") 
     long total;
 
     public Long getId() {
