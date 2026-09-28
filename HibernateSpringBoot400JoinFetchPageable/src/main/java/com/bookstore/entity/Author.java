@@ -15,7 +15,6 @@ public class Author implements Serializable {
 
     @Id
     private Long id;
-
     private String name;
     private String genre;
     private int age;
