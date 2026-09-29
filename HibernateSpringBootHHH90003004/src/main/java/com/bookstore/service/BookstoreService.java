@@ -24,7 +24,7 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<Author> fetchPageOfAuthorsWithBooksByGenre(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
@@ -36,7 +36,7 @@ public class BookstoreService {
         return pageOfAuthors;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Slice<Author> fetchSliceOfAuthorsWithBooksByGenre(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
@@ -48,7 +48,7 @@ public class BookstoreService {
         return sliceOfAuthors;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Author> fetchListOfAuthorsWithBooksByGenre(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
@@ -59,7 +59,7 @@ public class BookstoreService {
         return listOfAuthors;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<Author> fetchPageOfAuthorsWithBooksByGenreEntityGraph(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
@@ -71,7 +71,7 @@ public class BookstoreService {
         return pageOfAuthors;
     }
     
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<Author> fetchPageOfAuthorsWithBooksByGenreTuple(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
