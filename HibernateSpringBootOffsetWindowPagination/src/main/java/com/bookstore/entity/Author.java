@@ -6,8 +6,6 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.Instant;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,16 +13,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @EntityListeners({AuditingEntityListener.class})
-@Table(
-        name = "author",
-        indexes = {
-            @Index(
-                    name = "idx_author_pagination",
-                    columnList = "created_at DESC, id DESC",
-                    unique = true
-            )
-        }
-)
 public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;

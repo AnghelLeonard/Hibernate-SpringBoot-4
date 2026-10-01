@@ -18,7 +18,7 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-     public ResponseEntity<WindowResponse<Author>> getAuthors(            
+     public ResponseEntity<WindowResponse<Author>> fetchNextPageOfAuthors(            
             @RequestParam(required = false) Long offset,
             @RequestParam(defaultValue = "10") int size) {
 
