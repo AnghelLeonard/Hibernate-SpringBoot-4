@@ -34,6 +34,10 @@ public class KeysetTokenEncoder {
                 keys.put("createdAt", Instant.parse(dateStr));
             }
             
+            if (keys.containsKey("id") && keys.get("id") instanceof Number numId) {
+                keys.put("id", numId.longValue());
+            }
+            
             return ScrollPosition.forward(keys);
         } catch (JacksonException e) {
             // invalid token, go to first page
