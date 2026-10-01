@@ -17,17 +17,17 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<Author> fetchNextPage(long id, int limit) {
-        return authorRepository.fetchAll(id, limit);
+    public List<Author> fetchNextPageOfAuthors(Long lid, int size) {
+        return authorRepository.fetchNextPage(lid, size);
     }
     
-    public List<Author> fetchNextPageable(long id, int limit) {        
-        Pageable pageable = PageRequest.of(0, limit);
+    public List<Author> fetchNextPageableOfAuthors(Long lid, int size) {        
+        Pageable pageable = PageRequest.of(0, size);
         
-        return authorRepository.fetchAllPageable(id, pageable);
+        return authorRepository.fetchNextPageable(lid, pageable);
     }
     
-    public List<AuthorDto> fetchNextPageDto(long id, int limit) {
-        return authorRepository.fetchAllDto(id, limit);
+    public List<AuthorDto> fetchNextPageAsDtoOfAuthors(Long lid, int size) {
+        return authorRepository.fetchNextPageDto(lid, size);
     }
 }

@@ -2,6 +2,7 @@ package com.bookstore.repository;
 
 import com.bookstore.dto.AuthorDto;
 import com.bookstore.entity.Author;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,22 +17,25 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query(value = """
                    SELECT a FROM Author a 
-                   WHERE :lid IS NULL OR a.id < :lid
-                   ORDER BY a.id DESC LIMIT :size
+                   WHERE :ltime IS NULL OR (a.createdAt, a.id) < (:ltime, :lid)
+                   ORDER BY a.createdAt DESC, a.id DESC LIMIT :size
                    """)
-    List<Author> fetchNextPage(@Param("lid") Long lid, @Param("size") int size);
+    List<Author> fetchNextPage(
+            @Param("ltime") Instant ltime, @Param("lid") Long lid, @Param("size") int size);
     
     @Query(value = """
                    SELECT a FROM Author a 
-                   WHERE :lid IS NULL OR a.id < :lid
-                   ORDER BY a.id DESC
+                   WHERE :ltime IS NULL OR (a.createdAt, a.id) < (:ltime, :lid)
+                   ORDER BY a.createdAt DESC, a.id DESC
                    """)
-    List<Author> fetchNextPageable(@Param("lid") Long lid, Pageable pagrable);
+    List<Author> fetchNextPageable(
+            @Param("ltime") Instant ltime, @Param("lid") Long lid, Pageable pageable);
 
     @Query(value = """
                    SELECT a.name AS name, a.age AS age FROM Author a 
-                   WHERE :lid IS NULL OR a.id < :lid
-                   ORDER BY a.id DESC LIMIT :size
+                   WHERE :ltime IS NULL OR (a.createdAt, a.id) < (:ltime, :lid)
+                   ORDER BY a.createdAt DESC, a.id DESC LIMIT :size
                    """)
-    List<AuthorDto> fetchNextPageDto(@Param("lid") Long lid, @Param("size") int size);
+    List<AuthorDto> fetchNextPageDto(
+            @Param("ltime") Instant ltime, @Param("lid") Long lid, @Param("size") int size);
 }
