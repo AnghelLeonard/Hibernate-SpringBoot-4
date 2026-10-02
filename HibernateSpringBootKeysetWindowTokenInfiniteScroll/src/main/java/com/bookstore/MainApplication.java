@@ -24,7 +24,7 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {
-           //bookstoreService.insertData();           
+          // bookstoreService.insertData();           
         };
     }
 }

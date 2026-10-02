@@ -2,8 +2,7 @@ const container = document.getElementById('container');
 const loading = document.querySelector('.loading');
 
 var hasNextToken = true;
-var lastIdValue = 0;
-var lastCreatedAtValue = '';
+var resumeToken = '';
 const size = 10; // use it if you want (in this code is not used)
 
 getPost();
@@ -34,11 +33,10 @@ function iscroll() {
 
 async function getPost() {
 
-    const postResponse = await fetch(`/authors?lastCreatedAt=${encodeURIComponent(lastCreatedAtValue)}&lastId=${lastIdValue}`);
+    const postResponse = await fetch(`/authors?resumeToken=${encodeURIComponent(resumeToken)}`);
     const data = await postResponse.json();
 
-    lastIdValue = data.lastId;
-    lastCreatedAtValue = data.lastCreatedAt;
+    resumeToken = data.nextToken;    
     hasNextToken = data.hasNext;
 
     infniteScroll();

@@ -1,10 +1,8 @@
 package com.bookstore.controller;
 
-import com.bookstore.dto.KeysetPageResponse;
+import com.bookstore.dto.WindowResponse;
 import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
-import java.time.Instant;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,12 +18,11 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-     public ResponseEntity<KeysetPageResponse<Author>> fetchNextPageOfAuthors(            
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant lastCreatedAt,
-            @RequestParam(required = false) Long lastId,
+     public ResponseEntity<WindowResponse<Author>> fetchNextPageOfAuthors(            
+            @RequestParam(required = false) String resumeToken,
             @RequestParam(defaultValue = "10") int size) {
 
-        KeysetPageResponse<Author> response = bookstoreService.fetchNextPageOfAuthors(lastCreatedAt, lastId, size);
+        WindowResponse<Author> response = bookstoreService.fetchNextPageOfAuthors(resumeToken, size);
         
         return ResponseEntity.ok(response);
     }    
