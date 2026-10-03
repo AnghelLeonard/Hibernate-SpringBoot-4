@@ -1,12 +1,10 @@
 package com.bookstore.service;
 
 import com.bookstore.dto.AuthorDto;
-import com.bookstore.entity.Author;
+import com.bookstore.dto.KeysetDto;
 import com.bookstore.repository.AuthorRepository;
 import java.time.Instant;
 import java.util.List;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,34 +15,32 @@ public class BookstoreService {
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
     }
-    
-    public void insertData() {
-        
-        for(int i = 0;i < 100; i++) {
-            
-            Author author = new Author();
-            
-            author.setAge(0);
-            author.setGenre("Genre-" + i);
-            author.setName("Name-" + i);
-            
-            authorRepository.save(author);
-        }
-        
-        System.out.println("Done inserting ... try 'localhost:8080/authors'");
-    }
 
-    public List<Author> fetchNextPageOfAuthors(Instant ltime, Long lid, int size) {
+    public List<AuthorDto> fetchNextPageOfAuthors(Instant ltime, Long lid, int size) {
         return authorRepository.fetchNextPage(ltime, lid, size);
     }
-    
-    public List<Author> fetchNextPageableOfAuthors(Instant ltime, Long lid, int size) {        
-        Pageable pageable = PageRequest.of(0, size);
-        
-        return authorRepository.fetchNextPageable(ltime, lid, pageable);
-    }
-    
-    public List<AuthorDto> fetchNextPageAsDtoOfAuthors(Instant ltime, Long lid, int size) {
-        return authorRepository.fetchNextPageDto(ltime, lid, size);
+
+    public KeysetDto<AuthorDto> fetchNextPageOfAuthorsWithMetadata(
+            Instant lastCreatedAt, Long lastId, int size) {
+
+        Instant newLastCreatedAt = null;
+        Long newLastId = null;
+        boolean hasNext = false;
+
+        List<AuthorDto> authors = authorRepository.fetchNextPage(lastCreatedAt, lastId, (size + 1));
+
+        if (!authors.isEmpty()) {
+            hasNext = authors.size() == (size + 1);
+
+            if (hasNext) {
+                authors.remove(authors.size() - 1);
+            }
+
+            AuthorDto lastAuthor = authors.get(authors.size() - 1);
+            newLastCreatedAt = lastAuthor.getCreatedAt();
+            newLastId = lastAuthor.getId();
+        }
+
+        return new KeysetDto<>(authors, newLastCreatedAt, newLastId, hasNext);
     }
 }

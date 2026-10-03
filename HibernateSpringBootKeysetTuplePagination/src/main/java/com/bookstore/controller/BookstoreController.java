@@ -1,7 +1,7 @@
 package com.bookstore.controller;
 
 import com.bookstore.dto.AuthorDto;
-import com.bookstore.entity.Author;
+import com.bookstore.dto.KeysetDto;
 import com.bookstore.service.BookstoreService;
 import java.time.Instant;
 import java.util.List;
@@ -19,7 +19,7 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-    public List<Author> fetchNextPageOfAuthors(
+    public List<AuthorDto> fetchNextPageOfAuthors(
             @RequestParam(required = false) Instant lastTime,
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
@@ -27,21 +27,12 @@ public class BookstoreController {
         return bookstoreService.fetchNextPageOfAuthors(lastTime, lastId, size);
     }
     
-    @GetMapping("/authors/pageable")
-    public List<Author> fetchNextPageableOfAuthors(
+    @GetMapping("/authors/metadata")
+    public KeysetDto<AuthorDto> fetchNextPageOfAuthorsWithMetadata(
             @RequestParam(required = false) Instant lastTime,
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageableOfAuthors(lastTime, lastId, size);
-    }
-
-    @GetMapping("/authors/dto")
-    public List<AuthorDto> fetchNextPageAsDtoOfAuthors(            
-            @RequestParam(required = false) Instant lastTime,
-            @RequestParam(required = false) Long lastId,
-            @RequestParam(defaultValue = "10") int size) {
-
-        return bookstoreService.fetchNextPageAsDtoOfAuthors(lastTime, lastId, size);
+        return bookstoreService.fetchNextPageOfAuthorsWithMetadata(lastTime, lastId, size);
     }
 }

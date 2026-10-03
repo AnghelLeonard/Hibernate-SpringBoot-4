@@ -23,11 +23,12 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     List<AuthorDto> fetchNextPage(
             @Param("ltime") Instant ltime, @Param("lid") Long lid, @Param("size") int size);
     
+    // you can also add LIMIT via Pageable
     @Query(value = """
                    SELECT a FROM Author a 
                    WHERE :ltime IS NULL OR (a.createdAt, a.id) < (:ltime, :lid)
                    ORDER BY a.createdAt DESC, a.id DESC
                    """)
     List<AuthorDto> fetchNextPageable(
-            @Param("ltime") Instant ltime, @Param("lid") Long lid, Pageable pageable); 
+            @Param("ltime") Instant ltime, @Param("lid") Long lid, Pageable pageable);    
 }
