@@ -18,5 +18,5 @@ public interface AuthorRepository extends PagingAndSortingRepository<Author, Lon
     List<AuthorDto> fetchAllJpql(Pageable pageable);
     
     @NativeQuery(value = "SELECT name, age, COUNT(*) OVER() AS total FROM author")
-    List<AuthorDto> fetchAll(Pageable pageable);
+    List<AuthorDto> fetchAllNative(Pageable pageable);
 }

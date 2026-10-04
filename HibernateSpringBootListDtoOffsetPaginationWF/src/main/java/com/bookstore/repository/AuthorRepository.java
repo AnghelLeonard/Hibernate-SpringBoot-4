@@ -12,11 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {    
+public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {
+
+    @Query(value = "SELECT a.name AS name, a.age AS age, COUNT(*) OVER() AS total FROM Author a ORDER BY age")
+    List<AuthorDto> fetchAllLimit(Limit size);
 
     @NativeQuery(value = "SELECT name, age, COUNT(*) OVER() AS total FROM author ORDER BY age LIMIT ?1, ?2")
     List<AuthorDto> fetchAll(int page, int size);
-    
-    @Query(value = "SELECT a.name AS name, a.age AS age, COUNT(*) OVER() AS total FROM Author a ORDER BY age")
-    List<AuthorDto> fetchAllLimit(Limit size);
+
 }
