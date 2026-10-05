@@ -2,13 +2,13 @@ package com.bookstore.dto;
 
 import java.util.List;
 
-public class WindowResponse<T> {
+public class WindowDto<T> {
 
     private final List<T> content;
     private final String nextOffset;
     private final boolean hasNext;
 
-    public WindowResponse(List<T> content, String nextOffset, boolean hasNext) {
+    public WindowDto(List<T> content, String nextOffset, boolean hasNext) {
         this.content = content;
         this.nextOffset = nextOffset;
         this.hasNext = hasNext;

@@ -1,6 +1,6 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.WindowResponse;
+import com.bookstore.dto.WindowDto;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.data.domain.Limit;
@@ -18,27 +18,10 @@ public class BookstoreService {
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
     }
-
-    public void insertData() {
-
-        for (int i = 0; i < 100; i++) {
-
-            Author author = new Author();
-
-            author.setAge(0);
-            author.setGenre("Genre-" + i);
-            author.setName("Name-" + i);
-
-            authorRepository.save(author);
-        }
-
-        System.out.println("Done inserting ... try 'localhost:8080/authors'");
-    }
-
-     public WindowResponse<Author> fetchNextPageOfAuthors(Long offset, int size) {
+    
+     public WindowDto<Author> fetchNextPageOfAuthors(Long offset, int size) {
          
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
-        
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");        
         Limit limit = Limit.of(size);
         
         // Initialize or resume the offset position
@@ -54,13 +37,10 @@ public class BookstoreService {
         Long nextOffset = null;
         if (window.hasNext() && !window.isEmpty()) {
             // Extract position of the last element in the window
-            OffsetScrollPosition lastPosition = (OffsetScrollPosition) window.positionAt(window.size() - 1);
-            
-            // The position holds the current global offset index
-            // Adding +1 gives us the exact index to start the NEXT chunk
-            nextOffset = lastPosition.getOffset() + 1;
+            OffsetScrollPosition lastPosition = (OffsetScrollPosition) window.positionAt(window.size() - 1);                        
+            nextOffset = lastPosition.getOffset();
         }
 
-        return new WindowResponse<>(window.getContent(), String.valueOf(nextOffset), window.hasNext());
+        return new WindowDto<>(window.getContent(), String.valueOf(nextOffset), window.hasNext());
     }
 }
