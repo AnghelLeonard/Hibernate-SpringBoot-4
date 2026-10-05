@@ -10,12 +10,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
- @Transactional(readOnly= true)
+@Transactional(readOnly= true)
 public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {        
     
     @Query(value = "SELECT a FROM Author a")
     List<Author> fetchAllJpql(Pageable pageable);   
     
     @NativeQuery(value = "SELECT id, name, age, genre, COUNT(*) OVER() AS total FROM author")
-    List<Author> fetchAll(Pageable pageable);      
+    List<Author> fetchAllNative(Pageable pageable);      
 }

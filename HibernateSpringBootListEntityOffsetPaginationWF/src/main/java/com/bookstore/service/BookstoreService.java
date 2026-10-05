@@ -12,12 +12,7 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }
-
-    public List<Author> fetchNextPage(int page, int size) {
-
-        return authorRepository.fetchAll(page, size);
-    }
+    }   
     
     public List<Author> fetchNextPageJpql(int page, int size) {
         
@@ -33,5 +28,10 @@ public class BookstoreService {
         int offset = (safePage - 1) * size;
 
         return authorRepository.fetchAllJpqlAnsi(offset, size);
+    }
+     
+      public List<Author> fetchNextPageNative(int page, int size) {
+
+        return authorRepository.fetchAllNative(page, size);
     }
 }

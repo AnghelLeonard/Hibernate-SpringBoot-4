@@ -3,8 +3,9 @@ package com.bookstore.controller;
 import com.bookstore.dto.AuthorDto;
 import com.bookstore.service.BookstoreService;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,15 +17,19 @@ public class BookstoreController {
         this.bookstoreService = bookstoreService;
     }
 
-    @GetMapping("/native/authors/{page}/{size}")
-    public List<AuthorDto> fetchAuthorsNative(@PathVariable int page, @PathVariable int size) {
+    @GetMapping("/authors/jpql")
+    public ResponseEntity<List<AuthorDto>> fetchAuthorsJpql(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageNative(page, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageJpql(page, size));
     }
 
-    @GetMapping("/jpql/authors/{page}/{size}")
-    public List<AuthorDto> fetchAuthorsJpql(@PathVariable int page, @PathVariable int size) {
+    @GetMapping("/authors/native")
+    public ResponseEntity<List<AuthorDto>> fetchAuthorsNative(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageJpql(page, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageNative(page, size));
     }
 }

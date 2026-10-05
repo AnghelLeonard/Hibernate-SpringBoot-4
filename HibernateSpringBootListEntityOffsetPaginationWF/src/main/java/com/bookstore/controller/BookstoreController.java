@@ -3,8 +3,9 @@ package com.bookstore.controller;
 import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,21 +17,27 @@ public class BookstoreController {
         this.bookstoreService = bookstoreService;
     }
 
-    @GetMapping("/authors/{page}/{size}")
-    public List<Author> fetchAuthors(@PathVariable int page, @PathVariable int size) {
+    @GetMapping("/authors/jpql")
+    public ResponseEntity<List<Author>> fetchAuthorsJpql(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPage(page, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageJpql(page, size));
     }
 
-    @GetMapping("/authors/jpql/{page}/{size}")
-    public List<Author> fetchAuthorsJpql(@PathVariable int page, @PathVariable int size) {
+    @GetMapping("/authors/ansi")
+    public ResponseEntity<List<Author>> fetchAuthorsJpqlAnsi(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageJpql(page, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageJpqlAnsi(page, size));
     }
-    
-    @GetMapping("/authors/ansi/{page}/{size}")
-    public List<Author> fetchAuthorsJpqlAnsi(@PathVariable int page, @PathVariable int size) {
 
-        return bookstoreService.fetchNextPageJpqlAnsi(page, size);
+    @GetMapping("/authors/native")
+    public ResponseEntity<List<Author>> fetchAuthorsNative(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchNextPageNative(page, size));
     }
 }

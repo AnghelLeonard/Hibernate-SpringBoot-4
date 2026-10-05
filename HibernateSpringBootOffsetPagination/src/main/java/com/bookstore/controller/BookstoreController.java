@@ -80,20 +80,20 @@ public class BookstoreController {
 
     @GetMapping("/authors1")
     // http://localhost:8080/authors1?page=1&size=3&sort=name,desc
-    public Page<Author> fetchAuthors1(Pageable pageable) {
+    public ResponseEntity<Page<Author>> fetchAuthors1(Pageable pageable) {
 
-        return bookstoreService.fetchNextPagePageable(pageable);
+        return ResponseEntity.ok(bookstoreService.fetchNextPagePageable(pageable));
     }
 
     @GetMapping("/authors2")
     // http://localhost:8080/authors2?page=1&size=3&sort=id,asc&sort=name,desc
-    public Page<Author> fetchAuthors2(
+    public ResponseEntity<Page<Author>> fetchAuthors2(
             @PageableDefault(page = 0, size = 10)
             @SortDefault.SortDefaults({
         @SortDefault(sort = "age", direction = Sort.Direction.ASC),
         @SortDefault(sort = "genre", direction = Sort.Direction.DESC)
     }) Pageable pageable) {
-        return bookstoreService.fetchNextPagePageable(pageable);
+        return ResponseEntity.ok(bookstoreService.fetchNextPagePageable(pageable));
     }  
 
     // http://localhost:8080/authorsByGenreDto

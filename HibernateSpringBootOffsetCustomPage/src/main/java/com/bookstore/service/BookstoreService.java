@@ -1,5 +1,6 @@
 package com.bookstore.service;
 
+import com.bookstore.dto.AuthorDto;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.data.domain.Page;
@@ -17,10 +18,9 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public Page<Author> fetchNextPage(int page, int size) {
+     public Page<Author> fetchNextPage(int page, int size, Sort sort) {
 
-        return authorRepository.findAll(PageRequest.of(page, size, 
-                Sort.by(Sort.Direction.ASC, "age")));
+        return authorRepository.findAll(PageRequest.of(page, size, sort));
     }
 
     public Page<Author> fetchNextPageByGenre(int page, int size) {
@@ -48,7 +48,35 @@ public class BookstoreService {
     }
 
     public Page<Author> fetchNextPagePageable(Pageable pageable) {
-
+        
+        if(pageable.getSort().isUnsorted()) {
+            // at least log a warnning
+            throw new RuntimeException("Consider providing a sort");
+        }
         return authorRepository.findAll(pageable);
+    }           
+
+    public Page<AuthorDto> fetchNextPageByGenreDto(int page, int size) {
+
+        return authorRepository.fetchByGenreDto("History",
+                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age")));
     }
+    
+    public Page<AuthorDto> fetchNextPageByGenreExplicitCountDto(int page, int size) {
+
+        return authorRepository.fetchByGenreExplicitCountDto("History",
+                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age")));
+    }
+    
+    public Page<AuthorDto> fetchNextPageByGenreNativeDto(int page, int size) {
+
+        return authorRepository.fetchByGenreNativeDto("History",
+                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age")));
+    }
+    
+    public Page<AuthorDto> fetchNextPageByGenreNativeExplicitCountDto(int page, int size) {
+
+        return authorRepository.fetchByGenreNativeExplicitCountDto("History",
+                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age")));
+    }  
 }

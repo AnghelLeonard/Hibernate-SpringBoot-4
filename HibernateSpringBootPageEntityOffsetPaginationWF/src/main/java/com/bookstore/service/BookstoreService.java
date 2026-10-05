@@ -17,24 +17,24 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }
-    
-    public Page<Author> fetchNextPage(int page, int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age"));
-
-        List<Author> authors = authorRepository.fetchAll(pageable);
-        Page<Author> pageOfAuthors = new PageImpl(authors, pageable,
-                authors.isEmpty() ? 0 : authors.get(0).getTotal());
-
-        return pageOfAuthors;
-    } 
+    }       
     
     public Page<Author> fetchNextPageJpql(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age"));
 
         List<Author> authors = authorRepository.fetchAllJpql(pageable);
+        Page<Author> pageOfAuthors = new PageImpl(authors, pageable,
+                authors.isEmpty() ? 0 : authors.get(0).getTotal());
+
+        return pageOfAuthors;
+    }
+    
+    public Page<Author> fetchNextPageNative(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age"));
+
+        List<Author> authors = authorRepository.fetchAllNative(pageable);
         Page<Author> pageOfAuthors = new PageImpl(authors, pageable,
                 authors.isEmpty() ? 0 : authors.get(0).getTotal());
 

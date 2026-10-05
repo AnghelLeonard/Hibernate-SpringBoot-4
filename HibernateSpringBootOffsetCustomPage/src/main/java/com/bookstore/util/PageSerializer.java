@@ -21,7 +21,7 @@ public class PageSerializer extends ObjectValueSerializer<PageImpl<?>> {
         gen.writeNumberProperty("totalPages", page.getTotalPages());
         gen.writeBooleanProperty("isFirst", page.isFirst());
         gen.writeBooleanProperty("isLast", page.isLast());
-        gen.writeBooleanProperty("hasNet", page.hasNext());
+        gen.writeBooleanProperty("hasNext", page.hasNext());
         gen.writeBooleanProperty("hasPrevious", page.hasPrevious());        
         gen.writeEndObject();
     }

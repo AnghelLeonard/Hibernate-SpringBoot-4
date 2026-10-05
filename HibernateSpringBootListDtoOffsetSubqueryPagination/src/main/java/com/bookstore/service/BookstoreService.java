@@ -15,17 +15,17 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }
-
-    public List<AuthorDto> fetchNextPageNative(int page, int size) {
-
-        return authorRepository.fetchAllNative(page, size);
-    }
+    }   
 
     public List<AuthorDto> fetchNextPageJpql(int page, int size) {
         
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "age"));
 
         return authorRepository.fetchAllJpql(pageable);
+    }
+    
+     public List<AuthorDto> fetchNextPageNative(int page, int size) {
+
+        return authorRepository.fetchAllNative(page, size);
     }
 }

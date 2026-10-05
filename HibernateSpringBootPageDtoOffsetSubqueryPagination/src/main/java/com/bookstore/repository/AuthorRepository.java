@@ -8,19 +8,21 @@ import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {
-
-    @NativeQuery(value = """
-                         SELECT t.total, name, age FROM author, 
-                         (SELECT count(*) as total FROM author) AS t
-                         """)
-    List<AuthorDto> fetchAllNative(Pageable pageable);
+@Transactional(readOnly=true)
+public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {    
 
     @Query(value = """
                    SELECT a.name as name, a.age as age, 
                    (SELECT count(a) FROM Author a) AS total FROM Author a
                    """)
     List<AuthorDto> fetchAllJpql(Pageable pageable);
+    
+    @NativeQuery(value = """
+                         SELECT t.total, name, age FROM author, 
+                         (SELECT count(*) as total FROM author) AS t
+                         """)
+    List<AuthorDto> fetchAllNative(Pageable pageable);
 }
