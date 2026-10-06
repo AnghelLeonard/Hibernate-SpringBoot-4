@@ -2,6 +2,9 @@ package com.bookstore.dto;
 
 import java.util.List;
 
+public record WindowDto<T>(List<T> content, String nextOffset, boolean hasNext) {}
+
+/* or, as a class
 public class WindowDto<T> {
 
     private final List<T> content;
@@ -26,3 +29,4 @@ public class WindowDto<T> {
         return hasNext;
     }
 }
+*/
