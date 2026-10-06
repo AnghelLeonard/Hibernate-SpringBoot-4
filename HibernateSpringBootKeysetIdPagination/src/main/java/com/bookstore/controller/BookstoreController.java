@@ -4,6 +4,7 @@ import com.bookstore.dto.AuthorDto;
 import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,26 +19,26 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-    public List<Author> fetchNextPageOfAuthors(
+    public ResponseEntity<List<Author>> fetchNextPageOfAuthors(
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageOfAuthors(lastId, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageOfAuthors(lastId, size));
     }
     
     @GetMapping("/authors/pageable")
-    public List<Author> fetchNextPageableOfAuthors(
+    public ResponseEntity<List<Author>> fetchNextPageableOfAuthors(
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageableOfAuthors(lastId, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageableOfAuthors(lastId, size));
     }
 
     @GetMapping("/authors/dto")
-    public List<AuthorDto> fetchNextPageAsDtoOfAuthors(
+    public ResponseEntity<List<AuthorDto>> fetchNextPageAsDtoOfAuthors(
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageAsDtoOfAuthors(lastId, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageAsDtoOfAuthors(lastId, size));
     }
 }
