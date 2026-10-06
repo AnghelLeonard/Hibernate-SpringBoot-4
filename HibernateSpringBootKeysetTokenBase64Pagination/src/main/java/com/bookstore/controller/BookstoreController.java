@@ -3,6 +3,7 @@ package com.bookstore.controller;
 import com.bookstore.dto.AuthorDto;
 import com.bookstore.dto.KeysetDto;
 import com.bookstore.service.BookstoreService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +18,11 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-    public KeysetDto<AuthorDto> fetchNextPageOfAuthors(
+    public ResponseEntity<KeysetDto<AuthorDto>> fetchNextPageOfAuthors(
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageOfAuthors(cursor, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageOfAuthors(cursor, size));
     }
     
    
