@@ -8,9 +8,7 @@ public class Cursor {
 
     private static final String DELIMITER = "|";
 
-    public record DecodedCursor(Instant createdAt, Long id) {
-
-    }
+    public record DecodedCursor(Instant createdAt, Long id) {}
 
     // Convert entity values into an opaque Base64 string
     public static String encode(Instant createdAt, Long id) {

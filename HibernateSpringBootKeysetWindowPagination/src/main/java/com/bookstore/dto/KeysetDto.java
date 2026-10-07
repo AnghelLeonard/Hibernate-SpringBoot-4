@@ -3,14 +3,17 @@ package com.bookstore.dto;
 import java.time.Instant;
 import java.util.List;
 
-public class KeysetPageResponse<T> {
+public record KeysetDto<T>(List<T> content, Long lastId, Instant lastCreatedAt, boolean hasNext) {}
+
+/*
+public class KeysetDto<T> {
 
     private final List<T> content;
     private final Long lastId;
     private final Instant lastCreatedAt;
     private final boolean hasNext;
 
-    public KeysetPageResponse(List<T> content, Long lastId, Instant lastCreatedAt, boolean hasNext) {
+    public KeysetDto(List<T> content, Long lastId, Instant lastCreatedAt, boolean hasNext) {
         this.content = content;
         this.lastId = lastId;
         this.lastCreatedAt = lastCreatedAt;
@@ -34,3 +37,4 @@ public class KeysetPageResponse<T> {
         return hasNext;
     }
 }
+*/

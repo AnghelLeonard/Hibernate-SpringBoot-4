@@ -15,5 +15,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     
     Window<Author> findBy(ScrollPosition scrollPosition, Sort sort, Limit limit);
     
+    // Window<AuthorDto> findBy(ScrollPosition scrollPosition, Sort sort, Limit limit);
+    
     // use any derived query method and pass the proper parameters
 }
