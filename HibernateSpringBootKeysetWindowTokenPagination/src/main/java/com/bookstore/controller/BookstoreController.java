@@ -1,6 +1,6 @@
 package com.bookstore.controller;
 
-import com.bookstore.dto.WindowResponse;
+import com.bookstore.dto.WindowDto;
 import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +18,11 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-     public ResponseEntity<WindowResponse<Author>> fetchNextPageOfAuthors(            
-            @RequestParam(required = false) String resumeToken,
+     public ResponseEntity<WindowDto<Author>> fetchNextPageOfAuthors(            
+            @RequestParam(required = false) String nextToken,
             @RequestParam(defaultValue = "10") int size) {
 
-        WindowResponse<Author> response = bookstoreService.fetchNextPageOfAuthors(resumeToken, size);
+        WindowDto<Author> response = bookstoreService.fetchNextPageOfAuthors(nextToken, size);
         
         return ResponseEntity.ok(response);
     }    
