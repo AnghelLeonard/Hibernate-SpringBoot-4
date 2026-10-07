@@ -1,6 +1,6 @@
 package com.bookstore.controller;
 
-import com.bookstore.dto.PagedResponse;
+import com.bookstore.dto.WindowDto;
 import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-    public ResponseEntity<PagedResponse<Author>> getProducts(
+    public ResponseEntity<WindowDto<Author>> getProducts(
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String token,
             @RequestParam(defaultValue = "forward") String direction) {

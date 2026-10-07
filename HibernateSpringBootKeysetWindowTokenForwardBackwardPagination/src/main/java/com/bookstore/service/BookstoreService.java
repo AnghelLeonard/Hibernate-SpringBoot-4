@@ -1,9 +1,9 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.PagedResponse;
+import com.bookstore.dto.WindowDto;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
-import com.bookstore.util.TokenSerializer;
+import com.bookstore.util.Cursor;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public PagedResponse<Author> fetchNextPageOfAuthors(int size, String token, String direction) {
+    public WindowDto<Author> fetchNextPageOfAuthors(int size, String token, String direction) {
 
         ScrollPosition position;
         boolean isBackward = "backward".equalsIgnoreCase(direction);
@@ -30,20 +30,20 @@ public class BookstoreService {
         if (token == null || token.isBlank()) {
             position = ScrollPosition.keyset();
         } else {
-            Map<String, Object> keys = TokenSerializer.deserialize(token);
+            Map<String, Object> keys = Cursor.decode(token);
             if (isBackward) {
                 position = ScrollPosition.backward(keys);
             } else {
                 position = ScrollPosition.forward(keys);
             }
         }
-
-        // Fetch data window from DB
+        
         Window<Author> window = authorRepository.findByOrderByCreatedAtDescIdDesc(position, Limit.of(size));
+        
         List<Author> content = window.getContent();
 
         if (content.isEmpty()) {
-            return new PagedResponse<>(Collections.emptyList(), null, false);
+            return new WindowDto<>(Collections.emptyList(), null, false);
         }
 
         boolean hasMore = window.hasNext();
@@ -53,8 +53,8 @@ public class BookstoreService {
             int targetIndex = isBackward ? 0 : content.size() - 1;
 
             KeysetScrollPosition nextPosition = (KeysetScrollPosition) window.positionAt(targetIndex);
-            nextToken = TokenSerializer.serialize(nextPosition.getKeys());
+            nextToken = Cursor.encode(nextPosition.getKeys());
         }
-        return new PagedResponse<>(content, nextToken, window.hasNext());
+        return new WindowDto<>(content, nextToken, window.hasNext());
     }
 }
