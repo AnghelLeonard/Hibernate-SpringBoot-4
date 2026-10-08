@@ -1,6 +1,7 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.WindowResponse;
+import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.WindowDto;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import com.bookstore.util.KeysetTokenEncoder;
@@ -19,25 +20,9 @@ public class BookstoreService {
     public BookstoreService(AuthorRepository authorRepository, KeysetTokenEncoder tokenEncoder) {
         this.authorRepository = authorRepository;
         this.tokenEncoder = tokenEncoder;
-    }
+    }    
 
-    public void insertData() {
-
-        for (int i = 0; i < 100; i++) {
-
-            Author author = new Author();
-
-            author.setAge(0);
-            author.setGenre("Genre-" + i);
-            author.setName("Name-" + i);
-
-            authorRepository.save(author);
-        }
-
-        System.out.println("Done inserting ... try 'localhost:8080'");
-    }
-
-    public WindowResponse<Author> fetchNextPageOfAuthors(String resumeToken, int size) {
+    public WindowDto<AuthorDto> fetchNextPageOfAuthors(String resumeToken, int size) {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
         Limit limit = Limit.of(size);
@@ -46,7 +31,7 @@ public class BookstoreService {
         ScrollPosition position = tokenEncoder.decode(resumeToken);
 
         // query
-        Window<Author> window = authorRepository.findBy(position, sort, limit);
+        Window<AuthorDto> window = authorRepository.findBy(position, sort, limit);
 
         // generate new token
         String nextToken = null;
@@ -55,6 +40,6 @@ public class BookstoreService {
             nextToken = tokenEncoder.encode(lastElementPosition);
         }
 
-        return new WindowResponse<>(window.getContent(), nextToken, window.hasNext());
+        return new WindowDto<>(window.getContent(), nextToken, window.hasNext());
     }
 }

@@ -1,10 +1,8 @@
 package com.bookstore.service;
 
 import com.bookstore.dto.AuthorDto;
-import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import java.time.Instant;
-import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,25 +15,9 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }
+    }         
     
-    public void insertData() {
-        
-        for(int i = 0;i < 100; i++) {
-            
-            Author author = new Author();
-            
-            author.setAge(0);
-            author.setGenre("Genre-" + i);
-            author.setName("Name-" + i);
-            
-            authorRepository.save(author);
-        }
-        
-        System.out.println("Done inserting ... try 'localhost:8080'");
-    }   
-    
-    public Slice<Author> fetchNextPageOfAuthors(Instant ltime, Long lid, int size) {        
+    public Slice<AuthorDto> fetchNextPageOfAuthors(Instant ltime, Long lid, int size) {        
         Pageable pageable = PageRequest.of(0, size);
         
         return authorRepository.fetchNextPage(ltime, lid, pageable);

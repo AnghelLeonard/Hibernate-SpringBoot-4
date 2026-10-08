@@ -1,9 +1,10 @@
 package com.bookstore.controller;
 
-import com.bookstore.entity.Author;
+import com.bookstore.dto.AuthorDto;
 import com.bookstore.service.BookstoreService;
 import java.time.Instant;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +19,11 @@ public class BookstoreController {
     }
 
     @GetMapping("/authors")
-    public Slice<Author> fetchNextPageOfAuthors(
+    public ResponseEntity<Slice<AuthorDto>> fetchNextPageOfAuthors(
             @RequestParam(required = false) Instant lastTime,
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        return bookstoreService.fetchNextPageOfAuthors(lastTime, lastId, size);
+        return ResponseEntity.ok(bookstoreService.fetchNextPageOfAuthors(lastTime, lastId, size));
     }      
 }

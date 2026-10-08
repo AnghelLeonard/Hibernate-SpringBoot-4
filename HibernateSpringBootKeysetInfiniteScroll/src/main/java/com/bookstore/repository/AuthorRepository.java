@@ -1,5 +1,6 @@
 package com.bookstore.repository;
 
+import com.bookstore.dto.AuthorDto;
 import com.bookstore.entity.Author;
 import java.time.Instant;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
                    WHERE :ltime IS NULL OR (a.createdAt, a.id) < (:ltime, :lid)
                    ORDER BY a.createdAt DESC, a.id DESC
                    """)
-    Slice<Author> fetchNextPage(
+    Slice<AuthorDto> fetchNextPage(
             @Param("ltime") Instant ltime, @Param("lid") Long lid, Pageable pageable);    
 }
