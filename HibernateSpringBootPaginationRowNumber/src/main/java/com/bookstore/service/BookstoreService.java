@@ -14,9 +14,9 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<AuthorDto> fetchNextPage(int start, int end) {
+    public List<AuthorDto> fetchPageJpql(int start, int end) {
 
-        List<AuthorDto> authors = authorRepository.fetchPage(start, end);
+        List<AuthorDto> authors = authorRepository.fetchPageJpql(start, end);
 
         return authors;
     }

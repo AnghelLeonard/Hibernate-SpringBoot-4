@@ -3,8 +3,9 @@ package com.bookstore.controller;
 import com.bookstore.dto.AuthorDto;
 import com.bookstore.service.BookstoreService;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,10 +17,12 @@ public class BookstoreController {
         this.bookstoreService = bookstoreService;
     }
 
-    @GetMapping("/authors/{start}/{end}")
-    public List<AuthorDto> fetchAuthors(@PathVariable int start, @PathVariable int end) {
+    @GetMapping("/authors")
+    public ResponseEntity<List<AuthorDto>> fetchAuthors(
+            @RequestParam(defaultValue = "0") int start,
+            @RequestParam(defaultValue = "10") int end
+    ) {
 
-        return bookstoreService.fetchNextPage(start, end);
+        return ResponseEntity.ok(bookstoreService.fetchPageJpql(start, end));
     }
-
 }
