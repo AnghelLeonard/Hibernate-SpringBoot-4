@@ -1,7 +1,5 @@
 package com.bookstore.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
  
 @Entity
-@JsonInclude(Include.NON_EMPTY)
 public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
