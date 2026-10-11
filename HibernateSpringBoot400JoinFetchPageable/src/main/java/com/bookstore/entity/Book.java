@@ -1,5 +1,6 @@
 package com.bookstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -19,6 +20,7 @@ public class Book implements Serializable {
     private String isbn;   
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "author_id")
     private Author author;
 

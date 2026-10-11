@@ -21,27 +21,27 @@ public class BookstoreService {
         this.bookRepository = bookRepository;
     }
 
-    public Page<Author> fetchWithBooksByGenreCQ() {
+    public Page<Author> fetchWithBooksByGenreCQ(int page, int size, Sort sort) {
 
         return authorRepository.fetchWithBooksByGenreCQ("Anthology",
-                PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "name")));
+                PageRequest.of(page, size, sort));
     }
 
-    public Page<Author> fetchWithBooksByGenreEG() {
+    public Page<Author> fetchWithBooksByGenreEG(int page, int size, Sort sort) {
 
         return authorRepository.fetchWithBooksByGenreEG("Anthology",
-                PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "name")));
+                 PageRequest.of(page, size, sort));
     }
 
-    public Page<Book> fetchWithAuthorsByIsbnCQ() {
+    public Page<Book> fetchWithAuthorsByIsbnCQ(int page, int size, Sort sort) {
 
         return bookRepository.fetchWithAuthorsByIsbnCQ("001-",
-                PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "title")));
+                PageRequest.of(page, size, sort));
     }
 
-    public Page<Book> fetchWithAuthorsByIsbnEG() {
+    public Page<Book> fetchWithAuthorsByIsbnEG(int page, int size, Sort sort) {
 
         return bookRepository.fetchWithAuthorsByIsbnEG("001-",
-                PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "title")));
+                PageRequest.of(page, size, sort));
     }
 }
