@@ -29,11 +29,11 @@ public class BookstoreService {
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
     }
-    
+
     public Page<AuthorBookFlatDto> fetchPageOfAuthorsWithBooksByGenreDto(int page, int size, Sort sort) {
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<AuthorBookFlatDto> pageOfAuthors = authorRepository.fetchPageOfDto("Anthology", pageable);        
+        Page<AuthorBookFlatDto> pageOfAuthors = authorRepository.fetchPageOfDto("Anthology", pageable);
 
         return pageOfAuthors;
     }
@@ -46,7 +46,7 @@ public class BookstoreService {
 
         return sliceOfAuthors;
     }
-    
+
     public List<AuthorBookFlatDto> fetchListOfAuthorsWithBookByGenreDto(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(
@@ -55,7 +55,7 @@ public class BookstoreService {
 
         return listOfAuthors;
     }
-    
+
     public Page<AuthorBookCountFlatDto> fetchPageOfAuthorsWithBooksByGenreWithCountDto(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(
@@ -77,19 +77,19 @@ public class BookstoreService {
 
         return listOfAuthors;
     }
-    
-    @Transactional(readOnly=true)
+
+    @Transactional(readOnly = true)
     public AuthorBookFlatDtoWithCount fetchListOfAuthorsWithBooksDtoDenseRankWithCount(int start, int end) {
-        
+
         List<AuthorBookFlatDto> listOfAuthors
-                = authorRepository.fetchListOfDtoDenseRank("Anthology", start, end);        
+                = authorRepository.fetchListOfDtoDenseRank("Anthology", start, end);
         long total = authorRepository.countByGenre("Anthology");
-        
+
         AuthorBookFlatDtoWithCount listOfAuthorsWithCount = new AuthorBookFlatDtoWithCount(listOfAuthors, total);
 
         return listOfAuthorsWithCount;
     }
-       
+
     public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoDenseRankNative(int start, int end) {
 
         List<AuthorBookFlatDto> listOfAuthors
@@ -97,19 +97,19 @@ public class BookstoreService {
 
         return listOfAuthors;
     }
-    
-    @Transactional(readOnly=true)
+
+    @Transactional(readOnly = true)
     public Map.Entry<List<Object[]>, Long> fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCount(int start, int end) {
-               
+
         List<Object[]> listOfAuthors
-                = authorRepository.fetchListOfRawDenseRank("Anthology", start, end);        
+                = authorRepository.fetchListOfRawDenseRank("Anthology", start, end);
         long total = authorRepository.countByGenre("Anthology");
-        
-         return new AbstractMap.SimpleImmutableEntry<>(listOfAuthors, total);
+
+        return new AbstractMap.SimpleImmutableEntry<>(listOfAuthors, total);
     }
-    
+
     public AuthorBookDto mapToDto(List<Object[]> listOfAuthors, Long total) {
-        
+
         Map<Long, AuthorDto> authorDtoMap = new LinkedHashMap<>();
 
         for (Object[] row : listOfAuthors) {
@@ -119,19 +119,51 @@ public class BookstoreService {
             Long bookId = (Long) row[3];
             String bookTitle = (String) row[4];
             String bookIsbn = (String) row[5];
-            
-            authorDtoMap.computeIfAbsent(authorId, id -> 
-                new AuthorDto(authorId, authorName, authorAge, new ArrayList<>())
+
+            authorDtoMap.computeIfAbsent(authorId, id
+                    -> new AuthorDto(authorId, authorName, authorAge, new ArrayList<>())
             );
-           
+
             if (bookId != null) {
                 BookDto bookDto = new BookDto(bookId, bookTitle, bookIsbn);
                 authorDtoMap.get(authorId).books().add(bookDto);
             }
         }
-       
+
         List<AuthorDto> content = new ArrayList<>(authorDtoMap.values());
 
-         return new AuthorBookDto(content, total);
-    }            
+        return new AuthorBookDto(content, total);
+    }
+
+    public AuthorBookDto fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCountCTE(int start, int end) {
+
+        List<Object[]> listOfAuthors
+                = authorRepository.fetchListOfRawDenseRankWithCount("Anthology", start, end);
+
+        Map<Long, AuthorDto> authorDtoMap = new LinkedHashMap<>();
+
+        Long total = null;
+        for (Object[] row : listOfAuthors) {
+            Long authorId = (Long) row[0];
+            String authorName = (String) row[1];
+            Integer authorAge = (Integer) row[2];
+            Long bookId = (Long) row[3];
+            String bookTitle = (String) row[4];
+            String bookIsbn = (String) row[5];
+            total = (Long) row[6];
+
+            authorDtoMap.computeIfAbsent(authorId, id
+                    -> new AuthorDto(authorId, authorName, authorAge, new ArrayList<>())
+            );
+
+            if (bookId != null) {
+                BookDto bookDto = new BookDto(bookId, bookTitle, bookIsbn);
+                authorDtoMap.get(authorId).books().add(bookDto);
+            }
+        }
+
+        List<AuthorDto> content = new ArrayList<>(authorDtoMap.values());
+
+        return new AuthorBookDto(content, total);
+    }
 }

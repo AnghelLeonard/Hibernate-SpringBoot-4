@@ -99,4 +99,13 @@ public class BookstoreController {
 
         return ResponseEntity.ok(bookstoreService.mapToDto(result.getKey(), result.getValue()));
     }
+    
+    @GetMapping("/authorsAndBooksHierarchyCTE")
+    public ResponseEntity<AuthorBookDto> fetchPageOfAuthorsWithBooksByGenreHierarchyCTE(
+            @RequestParam(defaultValue = "0") int start,
+            @RequestParam(defaultValue = "1") int end) {              
+
+        return ResponseEntity.ok(
+                bookstoreService.fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCountCTE(start, end));
+    }
 }
