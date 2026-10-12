@@ -39,7 +39,7 @@
       ${hypersistence-optimizer.version} cannot be used there. Keep them in sync.
     -->
     <properties>
-        <hypersistence-optimizer.version>2.13.1</hypersistence-optimizer.version>
+        <hypersistence-optimizer.version>2.14.1</hypersistence-optimizer.version>
     </properties>
 
     <profiles>
@@ -47,7 +47,7 @@
             <id>hypersistence-optimizer-in-default-repo</id>
             <activation>
                 <file>
-                    <exists>${user.home}/.m2/repository/io/hypersistence/hypersistence-optimizer/2.13.1/hypersistence-optimizer-2.13.1-jakarta.jar</exists>
+                    <exists>${user.home}/.m2/repository/io/hypersistence/hypersistence-optimizer/2.14.1/hypersistence-optimizer-2.14.1-jakarta.jar</exists>
                 </file>
             </activation>
             <modules>
@@ -56,13 +56,14 @@
                 <module>HibernateSpringBootOptimizerMySQLIdentity</module>
                 <module>HibernateSpringBootOptimizerRuntimeEvents</module>
                 <module>HibernateSpringBootOptimizerEventFilters</module>
+                <module>HibernateSpringBootOptimizerEventPersistence</module>
             </modules>
         </profile>
         <profile>
             <id>hypersistence-optimizer-in-relocated-repo</id>
             <activation>
                 <file>
-                    <exists>${env.MAVEN_LOCAL_REPOSITORY}/io/hypersistence/hypersistence-optimizer/2.13.1/hypersistence-optimizer-2.13.1-jakarta.jar</exists>
+                    <exists>${env.MAVEN_LOCAL_REPOSITORY}/io/hypersistence/hypersistence-optimizer/2.14.1/hypersistence-optimizer-2.14.1-jakarta.jar</exists>
                 </file>
             </activation>
             <modules>
@@ -71,6 +72,7 @@
                 <module>HibernateSpringBootOptimizerMySQLIdentity</module>
                 <module>HibernateSpringBootOptimizerRuntimeEvents</module>
                 <module>HibernateSpringBootOptimizerEventFilters</module>
+                <module>HibernateSpringBootOptimizerEventPersistence</module>
             </modules>
         </profile>
     </profiles>

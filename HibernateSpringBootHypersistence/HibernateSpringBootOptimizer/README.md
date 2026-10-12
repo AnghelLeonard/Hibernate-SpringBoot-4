@@ -13,7 +13,7 @@ Install the `jakarta`-classified artifact into your local Maven repository since
 qualifier is needed for Jakarta persistence (the default artifact targets `javax.persistence`):
 
 ```
-io/hypersistence/hypersistence-optimizer/2.13.1/hypersistence-optimizer-2.13.1-jakarta.jar
+io/hypersistence/hypersistence-optimizer/2.14.1/hypersistence-optimizer-2.14.1-jakarta.jar
 ```
 
 Then one of the following applies:
