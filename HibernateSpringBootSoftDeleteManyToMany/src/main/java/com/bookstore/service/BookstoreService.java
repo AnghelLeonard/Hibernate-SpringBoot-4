@@ -3,20 +3,17 @@ package com.bookstore.service;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import com.bookstore.entity.Book;
-import com.bookstore.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookstoreService {
 
-    private final AuthorRepository authorRepository;
-    private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository; 
 
-    public BookstoreService(AuthorRepository authorRepository, BookRepository bookRepository) {
+    public BookstoreService(AuthorRepository authorRepository) {
 
-        this.authorRepository = authorRepository;
-        this.bookRepository = bookRepository;
+        this.authorRepository = authorRepository;      
     }
 
     @Transactional

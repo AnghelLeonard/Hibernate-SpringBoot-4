@@ -1,15 +1,12 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SoftDelete;
 
 @Entity
@@ -25,9 +22,8 @@ public class Book implements Serializable {
     private String title;
     private String isbn;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
-    @NotFound(action = NotFoundAction.EXCEPTION)
+    @ManyToOne // defaults to EAGER fetching
+    @JoinColumn(name = "author_id", referencedColumnName = "id")    
     private Author author;
 
     public Long getId() {

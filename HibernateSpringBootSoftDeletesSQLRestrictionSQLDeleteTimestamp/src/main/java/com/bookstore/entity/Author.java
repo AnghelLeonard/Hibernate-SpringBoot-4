@@ -15,17 +15,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
-@SQLDelete(sql
-        = "UPDATE author "
-        + "SET deleted = UTC_TIMESTAMP() "
-        + "WHERE id = ?")
+@SQLDelete(sql = "UPDATE author SET deleted = UTC_TIMESTAMP() WHERE id = ?")
 @SQLRestriction("deleted IS NULL")
-/*
-@SQLSelect(sql = """
-                 SELECT * FROM author 
-                 WHERE id = ?1 AND deleted IS NULL
-                 """)
-*/
 public class Author extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

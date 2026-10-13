@@ -33,7 +33,7 @@ public class BookstoreService {
     public void softDeleteAuthor() {
         Author author = authorRepository.findById(1L).get();
 
-        authorRepository.delete(author);
+        authorRepository.delete(author);      
     }
 
     @Transactional

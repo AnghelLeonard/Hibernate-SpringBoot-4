@@ -6,6 +6,6 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class BaseEntity {
  
-    @Column(name = "deleted")
+    @Column(name = "deleted", nullable = false)
     protected boolean deleted;     
 }

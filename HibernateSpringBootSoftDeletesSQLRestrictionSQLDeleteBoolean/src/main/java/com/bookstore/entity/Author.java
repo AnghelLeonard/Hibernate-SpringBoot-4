@@ -15,17 +15,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
-@SQLDelete(sql
-        = "UPDATE author "
-        + "SET deleted = true "
-        + "WHERE id = ?")
-@SQLRestriction("deleted = false")
-/*
-@SQLSelect(sql = """
-                 SELECT * FROM author 
-                 WHERE id = ?1 AND deleted = false
-                 """)
-*/
+@SQLDelete(sql = "UPDATE author SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false") // or, @SQLRestriction("coalesce(deleted, false) = false")
 public class Author extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
