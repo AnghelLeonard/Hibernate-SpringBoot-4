@@ -22,7 +22,8 @@ public class Book implements Serializable {
     private String title;
     private String isbn;
 
-    @ManyToOne // defaults to EAGER fetching
+    @ManyToOne//(fetch = FetchType.LAZY)
+    //@NotFound(action = NotFoundAction.EXCEPTION)
     @JoinColumn(name = "author_id", referencedColumnName = "id")    
     private Author author;
 

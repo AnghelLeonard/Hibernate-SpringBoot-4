@@ -7,5 +7,9 @@ import jakarta.persistence.MappedSuperclass;
 public abstract class BaseEntity {
  
     @Column(name = "deleted", nullable = false)
-    protected boolean deleted;     
+    protected boolean deleted;  
+
+    public boolean isDeleted() {
+        return deleted;
+    }     
 }

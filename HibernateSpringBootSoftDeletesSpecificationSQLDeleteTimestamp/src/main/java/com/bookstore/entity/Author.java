@@ -97,6 +97,10 @@ public class Author implements Serializable {
     public Instant getDeleted() {
         return deleted;
     }
+
+    public void setDeleted(Instant deleted) {
+        this.deleted = deleted;
+    }        
     
     @PreRemove
     private void authorRemove() {        

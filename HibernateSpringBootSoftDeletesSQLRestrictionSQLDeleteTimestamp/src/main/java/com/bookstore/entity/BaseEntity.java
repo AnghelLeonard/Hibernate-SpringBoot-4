@@ -9,4 +9,8 @@ public abstract class BaseEntity {
  
     @Column(name = "deleted")
     protected Instant deleted;     
+
+    public Instant getDeleted() {
+        return deleted;
+    }        
 }

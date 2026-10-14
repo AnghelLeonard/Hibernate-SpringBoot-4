@@ -34,18 +34,7 @@ public class BookstoreService {
         Author author = authorRepository.findById(1L).get();
 
         authorRepository.delete(author);
-    }
-
-    @Transactional
-    public void restoreBook() {
-        bookRepository.restoreById(1L);        
-    }
-
-    @Transactional
-    public void restoreAuthor() {
-        authorRepository.restoreById(1L);
-        bookRepository.restoreByAuthorId(1L);
-    }
+    }   
 
     public void displayAllExceptDeletedAuthors() {
         List<Author> authors = authorRepository.findAll();
@@ -93,5 +82,16 @@ public class BookstoreService {
         System.out.println("\nAll deleted books:");
         books.forEach(b -> System.out.println("Book title: " + b.getTitle()));
         System.out.println();
+    }
+    
+     @Transactional
+    public void restoreBook() {
+        bookRepository.restoreById(1L);        
+    }
+
+    @Transactional
+    public void restoreAuthor() {
+        authorRepository.restoreById(1L);
+        bookRepository.restoreByAuthorId(1L);
     }
 }
