@@ -95,10 +95,6 @@ public class Author extends BaseEntity implements Serializable {
     public void setBooks(List<Book> books) {
         this.books = books;
     }
-
-    public Instant getDeleted() {
-        return deleted;
-    }
     
     @PreRemove
     private void authorRemove() {

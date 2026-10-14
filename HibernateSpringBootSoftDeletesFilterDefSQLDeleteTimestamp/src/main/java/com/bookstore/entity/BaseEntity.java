@@ -11,4 +11,16 @@ public abstract class BaseEntity {
  
     @Column(name = "deleted")
     protected Instant deleted;     
+
+    public Instant getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Instant deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isDeleted() {
+        return deleted != null;
+    }        
 }

@@ -61,11 +61,7 @@ public class Book extends BaseEntity implements Serializable {
 
     public void setAuthor(Author author) {
         this.author = author;
-    }
-    
-     public Instant getDeleted() {
-        return deleted;
-    }
+    }      
 
     @PreRemove
     private void bookRemove() {
