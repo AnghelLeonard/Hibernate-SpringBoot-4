@@ -21,13 +21,15 @@ public class ScreenshotService {
         TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
 
         Screenshot screenshot = new Screenshot();
-
-        screenshot.setName("Screenshot-1");
-        screenshot.setCreateOn(new Timestamp(
+        
+        Timestamp timestamp  = new Timestamp(
                 ZonedDateTime.of(2018, 3, 30, 10, 15, 55, 0,
                         ZoneId.of("UTC")
-                ).toInstant().toEpochMilli()
-        ));
+                ).toInstant().toEpochMilli());
+
+        screenshot.setName("Screenshot-1");
+        screenshot.setCreateOn(timestamp);        
+        screenshot.setCreatedOnUTC(timestamp.toInstant());
 
         System.out.println("Timestamp epoch milliseconds before insert: "
                 + screenshot.getCreateOn().getTime());
@@ -39,5 +41,7 @@ public class ScreenshotService {
         Screenshot fetchScreenshot = screenshotRepository.findByName("Screenshot-1");
         System.out.println("Timestamp epoch milliseconds after fetching: "
                 + fetchScreenshot.getCreateOn().getTime());
+        System.out.println("Instant after fetching: "
+                + fetchScreenshot.getCreatedOnUTC());
     }
 }

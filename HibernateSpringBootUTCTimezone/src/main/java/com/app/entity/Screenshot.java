@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 public class Screenshot implements Serializable {
@@ -19,6 +20,7 @@ public class Screenshot implements Serializable {
     private String name;
 
     private Timestamp createOn;
+    private Instant createdOnUTC;
 
     public Long getId() {
         return id;
@@ -44,4 +46,11 @@ public class Screenshot implements Serializable {
         this.createOn = createOn;
     }
 
+    public Instant getCreatedOnUTC() {
+        return createdOnUTC;
+    }
+
+    public void setCreatedOnUTC(Instant createdOnUTC) {
+        this.createdOnUTC = createdOnUTC;
+    }   
 }
