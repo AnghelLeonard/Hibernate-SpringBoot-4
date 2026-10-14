@@ -57,7 +57,12 @@ public class BookstoreService {
         System.out.println();
     }
 
+    @Transactional(readOnly = true)
     public void displayAllOnlyDeletedAuthors() {
+
+        entityManager.unwrap(Session.class)
+                .disableFilter("excludeDeleted");
+
         List<Author> authors = authorRepository.findAllOnlyDeleted();
 
         System.out.println("\nAll deleted authors:");
@@ -72,29 +77,34 @@ public class BookstoreService {
 
         author.removeBook(book);
     }
-    
+
     @Transactional(readOnly = true)
     public void displayAllIncludeDeletedBooks() {
-        
+
         entityManager.unwrap(Session.class)
                 .disableFilter("excludeDeleted");
-        
+
         List<Book> books = bookRepository.findAll();
 
         System.out.println("\nAll books including deleted:");
         books.forEach(b -> System.out.println("Book title: " + b.getTitle() + " deleted " + b.getDeleted()));
         System.out.println();
     }
-    
-     public void displayAllExceptDeletedBooks() {
+
+    public void displayAllExceptDeletedBooks() {
         List<Book> books = bookRepository.findAll();
 
         System.out.println("\nAll books except deleted:");
         books.forEach(b -> System.out.println("Book title: " + b.getTitle() + " deleted " + b.getDeleted()));
         System.out.println();
     }
-    
-     public void displayAllOnlyDeletedBooks() {
+
+    @Transactional(readOnly = true)
+    public void displayAllOnlyDeletedBooks() {
+
+        entityManager.unwrap(Session.class)
+                .disableFilter("excludeDeleted");
+
         List<Book> books = bookRepository.findAllOnlyDeleted();
 
         System.out.println("\nAll deleted books:");
@@ -104,12 +114,20 @@ public class BookstoreService {
 
     @Transactional
     public void restoreBook() {
+        
+        entityManager.unwrap(Session.class)
+                .disableFilter("excludeDeleted");
+
         bookRepository.restoreById(1L);
     }
 
     @Transactional
     public void restoreAuthor() {
+        
+        entityManager.unwrap(Session.class)
+                .disableFilter("excludeDeleted");
+        
         authorRepository.restoreById(1L);
         bookRepository.restoreByAuthorId(1L);
-    }       
+    }
 }

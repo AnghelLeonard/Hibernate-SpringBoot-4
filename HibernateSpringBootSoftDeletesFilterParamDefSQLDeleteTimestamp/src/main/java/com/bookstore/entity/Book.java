@@ -7,13 +7,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreRemove;
 import java.io.Serializable;
+import java.time.Instant;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
+@SQLDelete(sql = "UPDATE book SET deleted = UTC_TIMESTAMP() WHERE id = ?")
 @Filter(
-        name = "deletedFilter",
-        condition = "(:includeDeleted = true) OR (:includeDeleted = false AND deleted_at IS NULL)"
+        name = "includeExcludeDeleted",
+        condition = """
+                    (:restoreDeleted = true AND :includeDeleted = false AND :includeOnlyDeleted = false AND deleted IS NOT NULL)
+                    OR (:restoreDeleted = false AND :includeDeleted = true AND :includeOnlyDeleted = false)
+                    OR (:restoreDeleted = false AND :includeOnlyDeleted = true AND deleted IS NOT NULL)
+                    OR (:restoreDeleted = false AND :includeDeleted = false AND :includeOnlyDeleted = false AND deleted IS NULL)
+                    """
 )
 public class Book extends BaseEntity implements Serializable {
 
@@ -61,6 +70,15 @@ public class Book extends BaseEntity implements Serializable {
     public void setAuthor(Author author) {
         this.author = author;
     }
+    
+     public Instant getDeleted() {
+        return deleted;
+    }
+
+    @PreRemove
+    private void bookRemove() {
+        deleted = null;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -83,6 +101,7 @@ public class Book extends BaseEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "Book{" + "id=" + id + ", title=" + title + ", isbn=" + isbn + '}';
-    }   
+        return "Book{" + "id=" + id + ", title=" + title + ", isbn=" + isbn + ", deleted =" + deleted + '}';
+    }
+
 }

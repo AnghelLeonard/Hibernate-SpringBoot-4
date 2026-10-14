@@ -9,7 +9,7 @@ CREATE TABLE `author` (
   `age`        INT(11)       NOT NULL,
   `genre`      VARCHAR(255)  DEFAULT NULL,
   `name`       VARCHAR(255)  DEFAULT NULL,
-  `deleted_at` DATETIME(6)   DEFAULT NULL,
+  `deleted` DATETIME(6)   DEFAULT NULL,
   CONSTRAINT `author_pk` PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -19,7 +19,7 @@ CREATE TABLE `book` (
   `author_id` BIGINT       NOT NULL,
   `title`     VARCHAR(255) DEFAULT NULL,
   `isbn`      VARCHAR(255) DEFAULT NULL,
-  `deleted_at` DATETIME(6) DEFAULT NULL,
+  `deleted` DATETIME(6) DEFAULT NULL,
   CONSTRAINT `book_pk` PRIMARY KEY (id),
   CONSTRAINT `book_author_fk` FOREIGN KEY (`author_id`) REFERENCES `author` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

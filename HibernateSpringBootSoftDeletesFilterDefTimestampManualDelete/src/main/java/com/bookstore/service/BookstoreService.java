@@ -29,17 +29,13 @@ public class BookstoreService {
         this.entityManager = entityManager;
     }
 
-    // returns only active authors 
-    @Transactional(readOnly = true)
+    // returns only active authors     
     public List<Author> getActiveAuthors() {
-
-        entityManager.unwrap(Session.class)
-                .enableFilter("activeOnlyFilter");
 
         return authorRepository.findAll();
     }
 
-    // Returns everything (both active and soft-deleted authors, e.g., for admin panels)
+    // Returns everything (both active and soft-deleted authors, e.g., for admin panels)    
     @Transactional(readOnly = true)
     public List<Author> getAllAuthorsIncludingDeleted() {
 
@@ -53,37 +49,34 @@ public class BookstoreService {
     public void softDeleteAuthor(Long authorId) {
         // findById() bypasses Hibernate filters natively, so we manually check if it's already deleted
         // you can use findOne() or bookRepository.findAllById(List.of(bookId)).getFirst(); 
-        // if you just want to see if a record is deleted then use, bookRepository.existsById(1L);
+        // if you just want to see if a record is deleted then use, authorRepository.existsById(1L); 
+        // to generate "select count(*) from author a1_0 where a1_0.deleted IS NULL and a1_0.id=?"      
         authorRepository.findById(authorId).ifPresent(author -> {
             if (!author.isDeleted()) {
                 Instant deletionTime = Instant.now();
 
                 // soft delete the parent
-                author.setDeletedAt(deletionTime);
+                author.setDeleted(deletionTime);
 
                 // Cascade identical UTC timestamp to all child books
-                author.getBooks().forEach(book -> book.setDeletedAt(deletionTime));
+                author.getBooks().forEach(book -> book.setDeleted(deletionTime));
             }
         });
     }
 
-    // returns only active books 
-    @Transactional(readOnly = true)
+    // returns only active books     
     public List<Book> getActiveBooks() {
-
-        entityManager.unwrap(Session.class)
-                .enableFilter("activeOnlyFilter");
 
         return bookRepository.findAll();
     }
 
-    // Returns everything (both active and soft-deleted books, e.g., for admin panels)
+    // Returns everything (both active and soft-deleted books, e.g., for admin panels) 
     @Transactional(readOnly = true)
     public List<Book> getAllBooksIncludingDeleted() {
 
         entityManager.unwrap(Session.class)
                 .disableFilter("activeOnlyFilter");
-
+                
         return bookRepository.findAll();
     }
 
@@ -94,7 +87,7 @@ public class BookstoreService {
         bookRepository.findById(bookId).ifPresent(book -> {
             if (!book.isDeleted()) {
                 // set the current precise UTC timestamp
-                book.setDeletedAt(Instant.now());
+                book.setDeleted(Instant.now());
 
                 // remove it from the list so author.getBooks() is accurate in-memory, 
                 // but keeps the author_id intact in the database

@@ -4,7 +4,7 @@ import com.bookstore.entity.Book;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,16 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 public interface BookRepository extends JpaRepository<Book, Long> {
      
 
-    @NativeQuery(value = "SELECT * FROM book AS b WHERE b.deleted IS NOT NULL")
+    @Query(value = "SELECT b FROM Book b WHERE b.deleted IS NOT NULL")
     List<Book> findAllOnlyDeleted();
     
     @Transactional
-    @NativeQuery(value = "UPDATE book SET deleted = NULL WHERE author_id = ?1")
+    @Query(value = "UPDATE Book b SET b.deleted = NULL WHERE b.author.id = ?1")
     @Modifying    
     public void restoreByAuthorId(Long id);
     
     @Transactional
-    @NativeQuery(value = "UPDATE book SET deleted = NULL WHERE id = ?1")
+    @Query(value = "UPDATE Book b SET b.deleted = NULL WHERE b.id = ?1")
     @Modifying    
     public void restoreById(Long id);
 }

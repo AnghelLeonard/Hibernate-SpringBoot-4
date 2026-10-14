@@ -6,21 +6,21 @@ import java.time.Instant;
 import org.hibernate.annotations.FilterDef;
 
 @MappedSuperclass
-@FilterDef(name = "activeOnlyFilter")
+@FilterDef(name = "activeOnlyFilter", autoEnabled = true)
 public abstract class BaseEntity {
 
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
+    @Column(name = "deleted")
+    private Instant deleted;
 
-    public Instant getDeletedAt() {
-        return deletedAt;
+    public Instant getDeleted() {
+        return deleted;
     }
 
-    public void setDeletedAt(Instant deletedAt) {
-        this.deletedAt = deletedAt;
+    public void setDeleted(Instant deleted) {
+        this.deleted = deleted;
     }
 
     public boolean isDeleted() {
-        return deletedAt != null;
+        return deleted != null;
     }
 }

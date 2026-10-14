@@ -12,7 +12,7 @@ import java.util.List;
 import org.hibernate.annotations.Filter;
 
 @Entity
-@Filter(name = "activeOnlyFilter", condition = "deleted_at IS NULL")
+@Filter(name = "activeOnlyFilter", condition = "deleted IS NULL")
 public class Author extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
