@@ -25,9 +25,14 @@ public class BookstoreService {
         // behind getReferenceById() we have EntityManager#getReference()        
         Author proxy = authorRepository.getReferenceById(1L);
 
+        boolean nameIsInitialized = Hibernate.isPropertyInitialized(proxy, "name");
+        boolean isEntityLoaded = Hibernate.isInitialized(proxy);
+
         System.out.println("Author class: " + author.getClass().getName());
         System.out.println("Proxy class: " + proxy.getClass().getName());
         System.out.println("'author' equals 'proxy'? " + author.equals(proxy));
+        System.out.println("The 'name' property was initialized: " + nameIsInitialized);
+        System.out.println("The 'proxy' was initialized: " + isEntityLoaded);
     }
 
     @Transactional(readOnly = true)
@@ -38,8 +43,13 @@ public class BookstoreService {
         
         Object unproxy = Hibernate.unproxy(proxy);
         
+        boolean nameIsInitialized = Hibernate.isPropertyInitialized(proxy, "name");
+        boolean isEntityLoaded = Hibernate.isInitialized(proxy);
+       
         System.out.println("Author class: " + author.getClass().getName());
         System.out.println("Unproxy class: " + unproxy.getClass().getName());
-        System.out.println("'author' equals 'unproxy'? " + author.equals(unproxy));          
+        System.out.println("'author' equals 'unproxy'? " + author.equals(unproxy)); 
+        System.out.println("The 'name' property was initialized: " + nameIsInitialized);
+        System.out.println("The 'proxy' was initialized: " + isEntityLoaded);
     }
 }
