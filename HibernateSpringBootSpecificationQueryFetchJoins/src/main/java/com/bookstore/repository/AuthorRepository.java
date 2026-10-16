@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface AuthorRepository extends JpaRepository<Author, Long>,
         JpaSpecificationExecutor<Author> {
-
-    @Transactional(readOnly = true)
+  
     @Query(value = "SELECT a.id FROM Author a WHERE a.genre = ?1")
     Page<Long> fetchPageOfIdsByGenre(String genre, Pageable pageable);        
 }
