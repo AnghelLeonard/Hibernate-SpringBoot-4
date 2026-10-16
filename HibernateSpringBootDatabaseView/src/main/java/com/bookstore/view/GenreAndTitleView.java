@@ -9,6 +9,13 @@ import org.springframework.data.annotation.Immutable;
 @Entity
 @Immutable
 @Table(name="genre_and_title_view")
+/*
+@View(query = """
+              SELECT a.genre, b.title 
+              FROM author a 
+              INNER JOIN book b ON b.author_id = a.id
+              """)
+*/
 public class GenreAndTitleView implements Serializable {
     
     private static final long serialVersionUID = 1L;

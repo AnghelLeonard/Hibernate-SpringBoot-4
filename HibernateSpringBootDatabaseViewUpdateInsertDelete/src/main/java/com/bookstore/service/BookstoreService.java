@@ -24,18 +24,19 @@ public class BookstoreService {
 
     public void insertAuthorViaView() {
         AuthorAnthologyView newAuthor = new AuthorAnthologyView();
+        
         newAuthor.setName("Toij Kalu");
-        newAuthor.setGenre("zzz");
+        newAuthor.setGenre("Anthology");
         newAuthor.setAge(42);
 
         authorAnthologyViewRepository.save(newAuthor);
     }
-    
+
     @Transactional
     public void deleteAuthorViaView() {
         AuthorAnthologyView author
                 = authorAnthologyViewRepository.findByName("Mark Janel");
-        
+
         authorAnthologyViewRepository.delete(author);
-    }    
+    }
 }
