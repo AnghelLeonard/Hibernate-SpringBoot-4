@@ -1,7 +1,7 @@
 package com.bookstore.controller;
 
 import com.bookstore.entity.Inventory;
-import com.bookstore.service.InventoryService;
+import com.bookstore.service.BookstoreService;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,22 +18,22 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@SessionAttributes({InventoryController.INVENTORY_ATTR})
-public class InventoryController {
+@SessionAttributes({BookstoreController.INVENTORY_ATTR})
+public class BookstoreController {
 
     protected static final String INVENTORY_ATTR = "inventory";
     private static final String BINDING_RESULT = "org.springframework.validation.BindingResult." + INVENTORY_ATTR;
 
-    private final InventoryService inventoryService;
+    private final BookstoreService bookstoreService;
 
-    public InventoryController(InventoryService inventoryService) {
-        this.inventoryService = inventoryService;
+    public BookstoreController(BookstoreService bookstoreService) {
+        this.bookstoreService = bookstoreService;
     }
 
     @GetMapping("/load/{id}")
     public String fetchInventory(@PathVariable Long id, Model model) {
         if (!model.containsAttribute(BINDING_RESULT)) {
-            model.addAttribute(INVENTORY_ATTR, inventoryService.fetchInventoryById(id));
+            model.addAttribute(INVENTORY_ATTR, bookstoreService.fetchInventoryById(id));
         }
 
         return "index";
@@ -45,7 +45,7 @@ public class InventoryController {
 
         if (!bindingResult.hasErrors()) {
             try {
-                Inventory updatedInventory = inventoryService.updateInventory(inventory);
+                Inventory updatedInventory = bookstoreService.updateInventory(inventory);
                 redirectAttributes.addFlashAttribute("updatedInventory", updatedInventory);
             } catch (OptimisticLockingFailureException e) {
                 bindingResult.reject("", "Another user updated the data. Press the link above to reload it.");

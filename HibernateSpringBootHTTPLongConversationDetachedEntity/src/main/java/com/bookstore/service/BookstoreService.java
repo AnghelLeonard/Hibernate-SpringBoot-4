@@ -5,11 +5,11 @@ import com.bookstore.repository.InventoryRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InventoryService {
+public class BookstoreService {
 
     private final InventoryRepository inventoryRepository;
 
-    public InventoryService(InventoryRepository inventoryRepository) {
+    public BookstoreService(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
     }
 
