@@ -1,6 +1,6 @@
 package com.bookstore;
 
-import com.bookstore.service.InventoryService;
+import com.bookstore.service.BookstoreService;
 import com.bookstore.entity.Inventory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,10 +13,10 @@ public class MainApplication {
     // Running the application should result in 
     // org.springframework.orm.ObjectOptimisticLockingFailureException
     
-    private final InventoryService inventoryService;
+    private final BookstoreService bookstoreService;
 
-    public MainApplication(InventoryService inventoryService) {
-        this.inventoryService = inventoryService;
+    public MainApplication(BookstoreService bookstoreService) {
+        this.bookstoreService = bookstoreService;
     }
 
     public static void main(String[] args) {
@@ -28,18 +28,18 @@ public class MainApplication {
         return args -> {
 
             System.out.println("Triggering the first transaction ...");
-            Inventory firstInventory = inventoryService.firstTransactionFetchesAndReturn();
+            Inventory firstInventory = bookstoreService.firstTransactionFetchesAndReturn();
             System.out.println("First transaction committed successfully ..."); 
             
             System.out.println("Triggering the second transaction ...");
-            inventoryService.secondTransactionFetchesAndReturn();
+            bookstoreService.secondTransactionFetchesAndReturn();
             System.out.println("Second transaction committed successfully ..."); 
             
             // AT THIS POINT, THE firstInventory IS DETACHED
             firstInventory.setQuantity(firstInventory.getQuantity() - 1);
             
             System.out.println("Triggering the third transaction ...");
-            inventoryService.thirdTransactionMergesAndUpdates(firstInventory);
+            bookstoreService.thirdTransactionMergesAndUpdates(firstInventory);
             System.out.println("Third transaction committed successfully ..."); 
         };
     }
