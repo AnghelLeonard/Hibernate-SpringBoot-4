@@ -8,6 +8,6 @@ CREATE TABLE `inventory` (
   `id`       BIGINT        NOT NULL,
   `quantity` INTEGER       NOT NULL,  
   `title`    VARCHAR(255)  DEFAULT NULL,
-  `version`  SMALLINT,
+  `version`  INT           NOT NULL,
   CONSTRAINT `author_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

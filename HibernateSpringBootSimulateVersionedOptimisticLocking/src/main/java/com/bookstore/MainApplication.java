@@ -1,6 +1,6 @@
 package com.bookstore;
 
-import com.bookstore.service.InventoryService;
+import com.bookstore.service.BookstoreService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -15,10 +15,10 @@ public class MainApplication {
     // Running the application should result in 
     // org.springframework.orm.ObjectOptimisticLockingFailureException
     
-    private final InventoryService inventoryService;
+    private final BookstoreService bookstoreService;
 
-    public MainApplication(InventoryService inventoryService) {
-        this.inventoryService = inventoryService;
+    public MainApplication(BookstoreService bookstoreService) {
+        this.bookstoreService = bookstoreService;
     }
 
     public static void main(String[] args) {
@@ -30,9 +30,9 @@ public class MainApplication {
         return args -> {
 
             ExecutorService executor = Executors.newFixedThreadPool(2);
-            executor.execute(inventoryService);
+            executor.execute(bookstoreService);
             // Thread.sleep(2000); -> adding a sleep here will break the transactions concurrency
-            executor.execute(inventoryService);
+            executor.execute(bookstoreService);
 
             executor.shutdown();
             try {
