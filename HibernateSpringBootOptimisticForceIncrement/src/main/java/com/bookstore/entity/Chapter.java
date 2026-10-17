@@ -20,7 +20,7 @@ public class Chapter implements Serializable {
     private String content;
 
     @Version
-    private short version;
+    private Integer version;
 
     public Long getId() {
         return id;
@@ -38,7 +38,7 @@ public class Chapter implements Serializable {
         this.title = title;
     }
 
-    public short getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
