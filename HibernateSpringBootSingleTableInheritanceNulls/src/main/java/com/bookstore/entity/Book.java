@@ -18,7 +18,7 @@ import java.io.Serializable;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
         discriminatorType = DiscriminatorType.INTEGER,
-        columnDefinition = "TINYINT(1)"
+        columnDefinition = "TINYINT"
 )
 @DiscriminatorValue("1")
 public class Book implements Serializable {

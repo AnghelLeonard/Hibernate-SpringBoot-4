@@ -16,7 +16,7 @@ CREATE TABLE `author` (
 CREATE TABLE `book` (
   `id`        BIGINT         NOT NULL AUTO_INCREMENT,  
   `author_id` BIGINT,
-  `dtype`     TINYINT(1)     NOT NULL CHECK (`dtype` in (1,2,3)),
+  `dtype`     TINYINT        NOT NULL CHECK (`dtype` in (1,2,3)),
   `format`    VARCHAR(255),
   `isbn`      VARCHAR(255),
   `size_in`   VARCHAR(255), 
