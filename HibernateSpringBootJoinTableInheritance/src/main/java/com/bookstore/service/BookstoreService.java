@@ -9,6 +9,7 @@ import com.bookstore.entity.Ebook;
 import com.bookstore.repository.EbookRepository;
 import org.springframework.stereotype.Service;
 import com.bookstore.repository.PaperbackRepository;
+import com.bookstore.specifications.BookSpecification;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,54 +54,78 @@ public class BookstoreService {
         ebook.setTitle("Anthology myths");
         ebook.setFormat("kindle");
 
-        author.addBook(book); // use addBook() helper
+        author.addBook(book);
         author.addBook(paperback);
         author.addBook(ebook);
 
         authorRepository.save(author);
     }
 
+    @Transactional(readOnly = true)
     public void fetchBookByTitle() {
-        Book book1 = bookRepository.findByTitle("The book of swords");
-        System.out.println(book1); // this is a Book
+        Book book = bookRepository.findByTitle("The book of swords");
+        System.out.println(book);
 
-        Book book2 = bookRepository.findByTitle("The beatles anthology");
-        System.out.println(book2); // this is a Paperback               
+        Paperback paperback = paperbackRepository.findByTitle("The beatles anthology");
+        System.out.println(paperback);
 
-        Book book3 = bookRepository.findByTitle("Anthology myths");
-        System.out.println(book3); // this is an Ebook
+        Ebook ebook = ebookRepository.findByTitle("Anthology myths");
+        System.out.println(ebook);
     }
 
-    public void fetchPaperback() {
-        Paperback p1 = paperbackRepository.findByTitle("The book of swords"); // this is a Book
-        System.out.println(p1); // prints null
+    @Transactional(readOnly = true)
+    public void fetchBookByIsbn() {
+        Book book = bookRepository.fetchByIsbn("001-AT");
+        System.out.println(book);
 
-        Paperback p2 = paperbackRepository.findByTitle("The beatles anthology"); // this is a Paperback
-        System.out.println(p2);
+        Paperback paperback = paperbackRepository.fetchByIsbn("002-AT");
+        System.out.println(paperback);
+
+        Ebook ebook = ebookRepository.fetchByIsbn("003-AT");
+        System.out.println(ebook);
     }
 
-    public void fetchEbook() {
-        Ebook e1 = ebookRepository.findByTitle("The book of swords"); // this is a Book
-        System.out.println(e1); // prints null
+    public void fetchEbooksByAuthorId() {
 
-        Ebook e2 = ebookRepository.findByTitle("Anthology myths"); // this is a Ebook
-        System.out.println(e2);
+        List<Ebook> books = ebookRepository.findEbooksByAuthorId(2L);
+        System.out.println(books);
     }
 
-    public void fetchBooksByAuthorId() {
-        List<Book> books = bookRepository.fetchBooksByAuthorId(1L);
+    public void fetchEBooksOfFormat() {
+
+        List<Book> books = bookRepository.findEBooksOfFormat("kindle");
+        System.out.println(books);
+    }
+
+    public void fetchEbooksViaSpecification() {
+
+        List<Book> books = bookRepository.findAll(BookSpecification.findEbookOfFormatSpec("kindle"));
         System.out.println(books);
     }
 
     @Transactional(readOnly = true)
     public void fetchAuthorAndBooksLazy() {
         Author author = authorRepository.findByName("Alicia Tom");
-        System.out.println(author + " | " + author.getBooks());
+        List<Book> books = author.getBooks();
+
+        System.out.println(author + "  |  " + books);
     }
 
-    @Transactional(readOnly = true)
-    public void fetchAuthorAndBooksEager() {
-        Author author = authorRepository.findAuthor();
-        System.out.println(author + " | " + author.getBooks());
+    public void fetchAuthorWithBooks() {
+        List<Author> authors = authorRepository.findAuthorWithBooks();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+
+    public void fetchAuthorsWithEBooks() {
+        List<Author> authors = authorRepository.findAuthorsWithEBooks();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+
+    public void fetchAuthorsNoBooksByFormat() {
+        List<Author> authors = authorRepository.findAuthorsNoBooksByFormat("kindle");
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // this causes LazyInitializationException
     }
 }

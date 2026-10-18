@@ -25,18 +25,30 @@ public class MainApplication {
 
             System.out.println("\n\nfetchBookByTitle():");
             bookstoreService.fetchBookByTitle();
-
-            System.out.println("\n\nfetchPaperback():");
-            bookstoreService.fetchPaperback();
-            System.out.println("\n\nfetchEbook():");
-            bookstoreService.fetchEbook();
-
-            System.out.println("\n\nfetchBooksByAuthorId():");
-            bookstoreService.fetchBooksByAuthorId();
+            
+            System.out.println("\n\nfetchBookByIsbn():");
+            bookstoreService.fetchBookByIsbn();
+            
+            System.out.println("\n\nfetchEbooksByAuthorId():");
+            bookstoreService.fetchEbooksByAuthorId();
+            
+            System.out.println("\n\nfetchEBooksOfFormat():");
+            bookstoreService.fetchEBooksOfFormat();
+            
+            System.out.println("\n\nfetchEbooksViaSpecification():");
+            bookstoreService.fetchEbooksViaSpecification();
+            
             System.out.println("\n\nfetchAuthorAndBooksLazy():");
             bookstoreService.fetchAuthorAndBooksLazy();
-            System.out.println("\n\nfetchAuthorAndBooksEager():");
-            bookstoreService.fetchAuthorAndBooksEager();
+            
+            System.out.println("\n\fetchAuthorWithBooks():");
+            bookstoreService.fetchAuthorWithBooks();
+            
+            System.out.append("\n\nfetchAuthorsWithEBooks():");                    
+            bookstoreService.fetchAuthorsWithEBooks();
+            
+            System.out.println("\n\fetchAuthorsNoBooksByFormat():");
+            bookstoreService.fetchAuthorsNoBooksByFormat();
         };
     }
 }
