@@ -9,6 +9,8 @@ import com.bookstore.entity.Ebook;
 import com.bookstore.repository.EbookRepository;
 import org.springframework.stereotype.Service;
 import com.bookstore.repository.PaperbackRepository;
+import com.bookstore.specifications.BookSpecification;
+import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -81,5 +83,49 @@ public class BookstoreService {
 
         Ebook ebook = ebookRepository.fetchByIsbn("003-AT");
         System.out.println(ebook);
+    }
+
+    public void fetchEbooksByAuthorId() {
+
+        List<Ebook> books = ebookRepository.findEbooksByAuthorId(2L);
+        System.out.println(books);
+    }
+
+    public void fetchEBooksOfFormat() {
+
+        List<Book> books = bookRepository.findEBooksOfFormat("kindle");
+        System.out.println(books);
+    }
+
+    public void fetchEbooksViaSpecification() {
+
+        List<Book> books = bookRepository.findAll(BookSpecification.findEbookOfFormatSpec("kindle"));
+        System.out.println(books);
+    }
+
+    @Transactional(readOnly = true)
+    public void fetchAuthorAndBooksLazy() {
+        Author author = authorRepository.findByName("Alicia Tom");
+        List<Book> books = author.getBooks();
+
+        System.out.println(author + "  |  " + books);
+    }
+
+    public void fetchAuthorWithBooks() {
+        List<Author> authors = authorRepository.findAuthorWithBooks();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+
+    public void fetchAuthorsWithEBooks() {
+        List<Author> authors = authorRepository.findAuthorsWithEBooks();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+
+    public void fetchAuthorsNoBooksByFormat() {
+        List<Author> authors = authorRepository.findAuthorsNoBooksByFormat("kindle");
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // this causes LazyInitializationException
     }
 }
