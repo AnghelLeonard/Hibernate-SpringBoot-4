@@ -13,5 +13,5 @@ public interface BookBaseRepository<T extends Book> extends JpaRepository<T, Lon
     T findByTitle(String title);
     
     @Query(value="SELECT b FROM #{#entityName} AS b WHERE b.isbn = ?1")
-    T fetchByIsbn(String isbn);
+    T fetchByIsbn(String isbn);        
 }

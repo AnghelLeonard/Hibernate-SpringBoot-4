@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface EbookRepository extends JpaRepository<Ebook, Long> {
-
-    @Transactional(readOnly = true)
-    Ebook findByTitle(String title);
 }

@@ -7,28 +7,23 @@ import com.bookstore.entity.Book;
 import com.bookstore.entity.Paperback;
 import com.bookstore.entity.Ebook;
 import com.bookstore.repository.EbookRepository;
-import org.springframework.stereotype.Service;
-import com.bookstore.repository.PaperbackRepository;
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 @Service
 public class BookstoreService {
 
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
-    private final PaperbackRepository paperbackRepository;
     private final EbookRepository ebookRepository;
 
-    public BookstoreService(AuthorRepository authorRepository,
-            BookRepository bookRepository,
-            PaperbackRepository paperbackRepository,
+    public BookstoreService(AuthorRepository authorRepository, BookRepository bookRepository,
             EbookRepository ebookRepository) {
 
         this.authorRepository = authorRepository;
-        this.bookRepository = bookRepository;
-        this.paperbackRepository = paperbackRepository;
-        this.ebookRepository = ebookRepository;
+        this.bookRepository = bookRepository;      
+        this.ebookRepository = ebookRepository;      
+
     }
 
     public void persistAuthorWithBooks() {
@@ -71,37 +66,9 @@ public class BookstoreService {
         Book book3 = bookRepository.findByTitle("Anthology myths");
         System.out.println(book3); // this is an Ebook
     }
-
-    public void fetchPaperback() {
-        Paperback p1 = paperbackRepository.findByTitle("The book of swords"); // this is a Book
-        System.out.println(p1); // prints null
-
-        Paperback p2 = paperbackRepository.findByTitle("The beatles anthology"); // this is a Paperback
-        System.out.println(p2);
-    }
-
-    public void fetchEbook() {
-        Ebook e1 = ebookRepository.findByTitle("The book of swords"); // this is a Book
-        System.out.println(e1); // prints null
-
-        Ebook e2 = ebookRepository.findByTitle("Anthology myths"); // this is a Ebook
-        System.out.println(e2);
-    }
-
-    public void fetchBooksByAuthorId() {
-        List<Book> books = bookRepository.fetchBooksByAuthorId(1L);
-        System.out.println(books);
-    }
-
-    @Transactional(readOnly = true)
-    public void fetchAuthorAndBooksLazy() {
-        Author author = authorRepository.findByName("Alicia Tom");
-        System.out.println(author + " | " + author.getBooks());
-    }
-
-    @Transactional(readOnly = true)
-    public void fetchAuthorAndBooksEager() {
-        Author author = authorRepository.findAuthor();
-        System.out.println(author + " | " + author.getBooks());
+    
+    public void fetchAllEBooks() {
+        List<Ebook> ebooks = ebookRepository.findAll();
+        System.out.println(ebooks); 
     }
 }
