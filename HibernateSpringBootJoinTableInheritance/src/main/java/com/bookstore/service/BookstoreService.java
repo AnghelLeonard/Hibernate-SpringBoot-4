@@ -9,7 +9,6 @@ import com.bookstore.entity.Ebook;
 import com.bookstore.repository.EbookRepository;
 import org.springframework.stereotype.Service;
 import com.bookstore.repository.PaperbackRepository;
-import com.bookstore.specifications.BookSpecification;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,8 +140,7 @@ public class BookstoreService {
         Ebook ebook = ebookRepository.fetchByIsbn("003-AT");
         System.out.println(ebook);
     }
-
-    @Transactional(readOnly = true)
+    
     public void fetchEbookByFormat() {
         List<Ebook> ebooks = ebookRepository.findByFormat("kindle");
         System.out.println(ebooks);
