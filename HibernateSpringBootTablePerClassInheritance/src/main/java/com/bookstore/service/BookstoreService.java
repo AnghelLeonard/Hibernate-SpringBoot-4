@@ -53,54 +53,176 @@ public class BookstoreService {
         ebook.setTitle("Anthology myths");
         ebook.setFormat("kindle");
 
-        author.addBook(book); // use addBook() helper
+        author.addBook(book);
         author.addBook(paperback);
         author.addBook(ebook);
 
         authorRepository.save(author);
     }
 
-    public void fetchBookByTitle() {
-        Book book1 = bookRepository.findByTitle("The book of swords");
-        System.out.println(book1); // this is a Book
-
-        Book book2 = bookRepository.findByTitle("The beatles anthology");
-        System.out.println(book2); // this is a Paperback               
-
-        Book book3 = bookRepository.findByTitle("Anthology myths");
-        System.out.println(book3); // this is an Ebook
-    }
-
-    public void fetchPaperback() {
-        Paperback p1 = paperbackRepository.findByTitle("The book of swords"); // this is a Book
-        System.out.println(p1); // prints null
-
-        Paperback p2 = paperbackRepository.findByTitle("The beatles anthology"); // this is a Paperback
-        System.out.println(p2);
-    }
-
-    public void fetchEbook() {
-        Ebook e1 = ebookRepository.findByTitle("The book of swords"); // this is a Book
-        System.out.println(e1); // prints null
-
-        Ebook e2 = ebookRepository.findByTitle("Anthology myths"); // this is a Ebook
-        System.out.println(e2);
-    }
-
     public void fetchBooksByAuthorId() {
         List<Book> books = bookRepository.fetchBooksByAuthorId(1L);
         System.out.println(books);
     }
+    
+    public void fetchAllBooks() {
+        List<Book> books = bookRepository.findAll();
+        System.out.println(books);
+    }
 
+    /*
     @Transactional(readOnly = true)
-    public void fetchAuthorAndBooksLazy() {
-        Author author = authorRepository.findByName("Alicia Tom");
-        System.out.println(author + " | " + author.getBooks());
+    public void fetchBookByTitle() {
+        Book book = bookRepository.findByTitle("The book of swords");
+        System.out.println(book);
+
+        Paperback paperback = (Paperback) bookRepository.findByTitle("The beatles anthology");
+        System.out.println(paperback);
+
+        Ebook ebook = (Ebook) bookRepository.findByTitle("Anthology myths");
+        System.out.println(ebook);
+    }    
+    
+    @Transactional(readOnly = true)
+    public void fetchBookByIsbn() {
+        Book book = bookRepository.fetchByIsbn("001-AT");
+        System.out.println(book);
+
+        Paperback paperback = (Paperback) bookRepository.fetchByIsbn("002-AT");
+        System.out.println(paperback);
+
+        Ebook ebook = (Ebook) bookRepository.fetchByIsbn("003-AT");
+        System.out.println(ebook);
+    }
+    */
+    
+    @Transactional(readOnly = true)
+    public void fetchPaperbackByTitle() {
+        // this is a Book
+        Paperback p1 = paperbackRepository.findByTitle("The book of swords");
+        System.out.println(p1);
+
+        // this is a Paperback
+        Paperback p2 = paperbackRepository.findByTitle("The beatles anthology");
+        System.out.println(p2);
+    }
+    
+    @Transactional(readOnly = true)
+    public void fetchPaperbackByIsbn() {
+        // this is a e-Book
+        Paperback p1 = paperbackRepository.fetchByIsbn("003-AT");
+        System.out.println(p1);
+
+        // this is a Paperback
+        Paperback p2 = paperbackRepository.fetchByIsbn("002-AT");
+        System.out.println(p2);
+    }    
+    
+    @Transactional(readOnly = true)
+    public void fetchBookByTitle() {
+        Book book = bookRepository.findByTitle("The book of swords");
+        System.out.println(book);
+
+        Paperback paperback = paperbackRepository.findByTitle("The beatles anthology");
+        System.out.println(paperback);
+
+        Ebook ebook = ebookRepository.findByTitle("Anthology myths");
+        System.out.println(ebook);
     }
 
     @Transactional(readOnly = true)
-    public void fetchAuthorAndBooksEager() {
-        Author author = authorRepository.findAuthor();
-        System.out.println(author + " | " + author.getBooks());
+    public void fetchBookByIsbn() {
+        Book book = bookRepository.fetchByIsbn("001-AT");
+        System.out.println(book);
+
+        Paperback paperback = paperbackRepository.fetchByIsbn("002-AT");
+        System.out.println(paperback);
+
+        Ebook ebook = ebookRepository.fetchByIsbn("003-AT");
+        System.out.println(ebook);
+    }
+        
+    public void fetchEbookByFormat() {
+        List<Ebook> ebooks = ebookRepository.findByFormat("kindle");
+        System.out.println(ebooks);
+    }
+    
+    public void fetchAllEbook() {
+        List<Ebook> ebooks = ebookRepository.findAll();
+        System.out.println(ebooks);
+    }
+    
+    public void fetchEbookByFormatQuery() {
+        List<Ebook> ebooks = ebookRepository.fetchByFormat("kindle");
+        System.out.println(ebooks);
+    }
+    
+    public void fetchEbooksAndAuthorsJ() {
+        List<Ebook> ebooks = ebookRepository.fetchEbooksAndAuthorsJ();
+        System.out.println(ebooks + "   |   " + ebooks.get(0).getAuthor());
+    }
+
+    public void fetchEbooksAndAuthorsJF() {
+        List<Ebook> ebooks = ebookRepository.fetchEbooksAndAuthorsJF();
+        System.out.println(ebooks + "   |   " + ebooks.get(0).getAuthor());
+    }
+    
+    public void fetchEBookOfTitle() {
+        Ebook ebook = bookRepository.fetchEBookOfTitle("Anthology myths");
+        System.out.println(ebook);
+    }
+    
+    public void fetchEBooksOfTitleTreat() {
+        Ebook ebook = bookRepository.fetchEBooksOfTitleTreat("Anthology myths");
+        System.out.println(ebook);
+    }
+    
+    public void fetchEBookOfFormat() {
+        Ebook ebook = bookRepository.fetchEBookOfFormat("kindle");
+        System.out.println(ebook);
+    }
+
+    public void fetchEBooksOfFormatTreat() {
+        Ebook ebook = bookRepository.fetchEBooksOfFormatTreat("kindle");
+        System.out.println(ebook);
+    }
+    
+     @Transactional(readOnly = true)
+    public void fetchAuthorAndBooksLazy() {
+        Author author = authorRepository.findByName("Alicia Tom");
+        List<Book> books = author.getBooks();
+
+        System.out.println(author + "  |  " + books);
+        books.forEach(book -> System.out.println(book.getClass()));
+    }
+
+    public void fetchAuthorsWithBooks() {
+        List<Author> authors = authorRepository.fetchAuthorsWithBooks();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+    
+    public void fetchAuthorsWithEbooksTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsWithEbooksTreat();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+    
+    public void fetchAuthorsNoBooksTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsNoBooksTreat();
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // LazyInitializationException
+    }
+
+    public void fetchAuthorsNoBooksFormatTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsNoBooksFormatTreat("kindle");
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // LazyInitializationException
+    }
+    
+    public void fetchAuthorsNoBooksTitleTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsNoBooksTitleTreat("Anthology myths");
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // LazyInitializationException
     }
 }

@@ -25,7 +25,7 @@ public class Author implements Serializable {
     private int age;
 
     @OneToMany(cascade = CascadeType.ALL,
-            mappedBy = "author", orphanRemoval = true)
+            mappedBy = "author", orphanRemoval = true)    
     private List<Book> books = new ArrayList<>();
 
     public void addBook(Book book) {
