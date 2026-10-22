@@ -7,6 +7,7 @@ import com.bookstore.entity.Ebook;
 import com.bookstore.repository.EbookRepository;
 import org.springframework.stereotype.Service;
 import com.bookstore.repository.PaperbackRepository;
+import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -51,29 +52,37 @@ public class BookstoreService {
         ebookRepository.save(ebook);
     }
 
-    public void fetchPaperback() {
-        Paperback p1 = paperbackRepository.findByTitle("Anthology myths"); // this is a Ebook
-        System.out.println(p1); // prints null
+    @Transactional(readOnly = true)
+    public void fetchPaperbackByTitle() {
+        // this is a Ebook
+        Paperback p1 = paperbackRepository.findByTitle("Anthology myths");
+        System.out.println(p1);
 
-        Paperback p2 = paperbackRepository.findByTitle("The beatles anthology"); // this is a Paperback
+        // this is a Paperback
+        Paperback p2 = paperbackRepository.findByTitle("The beatles anthology");
         System.out.println(p2);
     }
-
-    public void fetchEbook() {
-        Ebook e1 = ebookRepository.findByTitle("The beatles anthology"); // this is a Paperback
-        System.out.println(e1); // prints null
-
-        Ebook e2 = ebookRepository.findByTitle("Anthology myths"); // this is a Ebook
-        System.out.println(e2);
+    
+    public void fetchPaperbacksByAuthorId() {
+        List<Paperback> paperbacks = paperbackRepository.fetchByAuthorId(1L);
+         System.out.println(paperbacks);
     }
 
-    public void fetchEbookByAuthorId() {
-        Ebook ebook = ebookRepository.fetchByAuthorId(1L);
+    @Transactional(readOnly = true)
+    public void fetchBookByTitle() {
+        Paperback paperback = paperbackRepository.findByTitle("The beatles anthology");
+        System.out.println(paperback);
+
+        Ebook ebook = ebookRepository.findByTitle("Anthology myths");
         System.out.println(ebook);
     }
 
-    public void fetchPaperbackByAuthorId() {
-        Paperback paperback = paperbackRepository.fetchByAuthorId(1L);
+    @Transactional(readOnly = true)
+    public void fetchBookByIsbn() {
+        Paperback paperback = paperbackRepository.fetchByIsbn("002-AT");
         System.out.println(paperback);
+
+        Ebook ebook = ebookRepository.fetchByIsbn("003-AT");
+        System.out.println(ebook);
     }
 }

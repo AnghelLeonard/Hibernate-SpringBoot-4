@@ -1,0 +1,23 @@
+-- insert books
+INSERT INTO book (title, content) VALUES
+('Mastering Spring Cloud Microservices', 'A comprehensive guide on building scalable and fault-tolerant microservices using Spring Cloud, Eureka, and Spring Cloud Gateway.'),
+('Effective Java Patterns', 'Deep dive into fundamental Java programming best practices, memory management, and clean code principles for modern developers.'),
+('Designing Data-Intensive Applications', 'An in-depth look at core database concepts, storage engines, indexing strategies, and distributed system architectures.'),
+('Spring Security in Action', 'Learn how to secure enterprise Java applications from scratch covering OAuth2, OpenID Connect, and custom JWT filters.'),
+('Kotlin for Enterprise Java Developers', 'A practical transition guide from modern Java to Kotlin for building backend services and Spring Boot applications.'),
+('Understanding MySQL Performance', 'Advanced techniques for query optimization, indexing strategies, database engine tuning, and analyzing slow query logs.'),
+('Clean Architecture in Java', 'How to structure enterprise applications using hexagonal architecture, domain-driven design, and strict layer separation.'),
+('Reactive Programming with Spring WebFlux', 'Building non-blocking asynchronous applications using Project Reactor, Netty, and reactive relational database drivers.'),
+('Kubernetes for Java Developers', 'A hands-on guide to containerizing Spring Boot applications, managing configurations, and deploying to cloud clusters.'),
+('Continuous Integration with Jenkins and Docker', 'Automating build pipelines, artifact management, and containerized integration testing for Java projects.'),
+('Java Concurrency and Multithreading', 'Mastering the java.util.concurrent package, virtual threads, synchronization mechanisms, and low-latency programming.'),
+('Enterprise Integration Patterns with Apache Camel', 'Implementing routing, mediation, and data transformation strategies between decoupled enterprise microservices.'),
+('Testing Spring Boot Applications', 'A definitive guide to unit testing, integration testing, Mockito, WireMock, and Testcontainers for databases.'),
+('Domain-Driven Design Quickly', 'An accessible introduction to strategic and tactical DDD patterns including aggregates, repositories, and value objects.'),
+('Pragmatic Microservices Architecture', 'Real-world lessons on breaking monoliths into microservices, eventual consistency, and distributed tracing with Zipkin.'),
+('Introduction to Apache Kafka', 'Event-driven architectures using Kafka brokers, producers, consumers, and building streaming pipelines with Spring Boot.'),
+('Modern Relational Database Design', 'Normalization, foreign keys, transaction isolation levels, and optimizing complex SQL joins for high throughput.'),
+('Building GraphQL APIs with Spring', 'A complete reference to designing flexible and efficient APIs using Spring Boot Starter GraphQL and schema stitching.'),
+('Java Performance Tuning Guide', 'Garbage collection analysis, JVM tuning parameters, memory leak detection, and profiling tools for production environments.'),
+('Spring Boot Cookbook', 'Over 50 practical recipes for solving common backend challenges, asynchronous processing, and scheduling tasks.'),
+('Cloud Native Java Applications', 'Developing twelve-factor apps optimized for AWS, Azure, and Google Cloud using Spring Boot and GraalVM native images.');

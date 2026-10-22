@@ -22,17 +22,18 @@ public class MainApplication {
         return args -> {
             System.out.println("\n\npersistAuthorWithBooks():");
             bookstoreService.persistAuthorWithBooks();
+            
+            System.out.println("\n\nfetchPaperbackByTitle():");
+            bookstoreService.fetchPaperbackByTitle();
+            
+            System.out.println("\n\nfetchPaperbacksByAuthorId():");
+            bookstoreService.fetchPaperbacksByAuthorId();
 
-            System.out.println("\n\nfetchPaperback():");
-            bookstoreService.fetchPaperback();
-            System.out.println("\n\nfetchEbook():");
-            bookstoreService.fetchEbook();
-
-            System.out.println("\n\nfetchEbookByAuthorId():");
-            bookstoreService.fetchEbookByAuthorId();
-
-            System.out.println("\n\nfetchPaperbackByAuthorId():");
-            bookstoreService.fetchPaperbackByAuthorId();
+            System.out.println("\n\nfetchBookByTitle():");
+            bookstoreService.fetchBookByTitle();
+            
+            System.out.println("\n\nfetchBookByIsbn():");
+            bookstoreService.fetchBookByIsbn();
         };
     }
 }
