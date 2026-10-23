@@ -24,7 +24,7 @@ public class Book implements Serializable {
     @ManyToMany(mappedBy = "books")
     private Set<Author> authors = new HashSet<>();
 
-    private Book() {
+    protected Book() {
     }
 
     public Book(Book book) {

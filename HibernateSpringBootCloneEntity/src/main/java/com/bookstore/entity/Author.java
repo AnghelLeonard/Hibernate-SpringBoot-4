@@ -33,7 +33,7 @@ public class Author implements Serializable {
     )
     private Set<Book> books = new HashSet<>();
 
-    private Author() {
+    protected Author() {
     }
 
     public Author(Author author, boolean cloneChildren) {
