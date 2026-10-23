@@ -23,6 +23,7 @@ public class Author implements Serializable {
 
     // @Convert(converter = BooleanConverter.class)
     @NotNull
+    // @JdbcTypeCode(java.sql.Types.VARCHAR) // convert 'true' to 'Y' and 'false' to 'N'
     private Boolean bestSelling;
 
     public Long getId() {

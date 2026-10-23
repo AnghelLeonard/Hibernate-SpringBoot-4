@@ -10,7 +10,7 @@ public class BooleanConverter implements AttributeConverter<Boolean, String> {
     public String convertToDatabaseColumn(Boolean attr) {
         System.out.println("Convert boolean to yes/no ...");
 
-        return attr == null ? "No" : "Yes";
+        return (attr == null || attr == false) ? "No" : "Yes";
     }
 
     @Override
