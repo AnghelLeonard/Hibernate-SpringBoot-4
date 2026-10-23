@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface AuthorRepository extends JpaRepository<Author, Long> {
-    
-    @Transactional(readOnly=true)
-    Author findByName(String name);
+@Transactional(readOnly = true)
+public interface AuthorRepository extends JpaRepository<Author, Long> {            
 }

@@ -21,3 +21,12 @@ CREATE TABLE `book` (
   CONSTRAINT `book_pk` PRIMARY KEY (`id`),
   CONSTRAINT `book_author_fk` FOREIGN KEY (`author_id`) REFERENCES `author` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Table `bookstore_clerks`
+CREATE TABLE `bookstore_clerk` (
+    `id`         BIGINT       NOT NULL AUTO_INCREMENT,
+    `first_name` VARCHAR(255) NOT NULL,
+    `last_name`  VARCHAR(255) NOT NULL,
+    `age`        INTEGER      NOT NULL,
+    CONSTRAINT bookstore_clerk_pk PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
