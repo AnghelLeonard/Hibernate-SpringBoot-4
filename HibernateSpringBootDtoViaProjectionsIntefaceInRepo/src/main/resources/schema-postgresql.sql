@@ -1,10 +1,10 @@
 -- Drop tables
-DROP TABLE IF EXISTS "author" CASCADE;
+DROP TABLE IF EXISTS "author", "book" CASCADE;
 
 -- Table author
 CREATE TABLE "author" (
-  "age"   INTEGER NOT NULL, 
-  "id"    BIGINT  NOT NULL, 
-  "genre" VARCHAR(255), 
-  "name"  VARCHAR(255), 
+  "id"    BIGINT        NOT NULL,
+  "age"   INTEGER,    
+  "genre" VARCHAR(255),
+  "name"  VARCHAR(255),
   CONSTRAINT "author_pk" PRIMARY KEY ("id"))
