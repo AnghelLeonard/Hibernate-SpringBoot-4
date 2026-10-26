@@ -23,6 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>26</java.version>
         <maven.compiler.release>26</maven.compiler.release>
+        <be.version>7.0.10.Final</be.version>    
     </properties>
 
     <dependencies>
@@ -39,10 +40,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>   
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>                           
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>                          
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -59,7 +59,7 @@
             <plugin>  
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-maven-plugin</artifactId>  
-                <version>7.0.10.Final</version>
+                <version>${be.version}</version>
                 <executions>  
                     <execution>  
                         <configuration>                                                                                    
