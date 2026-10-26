@@ -1,5 +1,5 @@
 package com.bookstore;
- 
+
 import com.bookstore.projection.AuthorNameAge;
 import java.util.List;
 import com.bookstore.service.BookstoreService;
@@ -24,15 +24,22 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {
-
-            List<AuthorNameAge> authors = bookstoreService.fetchByGenre(); // or, fetchFirst2ByGenre()
-
-            System.out.println("Number of authors:" + authors.size());
-
-            for (AuthorNameAge author : authors) {
-                System.out.println("Author name: " + author.getName() 
-                        + " | Age: " + author.getAge());
-            }
+            
+            displayAuthors(bookstoreService.fetchByGenre1());
+            displayAuthors(bookstoreService.fetchByGenre2());
+            displayAuthors(bookstoreService.fetchByGenre3());
+            displayAuthors(bookstoreService.fetchByGenre4());
+            displayAuthors(bookstoreService.fetchByGenre5());
         };
+    }
+
+    public void displayAuthors(List<AuthorNameAge> authors) {
+
+        System.out.println("Number of authors:" + authors.size());
+
+        for (AuthorNameAge author : authors) {
+            System.out.println("Author name: " + author.getName()
+                    + " | Age: " + author.getAge());
+        }
     }
 }

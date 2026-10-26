@@ -15,13 +15,13 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<AuthorNameAge> findFirst2ByGenre() {
+    public List<AuthorNameAge> findFirst2ByGenreOrderByName() {
 
-        return authorRepository.findFirst2ByGenre("Anthology");
+        return authorRepository.findFirst2ByGenreOrderByName("Anthology");
     }
     
-    public List<AuthorNameAge> findByGenre() {
+    public List<AuthorNameAge> findByGenreOrderByName() {
 
-        return authorRepository.findByGenre("Anthology", Limit.of(2));
+        return authorRepository.findByGenreOrderByName("Anthology", Limit.of(2));
     }
 }

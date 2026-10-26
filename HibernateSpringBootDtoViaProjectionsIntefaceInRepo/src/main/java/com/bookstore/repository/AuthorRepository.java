@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface AuthorRepository extends JpaRepository<Author, Long> {
     
-    List<AuthorNameAge> findFirst2ByGenre(String genre);
-    List<AuthorNameAge> findByGenre(String genre, Limit limit);
+    List<AuthorNameAge> findFirst2ByGenreOrderByName(String genre);
+    List<AuthorNameAge> findByGenreOrderByName(String genre, Limit limit);       
 
     public static interface AuthorNameAge {
 
@@ -20,4 +20,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
         int getAge();
     }
+    
+    // public record AuthorNameAge(String name, Integer age) {}
 }

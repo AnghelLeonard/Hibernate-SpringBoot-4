@@ -17,12 +17,12 @@ public class BookstoreController {
 
     @GetMapping("/byGenre")
     public List<AuthorRepository.AuthorNameAge> fetchByGenre() {
-        return bookstoreService.findByGenre();
+        return bookstoreService.findByGenreOrderByName();
     }
     
     @GetMapping("/first2ByGenre")
     public List<AuthorRepository.AuthorNameAge> fetchFirst2ByGenre() {
-        return bookstoreService.findFirst2ByGenre();
+        return bookstoreService.findFirst2ByGenreOrderByName();
     }
 
 }

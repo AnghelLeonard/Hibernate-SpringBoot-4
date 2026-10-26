@@ -29,4 +29,14 @@ public class BookstoreService {
 
         return authorRepository.fetchByGenre3("Anthology", Limit.of(2));
     }
+    
+    public List<AuthorNameAge> fetchByGenre4() {
+
+        return authorRepository.fetchByGenre4("Anthology");
+    }
+    
+    public List<AuthorNameAge> fetchByGenre5() {
+
+        return authorRepository.fetchByGenre5("Anthology", Limit.of(2));
+    }    
 }

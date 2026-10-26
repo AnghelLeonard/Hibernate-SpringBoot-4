@@ -25,13 +25,17 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            List<AuthorNameAge> authors = bookstoreService.findByGenre(); // or, findFirst2ByGenre()
+            List<AuthorNameAge> authors = bookstoreService.findFirst2ByGenreOrderByName(); // or, findByGenreOrderByName()
 
             System.out.println("Number of authors:" + authors.size());
 
             for (AuthorNameAge author : authors) {
                 System.out.println("Author name: " + author.getName() 
                         + " | Age: " + author.getAge());
+                
+                // for Java record
+                // System.out.println("Author name: " + author.name() 
+                //        + " | Age: " + author.age());
             }
         };
     }
