@@ -7,11 +7,11 @@
         
     <!-- Find the names of authors -->
     <named-query name="Author.fetchName">
-        <query>SELECT a.name FROM Author a</query>
+        <query>SELECT a.name FROM Author a ORDER BY a.name</query>
     </named-query>
     
     <!-- Find the names and ages of authors -->
     <named-query name="Author.fetchNameAndAge">
-        <query>SELECT a.age AS age, a.name AS name FROM Author a</query>
+        <query>SELECT a.age AS age, a.name AS name FROM Author a ORDER BY a.name</query>
     </named-query>
 </entity-mappings>

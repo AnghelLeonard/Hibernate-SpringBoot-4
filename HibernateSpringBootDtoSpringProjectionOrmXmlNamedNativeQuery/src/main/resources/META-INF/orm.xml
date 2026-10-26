@@ -7,11 +7,11 @@
         
     <!-- Find the names of authors -->
     <named-native-query name="Author.fetchName">
-        <query>SELECT name FROM author</query>
+        <query>SELECT name FROM author ORDER BY name</query>
     </named-native-query>
     
     <!-- Find the names and ages of authors -->
     <named-native-query name="Author.fetchNameAndAge">
-        <query>SELECT age, name FROM author</query>
+        <query>SELECT age, name FROM author ORDER BY name</query>
     </named-native-query>
 </entity-mappings>
