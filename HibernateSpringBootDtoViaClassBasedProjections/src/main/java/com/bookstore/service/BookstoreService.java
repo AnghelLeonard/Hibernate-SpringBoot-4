@@ -1,7 +1,7 @@
 package com.bookstore.service;
 
 import java.util.List;
-import com.bookstore.projection.AuthorNameAge;
+import com.bookstore.dto.AuthorNameAge;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +14,8 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<AuthorNameAge> findFirst2ByGenre() {
+    public List<AuthorNameAge> findFirst2ByGenreOrderByName() {
 
-        return authorRepository.findFirst2ByGenre("Anthology");
+        return authorRepository.findFirst2ByGenreOrderByName("Anthology");
     }
 }

@@ -1,6 +1,6 @@
 package com.bookstore;
  
-import com.bookstore.projection.AuthorNameAge;
+import com.bookstore.dto.AuthorNameAge;
 import java.util.List;
 import com.bookstore.service.BookstoreService;
 import org.springframework.boot.ApplicationRunner;
@@ -25,7 +25,7 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            List<AuthorNameAge> authors = bookstoreService.findFirst2ByGenre();
+            List<AuthorNameAge> authors = bookstoreService.findFirst2ByGenreOrderByName();
 
             System.out.println("Number of authors:" + authors.size());
 

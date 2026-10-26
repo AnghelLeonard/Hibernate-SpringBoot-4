@@ -1,13 +1,16 @@
-package com.bookstore.projection;
+package com.bookstore.dto;
 
 import java.util.Objects;
+
+// or, as a Java record
+// public record AuthorNameAge(Integer age, String name) {}
 
 public class AuthorNameAge {
     
     private String name;
-    private int age;
+    private Integer age;
 
-    public AuthorNameAge(String name, int age) {
+    public AuthorNameAge(String name, Integer age) {
         this.name = name;
         this.age = age;
     }
@@ -20,19 +23,19 @@ public class AuthorNameAge {
         this.name = name;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 79 * hash + Objects.hashCode(this.name);
-        hash = 79 * hash + this.age;
+        int hash = 5;
+        hash = 67 * hash + Objects.hashCode(this.name);
+        hash = 67 * hash + Objects.hashCode(this.age);
         return hash;
     }
 
@@ -52,14 +55,10 @@ public class AuthorNameAge {
         }
         
         final AuthorNameAge other = (AuthorNameAge) obj;
-        if (this.age != other.age) {
-            return false;
-        }
-        
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
         
-        return true;
-    }       
+        return Objects.equals(this.age, other.age);
+    }    
 }
