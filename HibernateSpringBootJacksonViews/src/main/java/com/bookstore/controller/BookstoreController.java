@@ -1,6 +1,6 @@
 package com.bookstore.controller;
 
-import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.AuthorSummary;
 import com.bookstore.dto.Views;
 import com.bookstore.service.BookstoreService;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -19,19 +19,19 @@ public class BookstoreController {
 
     @GetMapping("/1")
     @JsonView(Views.NameEmail.class)
-    public List<AuthorDto> findNameEmailBy() {
+    public List<AuthorSummary> findNameEmailBy() {
         return bookstoreService.findBy();
     }
 
     @GetMapping("/2")
     @JsonView(Views.NameEmailAgeGenre.class)
-    public List<AuthorDto> findNameEmailAgeGenreBy() {
+    public List<AuthorSummary> findNameEmailAgeGenreBy() {
         return bookstoreService.findBy();
     }
     
     @GetMapping("/3")
     @JsonView(Views.All.class)
-    public List<AuthorDto> findAllBy() {
+    public List<AuthorSummary> findAllBy() {
         return bookstoreService.findBy();
     }
 }

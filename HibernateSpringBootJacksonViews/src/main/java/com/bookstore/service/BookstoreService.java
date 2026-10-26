@@ -1,10 +1,9 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.AuthorSummary;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookstoreService {
@@ -15,10 +14,9 @@ public class BookstoreService {
 
         this.authorRepository = authorRepository;
     }
-
-    @Transactional(readOnly = true)
-    public List<AuthorDto> findBy() {
-        List<AuthorDto> authors = authorRepository.findBy();
+    
+    public List<AuthorSummary> findBy() {
+        List<AuthorSummary> authors = authorRepository.findBy();
 
         return authors;
     }   

@@ -2,7 +2,7 @@ package com.bookstore.dto;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-public record AuthorDto(
+public record AuthorSummary(
         @JsonView(Views.NameEmail.class)
         String name,
         @JsonView(Views.NameEmail.class)
