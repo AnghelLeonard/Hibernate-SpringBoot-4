@@ -12,7 +12,7 @@ public class BaseAuthor implements Serializable {
     @Id
     private Long id;
 
-    private int age;
+    private Integer age;
     private String name;
     private String genre;
 
@@ -40,16 +40,17 @@ public class BaseAuthor implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
     @Override
     public String toString() {
-        return "Author{" + "name=" + name + "}";
-    }
+        return "BaseAuthor{" + "id=" + id + ", age=" + age 
+                + ", name=" + name + ", genre=" + genre + '}';
+    }   
 }
