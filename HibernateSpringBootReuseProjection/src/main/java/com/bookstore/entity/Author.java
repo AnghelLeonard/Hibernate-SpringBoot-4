@@ -17,7 +17,7 @@ public class Author implements Serializable {
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
     private String email;
     private String address;
     private String rating;
@@ -46,11 +46,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

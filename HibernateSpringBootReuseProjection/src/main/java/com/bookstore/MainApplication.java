@@ -24,6 +24,7 @@ public class MainApplication {
         return args -> {
             System.out.println("\n\n Fetch all:");
             System.out.println("---------------------------------");
+            bookstoreService.findAllBy();
             bookstoreService.fetchAll();
             
             System.out.println("\n\n Fetch age, name and genre:");
