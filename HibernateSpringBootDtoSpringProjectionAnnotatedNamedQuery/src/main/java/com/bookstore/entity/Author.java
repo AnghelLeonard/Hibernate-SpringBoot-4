@@ -1,31 +1,28 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
 import java.io.Serializable;
 
 @NamedQuery(
         name = "Author.fetchName",
-        query = "SELECT a.name FROM Author a"
+        query = "SELECT a.name FROM Author a ORDER BY a.name"
 )
 
 @NamedQuery(
         name = "Author.fetchNameAndAge",
-        query = "SELECT a.age AS age, a.name AS name FROM Author a"
+        query = "SELECT a.age AS age, a.name AS name FROM Author a ORDER BY a.name"
 )
 @Entity
 public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
-    private int age;
+    private Integer age;
     private String name;
     private String genre;
 
@@ -53,11 +50,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

@@ -3,5 +3,8 @@ package com.bookstore.dto;
 public interface AuthorNameAge {
      
     public String getName();
-    public int getAge();   
+    public Integer getAge();   
 }
+
+// or, as a Java record
+// public record AuthorNameAge(Integer age, String name) {}

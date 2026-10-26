@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import com.bookstore.dto.AuthorNameAge;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.NativeQuery;
 
 @Repository
@@ -14,9 +16,9 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     // Scalar Mapping
     @NativeQuery
-    List<String> fetchName();
+    List<String> fetchName(Sort sort, Limit limit);
   
     // Spring projection
     @NativeQuery
-    List<AuthorNameAge> fetchNameAndAge();
+    List<AuthorNameAge> fetchNameAndAge(Sort sort, Limit limit);
 }
