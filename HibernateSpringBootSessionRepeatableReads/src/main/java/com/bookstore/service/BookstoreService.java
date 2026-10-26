@@ -24,10 +24,8 @@ public class BookstoreService {
 
         template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-        // We use MySQL 8 InnoDB.
-        // The default isolation level for InnoDB is REPEATABLE READ, therefore
-        // we need to switch to READ_COMMITTED to reveal how Hibernate session-level
-        // repeatable reads works
+        // PostgreSQL has the default Isolation level: READ_COMMITTED
+        // But, if you will swtich to MySQL then the default will be REPEATABLE_READ        
         template.setIsolationLevel(Isolation.READ_COMMITTED.value());
         
         // Transaction A
