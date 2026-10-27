@@ -4,13 +4,13 @@ import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
-import com.bookstore.dto.BookstoreDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.Map;
 import org.hibernate.engine.spi.EntityEntry;
 import org.hibernate.engine.spi.EntityKey;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import com.bookstore.dto.Bookstore;
 
 @Service
 public class BookstoreService {
@@ -25,11 +25,11 @@ public class BookstoreService {
     }
 
     @Transactional
-    public List<BookstoreDto> fetchAuthors() {
+    public List<Bookstore> fetchAuthors() {
         
         briefOverviewOfPersistentContextContent();
 
-        List<BookstoreDto> dto = authorRepository.fetchAll();
+        List<Bookstore> dto = authorRepository.fetchAll();
         
         briefOverviewOfPersistentContextContent();
         

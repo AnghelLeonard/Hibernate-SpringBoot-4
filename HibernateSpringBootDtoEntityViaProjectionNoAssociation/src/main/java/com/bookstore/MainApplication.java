@@ -6,7 +6,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import com.bookstore.dto.BookstoreDto;
+import com.bookstore.dto.Bookstore;
 
 @SpringBootApplication
 public class MainApplication {
@@ -25,7 +25,7 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            List<BookstoreDto> authors = bookstoreService.fetchAuthors();
+            List<Bookstore> authors = bookstoreService.fetchAuthors();
             authors.forEach(a -> System.out.println(a.getAuthor() + ", Title: " + a.getTitle()));
         };
     }
