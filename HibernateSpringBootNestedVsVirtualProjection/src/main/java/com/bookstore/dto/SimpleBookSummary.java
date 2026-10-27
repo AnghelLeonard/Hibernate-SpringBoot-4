@@ -1,6 +1,6 @@
 package com.bookstore.dto;
 
-public interface SimpleBookDto {
+public interface SimpleBookSummary {
     
     public String getTitle(); // of book       
     public Integer getRank(); // of book

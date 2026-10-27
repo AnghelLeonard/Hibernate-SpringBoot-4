@@ -1,8 +1,5 @@
 package com.bookstore.service;
 
-import com.bookstore.dto.BookDto;
-import com.bookstore.dto.SimpleBookDto;
-import com.bookstore.dto.VirtualBookDto;
 import java.util.Arrays;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -14,6 +11,12 @@ import com.bookstore.repository.BookRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.engine.spi.EntityKey;
+import com.bookstore.dto.BookSummary;
+import com.bookstore.dto.SimpleBookSummary;
+import com.bookstore.dto.VirtualBookSummary;
+import com.bookstore.dto.RecordBookSummary;
+import com.bookstore.dto.RecordBookView;
+import com.bookstore.dto.SimpleRecordBookSummary;
 
 @Service
 public class BookstoreService {
@@ -29,11 +32,11 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookDto> fetchBooksWithAuthorsQueryBuilderMechanism() {
-        List<BookDto> books = bookRepository.findByOrderByRankAsc();
+    public List<BookSummary> fetchBooksWithAuthorsQueryBuilderMechanism() {
+        List<BookSummary> books = bookRepository.findAllByOrderByRankAsc();
 
         System.out.println("\nResult set:");
-        books.forEach(b -> System.out.println(b.getTitle() + ", "
+        books.forEach(b -> System.out.println(b.getTitle() + ", " + b.getRank() + ", "
                 + b.getAuthor().getName() + ", " + b.getAuthor().getGenre()));
 
         briefOverviewOfPersistentContextContent();
@@ -42,11 +45,11 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookDto> fetchBooksWithAuthorsViaQuery() {
-        List<BookDto> books = bookRepository.findByViaQuery();
+    public List<BookSummary> fetchBooksWithAuthorsViaQuery() {
+        List<BookSummary> books = bookRepository.findByViaQuery();
 
         System.out.println("\nResult set:");
-        books.forEach(b -> System.out.println(b.getTitle() + ", "
+        books.forEach(b -> System.out.println(b.getTitle() + ", " + b.getRank() + ", "
                 + b.getAuthor().getName() + ", " + b.getAuthor().getGenre()));
 
         briefOverviewOfPersistentContextContent();
@@ -55,30 +58,17 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<SimpleBookDto> fetchBooksWithAuthorsViaQuerySimpleDto() {
-        List<SimpleBookDto> books = bookRepository.findByViaQuerySimpleDto();
+    public List<SimpleBookSummary> fetchBooksWithAuthorsViaQuerySimpleDto() {
+        List<SimpleBookSummary> books = bookRepository.findByViaQuerySimpleDto();
 
         System.out.println("\nResult set:");
-        books.forEach(b -> System.out.println(b.getTitle() + ", "
+        books.forEach(b -> System.out.println(b.getTitle() + ", " + b.getRank() + ", "
                 + b.getName() + ", " + b.getGenre()));
 
         briefOverviewOfPersistentContextContent();
 
         return books;
-    }
-
-    @Transactional(readOnly = true)
-    public List<VirtualBookDto> fetchBooksWithAuthorsViaQueryVirtualDto() {
-        List<VirtualBookDto> books = bookRepository.findByViaQueryVirtualDto();
-
-        System.out.println("\nResult set:");
-        books.forEach(b -> System.out.println(b.getTitle() + ", "
-                + b.getAuthor().getName() + ", " + b.getAuthor().getGenre()));
-
-        briefOverviewOfPersistentContextContent();
-
-        return books;
-    }
+    }    
 
     @Transactional(readOnly = true)
     public List<Object[]> fetchBooksWithAuthorsViaArrayOfObjects() {
@@ -90,7 +80,59 @@ public class BookstoreService {
         briefOverviewOfPersistentContextContent();
 
         return books;
-    }        
+    }       
+    
+    @Transactional(readOnly = true)
+    public List<VirtualBookSummary> fetchBooksWithAuthorsViaQueryVirtualDto() {
+        List<VirtualBookSummary> books = bookRepository.findByViaQueryVirtualDto();
+
+        System.out.println("\nResult set:");
+        books.forEach(b -> System.out.println(b.getTitle() + ", " + b.getRank() + ", "
+                + b.getAuthor().getName() + ", " + b.getAuthor().getGenre()));
+
+        briefOverviewOfPersistentContextContent();
+
+        return books;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<RecordBookSummary> fetchBooksWithAuthorsViaQueryRecordDto() {
+        List<RecordBookSummary> books = bookRepository.findByViaQueryRecordDto();
+
+        System.out.println("\nResult set:");
+        books.forEach(b -> System.out.println(b.title() + ", " + b.rank() + ", "
+                + b.author().name() + ", " + b.author().genre()));
+
+        briefOverviewOfPersistentContextContent();
+
+        return books;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<SimpleRecordBookSummary> fetchByViaQuerySimpleRecordDto() {
+        List<SimpleRecordBookSummary> books = bookRepository.findByViaQuerySimpleRecordDto();
+
+        System.out.println("\nResult set:");
+        books.forEach(b -> System.out.println(b.title() + ", " + b.rank() + ", "
+                + b.author().name() + ", " + b.author().genre()));
+
+        briefOverviewOfPersistentContextContent();
+
+        return books;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<RecordBookView> fetchByViaQuerySimpleRecordView() {
+        List<RecordBookView> books = bookRepository.findByViaQuerySimpleRecordView();
+
+        System.out.println("\nResult set:");
+        books.forEach(b -> System.out.println(b.title() + ", " + b.rank() + ", "
+                + b.author().name() + ", " + b.author().genre()));
+
+        briefOverviewOfPersistentContextContent();
+
+        return books;
+    }
 
     private void briefOverviewOfPersistentContextContent() {
         org.hibernate.engine.spi.PersistenceContext persistenceContext = getPersistenceContext();

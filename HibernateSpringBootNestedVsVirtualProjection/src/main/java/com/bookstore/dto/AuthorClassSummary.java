@@ -2,7 +2,7 @@ package com.bookstore.dto;
 
 import java.util.Objects;
 
-public class AuthorClassDto {
+public class AuthorClassSummary {
     
     private String genre;
     private String name;
@@ -46,7 +46,7 @@ public class AuthorClassDto {
             return false;
         }
         
-        final AuthorClassDto other = (AuthorClassDto) obj;
+        final AuthorClassSummary other = (AuthorClassSummary) obj;
         if (!Objects.equals(this.genre, other.genre)) {
             return false;
         }

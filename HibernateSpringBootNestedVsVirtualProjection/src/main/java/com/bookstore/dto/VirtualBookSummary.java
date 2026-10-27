@@ -2,11 +2,11 @@ package com.bookstore.dto;
 
 import org.springframework.beans.factory.annotation.Value;
 
-public interface VirtualBookDto {
+public interface VirtualBookSummary {
     
     public String getTitle(); // of book
     public Integer getRank(); // of rank
     
-    @Value("#{@authorMapper.buildAuthorDto(target.name, target.genre)}")
-    AuthorClassDto getAuthor();
+    @Value("#{@authorMapper.buildAuthorSummary(target.name, target.genre)}")
+    AuthorClassSummary getAuthor();
 }

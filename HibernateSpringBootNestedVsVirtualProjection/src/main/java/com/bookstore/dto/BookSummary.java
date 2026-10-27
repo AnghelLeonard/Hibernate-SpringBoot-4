@@ -1,12 +1,12 @@
 package com.bookstore.dto;
 
-public interface BookDto {
+public interface BookSummary {
 
     public String getTitle();
     public Integer getRank();
-    public AuthorDto getAuthor();
+    public AuthorSummary getAuthor();
     
-    interface AuthorDto {
+    interface AuthorSummary {
         
         public String getName();
         public String getGenre();
