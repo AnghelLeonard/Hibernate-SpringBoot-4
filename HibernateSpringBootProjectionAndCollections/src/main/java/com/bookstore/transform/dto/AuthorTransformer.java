@@ -9,30 +9,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthorTransformer {
 
-    public List<AuthorDto> transform(List<Object[]> rs) {
+    public List<AuthorSummary> transform(List<Object[]> rs) {
 
-        final Map<Long, AuthorDto> authorsDtoMap = new HashMap<>();
+        final Map<Long, AuthorSummary> authorsSummaryMap = new HashMap<>();
 
         for (Object[] o : rs) {
             
             Long authorId = ((Number) o[0]).longValue();
 
-            AuthorDto authorDto = authorsDtoMap.get(authorId);
-            if (authorDto == null) {
-                authorDto = new AuthorDto();
-                authorDto.setId(((Number) o[0]).longValue());
-                authorDto.setName((String) o[1]);
-                authorDto.setGenre((String) o[2]);
+            AuthorSummary authorSummary = authorsSummaryMap.get(authorId);
+            if (authorSummary == null) {
+                authorSummary = new AuthorSummary();
+                authorSummary.setId(((Number) o[0]).longValue());
+                authorSummary.setName((String) o[1]);
+                authorSummary.setGenre((String) o[2]);
             }
 
-            BookDto bookDto = new BookDto();
-            bookDto.setId(((Number) o[3]).longValue());
-            bookDto.setTitle((String) o[4]);
+            BookSummary bookSummary = new BookSummary();
+            bookSummary.setId(((Number) o[3]).longValue());
+            bookSummary.setTitle((String) o[4]);
 
-            authorDto.addBook(bookDto);
-            authorsDtoMap.putIfAbsent(authorDto.getId(), authorDto);
+            authorSummary.addBook(bookSummary);
+            authorsSummaryMap.putIfAbsent(authorSummary.getId(), authorSummary);
         }
 
-        return new ArrayList<>(authorsDtoMap.values());
+        return new ArrayList<>(authorsSummaryMap.values());
     }
 }

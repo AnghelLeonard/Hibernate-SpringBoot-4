@@ -2,17 +2,17 @@ package com.bookstore.jdbc.template.dto;
 
 import java.io.Serializable;
 
-public class BookDto implements Serializable {
+public class BookSummary implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Long bookId;
     private String title;
 
-    public BookDto() {
+    public BookSummary() {
     }
 
-    public BookDto(Long bookId, String title) {
+    public BookSummary(Long bookId, String title) {
         this.bookId = bookId;
         this.title = title;
     }

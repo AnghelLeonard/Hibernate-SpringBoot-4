@@ -1,6 +1,6 @@
 package com.bookstore.spring.dto;
 
-public interface SimpleAuthorDto {
+public interface SimpleAuthorSummary {
 
     public String getName();  // of author
     public String getGenre(); // of author

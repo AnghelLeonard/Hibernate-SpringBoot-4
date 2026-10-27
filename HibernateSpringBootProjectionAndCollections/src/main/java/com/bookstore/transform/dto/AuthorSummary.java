@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AuthorDto implements Serializable {
+// if you use a Java record then you'll have to modify AuthorTransformer accordingly
+// public record AuthorSummary(Long authorId, String name, String genre, List<BookSummary> books) {}
+
+public class AuthorSummary implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -12,12 +15,12 @@ public class AuthorDto implements Serializable {
     private String name;
     private String genre;
 
-    private List<BookDto> books = new ArrayList<>();
+    private List<BookSummary> books = new ArrayList<>();
 
-    public AuthorDto() {
+    public AuthorSummary() {
     }
 
-    public AuthorDto(Long authorId, String name, String genre) {
+    public AuthorSummary(Long authorId, String name, String genre) {
         this.authorId = authorId;
         this.name = name;
         this.genre = genre;
@@ -47,15 +50,15 @@ public class AuthorDto implements Serializable {
         this.genre = genre;
     }
 
-    public List<BookDto> getBooks() {
+    public List<BookSummary> getBooks() {
         return books;
     }
 
-    public void setBooks(List<BookDto> books) {
+    public void setBooks(List<BookSummary> books) {
         this.books = books;
     }
 
-    public void addBook(BookDto book) {
+    public void addBook(BookSummary book) {
         books.add(book);
     }
 

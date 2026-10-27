@@ -2,13 +2,13 @@ package com.bookstore.spring.dto;
 
 import java.util.List;
 
-public interface AuthorDto {
+public interface AuthorSummary {
 
     public String getName();
     public String getGenre();
-    public List<BookDto> getBooks();
+    public List<BookSummary> getBooks();
 
-    interface BookDto {
+    interface BookSummary {
         public String getTitle();
     }
 }

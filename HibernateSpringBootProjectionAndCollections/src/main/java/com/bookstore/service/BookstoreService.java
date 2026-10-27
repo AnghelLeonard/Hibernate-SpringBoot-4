@@ -1,8 +1,8 @@
 package com.bookstore.service;
 
 import com.bookstore.jdbc.template.dto.AuthorExtractor;
-import com.bookstore.spring.dto.AuthorDto;
-import com.bookstore.spring.dto.SimpleAuthorDto;
+import com.bookstore.record.dto.FlatRecordAuthorBook;
+import com.bookstore.record.dto.RecordAuthorSummary;
 import com.bookstore.repository.AuthorRepository;
 import com.bookstore.transform.dto.AuthorTransformer;
 import jakarta.persistence.EntityManager;
@@ -11,11 +11,14 @@ import java.util.Arrays;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.hibernate.engine.spi.EntityEntry;
 import org.hibernate.engine.spi.EntityKey;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.springframework.transaction.annotation.Transactional;
+import com.bookstore.spring.dto.AuthorSummary;
+import com.bookstore.spring.dto.SimpleAuthorSummary;
+import java.util.AbstractMap;
+import java.util.stream.Collectors;
 
 @Service
 public class BookstoreService {
@@ -39,8 +42,8 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuthorDto> fetchAuthorsWithBooksQueryBuilderMechanism() {
-        List<AuthorDto> authors = authorRepository.findBy();
+    public List<AuthorSummary> fetchAuthorsWithBooksQueryBuilderMechanism() {
+        List<AuthorSummary> authors = authorRepository.findBy();
 
         System.out.println("\nResult set:");
         authors.forEach(a -> {
@@ -54,8 +57,8 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuthorDto> fetchAuthorsWithBooksViaQuery() {
-        List<AuthorDto> authors = authorRepository.findByViaQuery();
+    public List<AuthorSummary> fetchAuthorsWithBooksViaQuery() {
+        List<AuthorSummary> authors = authorRepository.findByViaQuery();
 
         System.out.println("\nResult set:");
         authors.forEach(a -> {
@@ -69,8 +72,8 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public Set<AuthorDto> fetchAuthorsWithBooksViaJoinFetch() {
-        Set<AuthorDto> authors = authorRepository.findByJoinFetch();
+    public List<AuthorSummary> fetchAuthorsWithBooksViaJoinFetch() {
+        List<AuthorSummary> authors = authorRepository.findByJoinFetch();
 
         System.out.println("\nResult set:");
         authors.forEach(a -> {
@@ -84,8 +87,8 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<SimpleAuthorDto> fetchAuthorsWithBooksViaQuerySimpleDto() {
-        List<SimpleAuthorDto> authors = authorRepository.findByViaQuerySimpleDto();
+    public List<SimpleAuthorSummary> fetchAuthorsWithBooksViaQuerySimpleDto() {
+        List<SimpleAuthorSummary> authors = authorRepository.findByViaQuerySimpleDto();
 
         System.out.println("\nResult set:");
         authors.forEach(a -> {
@@ -95,6 +98,31 @@ public class BookstoreService {
         briefOverviewOfPersistentContextContent();
 
         return authors;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecordAuthorSummary> fetchAuthorsWithBooksViaQueryRecordDto() {
+        List<FlatRecordAuthorBook> authors = authorRepository.findByViaQueryRecordDto();
+
+        System.out.println("\nResult set:");
+        authors.forEach(a -> {
+            System.out.println(a.name() + ", " + a.genre() + ", " + a.title());
+        });
+
+        briefOverviewOfPersistentContextContent();
+
+        return authors.stream()
+                .collect(Collectors.groupingBy(
+                        flat -> new AbstractMap.SimpleEntry<>(flat.name(), flat.genre()),
+                        Collectors.mapping(flat -> new RecordAuthorSummary.RecordBookSummary(
+                        flat.title()), Collectors.toList())
+                ))
+                .entrySet().stream()
+                .map(entry -> new RecordAuthorSummary(
+                entry.getKey().getKey(), // name
+                entry.getKey().getValue(), // genre
+                entry.getValue() // List<RecordBookSummary>
+        )).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -110,24 +138,24 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<com.bookstore.transform.dto.AuthorDto> fetchAuthorsWithBooksViaArrayOfObjectsAndTransformToDto() {
+    public List<com.bookstore.transform.dto.AuthorSummary> fetchAuthorsWithBooksViaArrayOfObjectsAndTransformToDto() {
 
         List<Object[]> authors = authorRepository.findByViaArrayOfObjectsWithIds();
-        List<com.bookstore.transform.dto.AuthorDto> authorsDto = authorTransformer.transform(authors);
+        List<com.bookstore.transform.dto.AuthorSummary> authorsSummary = authorTransformer.transform(authors);
 
         System.out.println("\nResult set:");
         authors.forEach(a -> System.out.println(Arrays.toString(a)));
 
         briefOverviewOfPersistentContextContent();
 
-        return authorsDto;
+        return authorsSummary;
     }
 
     @Transactional(readOnly = true)
-    public List<com.bookstore.jdbc.template.dto.AuthorDto> fetchAuthorsWithBooksViaJdbcTemplateToDto() {
+    public List<com.bookstore.jdbc.template.dto.AuthorSummary> fetchAuthorsWithBooksViaJdbcTemplateToDto() {
 
-        List<com.bookstore.jdbc.template.dto.AuthorDto> authors = authorExtractor.extract();
-        
+        List<com.bookstore.jdbc.template.dto.AuthorSummary> authors = authorExtractor.extract();
+
         System.out.println("\nResult set:");
         authors.forEach(a -> {
             System.out.println("\n\n" + a.getName() + ", " + a.getGenre());

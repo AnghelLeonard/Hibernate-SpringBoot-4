@@ -2,17 +2,20 @@ package com.bookstore.transform.dto;
 
 import java.io.Serializable;
 
-public class BookDto implements Serializable {
+// if you use a Java record then you'll have to modify AuthorTransformer accordingly
+// public record BookSummary(Long bookId, String title) {}
+
+public class BookSummary implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Long bookId;
     private String title;
 
-    public BookDto() {
+    public BookSummary() {
     }
 
-    public BookDto(Long bookId, String title) {
+    public BookSummary(Long bookId, String title) {
         this.bookId = bookId;
         this.title = title;
     }

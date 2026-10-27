@@ -19,27 +19,27 @@ public class AuthorExtractor {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<AuthorDto> extract() {
+    public List<AuthorSummary> extract() {
 
         String sql = """
                      SELECT a.id, a.name, a.genre, b.id, b.title 
                      FROM author a INNER JOIN book b ON a.id = b.author_id
                      """;
 
-        List<AuthorDto> result = jdbcTemplate.query(sql, (ResultSet rs) -> {
+        List<AuthorSummary> result = jdbcTemplate.query(sql, (ResultSet rs) -> {
 
-            final Map<Long, AuthorDto> authorsMap = new HashMap<>();
+            final Map<Long, AuthorSummary> authorsMap = new HashMap<>();
             while (rs.next()) {
                 Long authorId = (rs.getLong("id"));
-                AuthorDto author = authorsMap.get(authorId);
+                AuthorSummary author = authorsMap.get(authorId);
                 if (author == null) {
-                    author = new AuthorDto();
+                    author = new AuthorSummary();
                     author.setId(rs.getLong("id"));
                     author.setName(rs.getString("name"));
                     author.setGenre(rs.getString("genre"));
                 }
 
-                BookDto book = new BookDto();
+                BookSummary book = new BookSummary();
                 book.setId(rs.getLong("id"));
                 book.setTitle(rs.getString("title"));
 
