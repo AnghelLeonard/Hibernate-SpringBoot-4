@@ -2,6 +2,7 @@ package com.bookstore.service;
 
 import java.util.List;
 import com.bookstore.dto.AuthorNameAge;
+import com.bookstore.dto.AuthorNameAgeDefaults;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +18,10 @@ public class BookstoreService {
     public List<AuthorNameAge> fetchByAge() {
 
         return authorRepository.fetchByAge(40);
+    }
+    
+    public List<AuthorNameAgeDefaults> fetchByAgeDefaults() {
+
+        return authorRepository.fetchByAgeDefaults(40);
     }
 }

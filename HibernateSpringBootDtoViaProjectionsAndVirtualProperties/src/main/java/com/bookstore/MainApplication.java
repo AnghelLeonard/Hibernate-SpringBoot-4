@@ -1,6 +1,7 @@
 package com.bookstore;
 
 import com.bookstore.dto.AuthorNameAge;
+import com.bookstore.dto.AuthorNameAgeDefaults;
 import java.util.List;
 import com.bookstore.service.BookstoreService;
 import org.springframework.boot.ApplicationRunner;
@@ -25,11 +26,25 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
+            System.out.println("Using virtual properties:");
+                    
             List<AuthorNameAge> authors = bookstoreService.fetchByAge();
 
             System.out.println("Number of authors:" + authors.size());
 
             for (AuthorNameAge author : authors) {
+                System.out.println("Author name: " + author.getName()
+                        + " | Age: " + author.years() + " | Rank: " + author.rank()
+                        + " | Books: " + author.books());
+            }
+            
+            System.out.println("\nUsing 'default' methods:");
+            
+            List<AuthorNameAgeDefaults> authorsDefaults = bookstoreService.fetchByAgeDefaults();
+
+            System.out.println("Number of authors:" + authors.size());
+
+            for (AuthorNameAgeDefaults author : authorsDefaults) {
                 System.out.println("Author name: " + author.getName()
                         + " | Age: " + author.years() + " | Rank: " + author.rank()
                         + " | Books: " + author.books());
