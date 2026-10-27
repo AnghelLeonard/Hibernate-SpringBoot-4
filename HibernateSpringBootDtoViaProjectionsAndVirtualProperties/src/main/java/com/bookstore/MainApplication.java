@@ -1,6 +1,6 @@
 package com.bookstore;
 
-import com.bookstore.projection.AuthorNameAge;
+import com.bookstore.dto.AuthorNameAge;
 import java.util.List;
 import com.bookstore.service.BookstoreService;
 import org.springframework.boot.ApplicationRunner;

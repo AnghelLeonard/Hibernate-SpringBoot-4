@@ -1,4 +1,4 @@
-package com.bookstore.projection;
+package com.bookstore.dto;
 
 import org.springframework.beans.factory.annotation.Value;
 
