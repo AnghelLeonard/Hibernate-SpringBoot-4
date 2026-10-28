@@ -14,8 +14,13 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<Tuple> fetchAuthors() {
+    public List<Tuple> fetchAuthorsJpql() {
 
-        return authorRepository.fetchAuthors();
+        return authorRepository.fetchAuthorsJpql();
+    }
+    
+    public List<Tuple> fetchAuthorsNative() {
+
+        return authorRepository.fetchAuthorsNative();
     }
 }
