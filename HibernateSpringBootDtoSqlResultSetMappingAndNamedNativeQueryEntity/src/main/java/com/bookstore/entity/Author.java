@@ -5,8 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityResult;
 import jakarta.persistence.FieldResult;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.OneToMany;
@@ -40,7 +38,11 @@ import java.util.List;
 // Multiple entities
 @NamedNativeQuery(
         name = "AuthorWithBookQuery",
-        query = "SELECT a.*, b.* FROM author a INNER JOIN book b ON a.id = b.author_id",
+        query = """
+                SELECT a.id AS id, a.name AS author_name, a.genre AS author_genre, a.age AS age,
+                b.id AS book_id, b.title AS book_title, b.isbn AS book_isbn 
+                FROM author a INNER JOIN book b ON a.id = b.author_id
+                """,
         resultSetMapping = "AuthorWithBookMapping"
 )
 @SqlResultSetMapping(
@@ -58,7 +60,7 @@ import java.util.List;
             @EntityResult(
                     entityClass = Book.class,
                     fields = {
-                        @FieldResult(name = "id", column = "id"),
+                        @FieldResult(name = "id", column = "book_id"),
                         @FieldResult(name = "title", column = "book_title"),
                         @FieldResult(name = "isbn", column = "book_isbn")
                     }
@@ -70,8 +72,7 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     @Column(name = "author_name")
@@ -80,7 +81,7 @@ public class Author implements Serializable {
     @Column(name = "author_genre")
     private String genre;
 
-    private int age;
+    private Integer age;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -131,11 +132,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

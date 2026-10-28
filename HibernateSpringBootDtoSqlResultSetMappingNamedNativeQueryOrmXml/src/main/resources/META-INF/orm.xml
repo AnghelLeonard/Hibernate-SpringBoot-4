@@ -5,6 +5,8 @@
                  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
         http://java.sun.com/xml/ns/persistence/orm_2_0.xsd ">
         
+    <package>com.bookstore.entity</package>
+    
     <!-- Find the names of authors -->
     <named-native-query name="Author.fetchName">
         <query>SELECT name FROM author</query>
