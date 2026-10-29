@@ -8,20 +8,18 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    // INNER JOIN BAD
-    @Transactional(readOnly = true)
+    // INNER JOIN NOT GOOD    
     @Query(value = "SELECT b FROM Book b INNER JOIN b.author a")
-    List<Book> fetchBooksAuthorsInnerJoinBad();
+    List<Book> fetchBooksAuthorsInnerJoinNotGood();
     
-    // INNER JOIN GOOD
-    @Transactional(readOnly = true)
+    // INNER JOIN GOOD    
     @Query(value = "SELECT b, a FROM Book b INNER JOIN b.author a")
     List<Book> fetchBooksAuthorsInnerJoinGood();
 
-    // JOIN FETCH
-    @Transactional(readOnly = true)
+    // JOIN FETCH    
     @Query(value = "SELECT b FROM Book b JOIN FETCH b.author a")
     List<Book> fetchBooksAuthorsJoinFetch();
 }

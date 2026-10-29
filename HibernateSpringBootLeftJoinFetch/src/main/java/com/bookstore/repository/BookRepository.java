@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface BookRepository extends JpaRepository<Book, Long> {
-
-    @Transactional(readOnly = true)
+   
     @Query(value = "SELECT b FROM Book b LEFT JOIN FETCH b.author")
     // or, via JOIN
     // @Query(value = "SELECT b, a FROM Book b LEFT JOIN b.author a")

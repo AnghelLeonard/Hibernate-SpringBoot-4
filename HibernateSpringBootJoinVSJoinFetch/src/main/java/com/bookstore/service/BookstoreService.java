@@ -31,8 +31,8 @@ public class BookstoreService {
 
     // INNER JOIN BAD
     @Transactional(readOnly = true)
-    public void fetchBooksAuthorsInnerJoinBad() {
-        List<Book> books = bookRepository.fetchBooksAuthorsInnerJoinBad();
+    public void fetchBooksAuthorsInnerJoinNotGood() {
+        List<Book> books = bookRepository.fetchBooksAuthorsInnerJoinNotGood();
 
         books.forEach((e) -> System.out.println("Book title: " + e.getTitle() + ", Isbn: " + e.getIsbn()
                 + ", author: " + e.getAuthor())); // causes extra SELECTs but the result is ok

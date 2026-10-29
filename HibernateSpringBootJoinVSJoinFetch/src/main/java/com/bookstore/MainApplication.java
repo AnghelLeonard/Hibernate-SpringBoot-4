@@ -23,8 +23,8 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            System.out.println("\n\nfetchBooksAuthorsInnerJoinBad: ");
-            bookstoreService.fetchBooksAuthorsInnerJoinBad();
+            System.out.println("\n\fetchBooksAuthorsInnerJoinNotGood: ");
+            bookstoreService.fetchBooksAuthorsInnerJoinNotGood();
             
             System.out.println("\n\nfetchBooksAuthorsInnerJoinGood: ");
             bookstoreService.fetchBooksAuthorsInnerJoinGood();
