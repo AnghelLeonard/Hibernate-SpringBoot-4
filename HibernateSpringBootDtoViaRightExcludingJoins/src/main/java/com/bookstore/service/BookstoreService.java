@@ -1,6 +1,6 @@
 package com.bookstore.service;
 
-import com.bookstore.projection.AuthorNameBookTitle;
+import com.bookstore.dto.AuthorNameBookTitle;
 import com.bookstore.repository.AuthorRepository;
 import com.bookstore.repository.BookRepository;
 import java.util.List;
