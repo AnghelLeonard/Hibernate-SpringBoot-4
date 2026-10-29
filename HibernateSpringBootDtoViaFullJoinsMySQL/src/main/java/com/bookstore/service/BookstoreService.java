@@ -1,6 +1,6 @@
 package com.bookstore.service;
 
-import com.bookstore.projection.AuthorNameBookTitle;
+import com.bookstore.dto.AuthorNameBookTitle;
 import com.bookstore.repository.AuthorRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
