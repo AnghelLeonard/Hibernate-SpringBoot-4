@@ -4,7 +4,7 @@ import com.bookstore.repository.BookRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.bookstore.repository.FormatRepository;
-import com.bookstore.projection.BookTitleAndFormatType;
+import com.bookstore.dto.BookTitleAndFormatType;
 
 @Service
 public class BookstoreService {

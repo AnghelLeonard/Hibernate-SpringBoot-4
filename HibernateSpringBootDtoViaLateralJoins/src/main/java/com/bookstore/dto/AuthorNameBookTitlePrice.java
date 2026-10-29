@@ -1,4 +1,4 @@
-package com.bookstore.projection;
+package com.bookstore.dto;
 
 public interface AuthorNameBookTitlePrice {
             
@@ -6,3 +6,6 @@ public interface AuthorNameBookTitlePrice {
     String getTitle();    
     Integer getPrice();
 }
+
+// or Java record
+// public record AuthorNameBookTitlePrice(String name, String title, Integer price) {}
