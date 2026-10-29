@@ -6,3 +6,6 @@ public interface BookstoreDto {
     
     String getTitle();    
 }
+
+// or, a Java record
+// public record BookstoreDto(String name, String title) {}

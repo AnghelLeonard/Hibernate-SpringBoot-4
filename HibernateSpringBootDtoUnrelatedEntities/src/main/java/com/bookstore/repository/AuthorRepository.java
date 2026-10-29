@@ -9,11 +9,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface AuthorRepository extends JpaRepository<Author, Long> {
  
-    // Query all author names and their titles with the given price
-    
-    @Transactional(readOnly = true)    
+    // Query all author names and their titles with the given price            
     @Query(value = """
                    SELECT a.name AS name, b.title AS title
                    FROM Author a INNER JOIN Book b ON a.name = b.name
