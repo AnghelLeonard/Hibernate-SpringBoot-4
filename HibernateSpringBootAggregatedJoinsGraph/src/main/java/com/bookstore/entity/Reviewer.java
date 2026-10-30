@@ -2,8 +2,6 @@ package com.bookstore.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import java.io.Serializable;
@@ -13,8 +11,7 @@ import java.util.List;
 @Entity
 public class Reviewer implements Serializable {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
     
     @JsonBackReference
@@ -22,7 +19,7 @@ public class Reviewer implements Serializable {
     private List<Review> reviews = new ArrayList<>();
     
     public String reviewerName;
-    public int reviewerAge;
+    public Integer reviewerAge;
 
     public Long getId() {
         return id;
@@ -48,11 +45,11 @@ public class Reviewer implements Serializable {
         this.reviewerName = reviewerName;
     }
 
-    public int getReviewerAge() {
+    public Integer getReviewerAge() {
         return reviewerAge;
     }
 
-    public void setReviewerAge(int reviewerAge) {
+    public void setReviewerAge(Integer reviewerAge) {
         this.reviewerAge = reviewerAge;
     }
     
@@ -76,7 +73,7 @@ public class Reviewer implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2023;
+        return getClass().hashCode();
     }
 
     @Override

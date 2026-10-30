@@ -13,6 +13,6 @@ public class JooqConfig {
     @Bean
     public DSLContext dslContext(DataSource dataSource) {
         
-        return DSL.using(dataSource, SQLDialect.MYSQL);
+        return DSL.using(dataSource, SQLDialect.POSTGRES);
     }
 }

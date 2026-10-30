@@ -18,7 +18,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
            """)
     List<Author> findAuthorsAndBooks();        
 
-@Query("""
+    @Query("""
            SELECT a FROM Author a
              LEFT JOIN FETCH a.tags          
            """)
