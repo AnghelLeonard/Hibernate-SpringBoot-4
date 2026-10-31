@@ -18,7 +18,7 @@ public class Author implements Serializable {
     private int age;
     
     @Version // without this, you'll get a SELECT for each INSERT since saveAll() uses merge()
-    private Short version;
+    private Integer version;
 
     public Long getId() {
         return id;
@@ -52,7 +52,7 @@ public class Author implements Serializable {
         this.age = age;
     }
 
-    public Short getVersion() {
+    public Integer getVersion() {
         return version;
     }   
 }
