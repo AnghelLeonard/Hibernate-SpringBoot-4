@@ -19,7 +19,7 @@ public class Author implements Serializable {
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -70,11 +70,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }  
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
