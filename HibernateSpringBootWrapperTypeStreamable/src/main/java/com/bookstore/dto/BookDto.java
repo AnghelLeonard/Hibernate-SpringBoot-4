@@ -1,16 +1,19 @@
 package com.bookstore.dto;
 
+public record BookDto(Integer price, String title) {}
+
+/*
 public class BookDto {
 
-    private final int price;
+    private final Integer price;
     private final String title;
 
-    public BookDto(int price, String title) {
+    public BookDto(Integer price, String title) {
         this.price = price;
         this.title = title;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
@@ -23,3 +26,4 @@ public class BookDto {
         return "BookDto{" + "price=" + price + ", title=" + title + '}';
     }        
 }
+*/

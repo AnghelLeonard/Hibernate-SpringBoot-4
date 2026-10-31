@@ -5,9 +5,9 @@ USE `bookstoredb`;
 
 -- Table `author`
 CREATE TABLE `author` (
-  `id`    BIGINT        NOT NULL AUTO_INCREMENT,
-  `age`   INT(11)       NOT NULL,
-  `genre` VARCHAR(255)  DEFAULT NULL,
-  `name`  VARCHAR(255)  DEFAULT NULL,
+  `id`    BIGINT    NOT NULL,
+  `age`   INT(11),
+  `genre` VARCHAR(255),
+  `name`  VARCHAR(255),
   CONSTRAINT `author_pk` PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
