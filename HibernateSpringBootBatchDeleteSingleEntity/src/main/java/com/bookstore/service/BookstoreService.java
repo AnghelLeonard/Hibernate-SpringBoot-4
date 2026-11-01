@@ -22,6 +22,7 @@ public class BookstoreService {
 
         for (int i = 0; i < 100; i++) {
             Author author = new Author();
+            author.setId((long) i);
             author.setName("Name_" + i);
             author.setGenre("Genre_" + i);
             author.setAge((int) ((Math.random() + 0.1) * 100));            

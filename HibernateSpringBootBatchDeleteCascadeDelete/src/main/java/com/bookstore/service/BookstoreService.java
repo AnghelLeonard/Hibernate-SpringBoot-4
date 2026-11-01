@@ -21,15 +21,18 @@ public class BookstoreService {
 
         List<Author> authors = new ArrayList<>();
 
+        long step = 1;
         for (int i = 0; i < 10; i++) {
 
             Author author = new Author();
+            author.setId((long) i);
             author.setName("Name_" + i);
             author.setGenre("Genre_" + i);
             author.setAge((int) ((Math.random() + 0.1) * 100));
 
             for (int j = 0; j < 5; j++) {
                 Book book = new Book();
+                book.setId((long) (j + step));
                 book.setTitle("Title: " + j);
                 book.setIsbn("Isbn: " + j);
 
@@ -37,6 +40,7 @@ public class BookstoreService {
             }
 
             authors.add(author);
+            step += 5;
         }
 
         authorRepository.saveAll(authors);

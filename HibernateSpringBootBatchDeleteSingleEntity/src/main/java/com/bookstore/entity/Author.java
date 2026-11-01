@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 import java.io.Serializable;
@@ -12,16 +10,15 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @Version
-    private short version;
+    private Integer version;
 
     public Long getId() {
         return id;
@@ -55,7 +52,7 @@ public class Author implements Serializable {
         this.age = age;
     }
 
-    public short getVersion() {
+    public Integer getVersion() {
         return version;
     }
 }
