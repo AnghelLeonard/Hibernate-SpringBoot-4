@@ -6,15 +6,15 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
+import org.springframework.stereotype.Component;
 
 // This is needed just to monitor batching information
-// @Component
+ @Component
 public class DatasourceProxyBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger logger

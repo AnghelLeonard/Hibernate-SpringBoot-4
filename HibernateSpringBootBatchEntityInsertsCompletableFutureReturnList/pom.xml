@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.jpa</groupId>
-    <artifactId>HibernateSpringBootBatchInsertsCompletableFutureReturnList</artifactId>
+    <artifactId>HibernateSpringBootBatchEntityInsertsCompletableFutureReturnList</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootBatchInsertsCompletableFutureReturnList</name>
+    <name>HibernateSpringBootBatchEntityInsertsCompletableFutureReturnList</name>
     <description>JPA project for Spring Boot</description>
 
     <parent>
@@ -40,10 +40,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>   
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>                           
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>                          
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
