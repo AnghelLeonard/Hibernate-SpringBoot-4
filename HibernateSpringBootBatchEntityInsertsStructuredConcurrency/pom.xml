@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>java.modern.challenge</groupId>
-    <artifactId>HibernateSpringBootBatchInsertsStructuredConcurrency</artifactId>
+    <artifactId>HibernateSpringBootBatchEntityInsertsStructuredConcurrency</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootBatchInsertsStructuredConcurrency</name>
+    <name>HibernateSpringBootBatchEntityInsertsStructuredConcurrency</name>
     <description>Hibernate - Spring Boot 4</description>
 
     <parent>
@@ -41,10 +41,9 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>   
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>                           
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>                          
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

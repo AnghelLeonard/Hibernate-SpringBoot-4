@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +24,17 @@ public class BatchExecutor<T> {
     private final TransactionTemplate txTemplate;
     private final EntityManager entityManager;
     
-    public static final ExecutorService executor = Executors.newFixedThreadPool(
-                Runtime.getRuntime().availableProcessors()); // 1, 4, 8, ...
+    // uses all available processors
+    // private static final ExecutorService executor = Executors.newFixedThreadPool(
+    //            Runtime.getRuntime().availableProcessors());
+    public static final ExecutorService executor = new ThreadPoolExecutor(
+            // adjust these values to create the needed benchmark
+            4, // core threads
+            8, // max threads (keep below HikariCP pool max)
+            30L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(50), // bound queue size to prevent OOM
+            new ThreadPoolExecutor.CallerRunsPolicy() // fallback pressure strategy
+    );
        
     public BatchExecutor(TransactionTemplate txTemplate, EntityManager entityManager) {
         this.txTemplate = txTemplate;
@@ -40,8 +51,15 @@ public class BatchExecutor<T> {
                 .collect(Collectors.groupingBy(c -> count.getAndIncrement() / batchSize))
                 .values()
                 .stream()
-                .map(this::executeBatch)
-                .toArray(CompletableFuture[]::new);
+                .map(list -> executeBatch(list)
+                .thenRun(() -> System.out.println("Batch saved and committed successfully!"))
+                .exceptionally(throwable -> {
+                    System.err.println("Batch failed and rolled back safely: " + throwable.getMessage());
+                    // returning null here marks this specific future as "successful with a null value"
+                    // if you want CompletableFuture.allOf() to fail, throw a RuntimeException here instead
+                    return null;
+                })
+                ).toArray(CompletableFuture[]::new);
         
         CompletableFuture<Void> run = CompletableFuture.allOf(futures);
               
@@ -51,12 +69,13 @@ public class BatchExecutor<T> {
 
     public <S extends T> CompletableFuture<Void> executeBatch(List<S> list) {
 
-        return CompletableFuture.runAsync(() -> {            
+        // return the future so the caller can track completion or failure
+        return CompletableFuture.runAsync(() -> {
             txTemplate.executeWithoutResult(status -> {
-                    for (S entity : list) {
-                        entityManager.persist(entity);
-                    }                    
-                });            
-        }, executor);
+                for (S entity : list) {
+                    entityManager.persist(entity);
+                }
+            });
+        }, executor); // the exception propagates into the CompletableFuture lifecycle here
     }
 }
