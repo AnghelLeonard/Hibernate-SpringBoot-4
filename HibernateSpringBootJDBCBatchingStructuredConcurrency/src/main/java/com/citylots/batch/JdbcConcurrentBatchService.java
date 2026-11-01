@@ -57,7 +57,7 @@ public class JdbcConcurrentBatchService {
                 .filter(r -> !r.isSuccess())
                 .count();
 
-        System.out.println("Batching is done! Saved rows: "
+        System.out.println("Batching is done! Executed " + results.size() + " batches. Saved rows: "
                 + totalSuccessRows + " Fails: " + totalFailed);
     }
 }
