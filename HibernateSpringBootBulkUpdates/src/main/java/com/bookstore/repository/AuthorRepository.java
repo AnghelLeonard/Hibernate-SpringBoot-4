@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface AuthorRepository extends JpaRepository<Author, Long> {
     
-    @Query("SELECT DISTINCT a FROM Author a JOIN FETCH a.books b WHERE a.age > ?1")
+    @Query("SELECT a FROM Author a JOIN FETCH a.books b WHERE a.age > ?1")
     List<Author> findGtGivenAge(int age);
 
     @Transactional
