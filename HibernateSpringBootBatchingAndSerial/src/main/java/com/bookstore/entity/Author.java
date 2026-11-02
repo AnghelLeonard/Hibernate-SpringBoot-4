@@ -1,8 +1,10 @@
 package com.bookstore.entity;
 
-import com.bookstore.generator.AuthorId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import java.io.Serializable;
 
 @Entity
@@ -11,19 +13,16 @@ public class Author implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    // This will disable insert batching - AVOID IT!
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
-
-    // This will go for the SEQUENCE generator which uses the
-    // pooled(hi/lo) algorithm which generated in-memory identifiers  
-    // @GeneratedValue(strategy = GenerationType.AUTO)    
-    //@GeneratedValue(strategy = GenerationType.SEQUENCE) // works as AUTO   
-    
-    // This will go for a custom hi/lo algorithm which uses an increment size of 100
-    @AuthorId
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "author_seq_gen")
+    @SequenceGenerator(
+            name = "author_seq_gen",
+            sequenceName = "author_seq",
+            initialValue = 1,
+            allocationSize = 500
+    )
     private Long id;
 
-    private int age;
+    private Integer age;
     private String name;
     private String genre;
 
@@ -51,11 +50,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
