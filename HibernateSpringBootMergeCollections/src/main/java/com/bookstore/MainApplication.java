@@ -40,6 +40,7 @@ public class MainApplication {
 
             // add a new book
             Book book = new Book();
+            book.setId(5L);
             book.setTitle("History In 100 Minutes");
             book.setIsbn("005-JN");
             detachedBooks.add(book);
