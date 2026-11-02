@@ -11,7 +11,7 @@ public class Book implements Serializable {
     private String title;
     private String isbn;
     private String genre;
-    private int price;  
+    private Integer price;  
 
     public String getTitle() {
         return title;
@@ -37,11 +37,11 @@ public class Book implements Serializable {
         this.genre = genre;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 
