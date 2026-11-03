@@ -21,8 +21,7 @@ public class MainApplication {
 
     @Bean
     public ApplicationRunner init() {
-        return args -> {
-
+        return args -> {            
             bookstoreService.doTimeConsumingTask();
         };
     }

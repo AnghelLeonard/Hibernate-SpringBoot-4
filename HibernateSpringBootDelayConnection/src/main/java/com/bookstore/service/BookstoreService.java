@@ -12,7 +12,7 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }
+    }        
 
     @Transactional
     public void doTimeConsumingTask() throws InterruptedException {
@@ -34,5 +34,4 @@ public class BookstoreService {
         
         author.setAge(44);
     }
-
 }

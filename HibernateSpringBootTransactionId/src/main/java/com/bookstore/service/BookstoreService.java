@@ -1,6 +1,5 @@
 package com.bookstore.service;
 
-import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +13,7 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void displayTransactionId() {
         
         // we need an SQL statement to generate a transaction id
