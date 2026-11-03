@@ -13,17 +13,18 @@ public class BookstoreService {
     private static final Logger log = Logger.getLogger(BookstoreService.class.getName());   
     
     private final AuthorRepository authorRepository;
-    private final HelperService helperService;
+    private final AuthorService authorService;
 
-    public BookstoreService(AuthorRepository authorRepository, HelperService helperService) {
+    public BookstoreService(AuthorRepository authorRepository, AuthorService authorService) {
         this.authorRepository = authorRepository;
-        this.helperService = helperService;
+        this.authorService = authorService;
     }
 
     public void mainAuthor() {
         Author author = new Author();
+        author.setId(6L);
         // persistAuthor(author);
-        helperService.persistAuthor(author);
+        authorService.persistAuthor(author);
         notifyAuthor(author);
     }
 

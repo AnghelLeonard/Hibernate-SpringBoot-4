@@ -7,11 +7,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class HelperService {
+public class AuthorService {
 
     private final AuthorRepository authorRepository;
 
-    public HelperService(AuthorRepository authorRepository) {
+    public AuthorService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
     }
 
