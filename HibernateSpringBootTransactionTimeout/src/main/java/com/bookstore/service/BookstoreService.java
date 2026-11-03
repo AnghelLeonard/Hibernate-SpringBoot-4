@@ -18,6 +18,7 @@ public class BookstoreService {
     public void newAuthor() {
         
         Author author = new Author();
+        author.setId(1L);
         author.setAge(23);
         author.setGenre("Anthology");
         author.setName("Mark Janel");
