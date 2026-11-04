@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.io.Serializable;
@@ -20,13 +18,12 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -78,11 +75,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }   
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
