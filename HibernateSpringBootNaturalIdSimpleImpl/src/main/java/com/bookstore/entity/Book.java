@@ -20,7 +20,7 @@ public class Book implements Serializable {
     private Long id;
 
     private String title;
-    private int price;
+    private Integer price;
 
     @NaturalId(mutable = false)
     @Column(nullable = false, updatable = false, unique = true, length = 50)
@@ -50,11 +50,11 @@ public class Book implements Serializable {
         this.isbn = isbn;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 
