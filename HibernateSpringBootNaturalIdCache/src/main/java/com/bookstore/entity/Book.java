@@ -1,12 +1,12 @@
 package com.bookstore.entity;
 
-
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import java.io.Serializable;
 import java.util.Objects;
 import org.hibernate.annotations.Cache;
@@ -14,7 +14,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.NaturalIdCache;
 
-@Entity 
+@Entity
 @Cacheable
 @NaturalIdCache(region = "BookIsbn")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "Book")
@@ -23,7 +23,10 @@ public class Book implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "book_sequence")
+    @SequenceGenerator(name = "book_sequence",
+            allocationSize = 50)
     private Long id;
 
     private String title;
@@ -87,7 +90,7 @@ public class Book implements Serializable {
 
     @Override
     public String toString() {
-        return "Book{" + "id=" + id + ", title=" + title 
+        return "Book{" + "id=" + id + ", title=" + title
                 + ", isbn=" + isbn + ", price=" + price + '}';
     }
 }
