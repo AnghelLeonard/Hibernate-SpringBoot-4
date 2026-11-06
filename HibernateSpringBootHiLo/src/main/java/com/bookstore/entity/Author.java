@@ -12,7 +12,19 @@ public class Author implements Serializable {
 
     @Id     
     @AuthorId
+    // @AuthorId(sequenceName="five_sequence", initialValue=5, incrementSize=5)
     private Long id;
+    
+    /* you can use this with "hi/lo" if you un-comment it in application.properties
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "author_seq_gen")
+    @SequenceGenerator(
+        name = "author_seq_gen", 
+        sequenceName = "author_seq", 
+        allocationSize = 50 
+    )
+    private Long id;
+    */
 
     private String name;
 

@@ -12,4 +12,8 @@ import static java.lang.annotation.ElementType.METHOD;
 @IdGeneratorType(CustomIdGenerator.class)
 @Retention( RetentionPolicy.RUNTIME)
 @Target({ FIELD, METHOD})
-public @interface AuthorId {}
+public @interface AuthorId {
+    String sequenceName() default "custom_hilo_sequence";
+    int initialValue()    default 1;
+    int incrementSize()   default 100;
+}

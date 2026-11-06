@@ -10,9 +10,7 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_pooled_sequence")
-    // @SequenceGenerator(name = "custom_pooled_sequence", allocationSize = 100)
+    @Id    
     @AuthorId
     private Long id;
 

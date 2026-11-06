@@ -22,7 +22,7 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {
-            bookstoreService.save3Authors();            
+            bookstoreService.saveAuthors();            
         };
     }
 }

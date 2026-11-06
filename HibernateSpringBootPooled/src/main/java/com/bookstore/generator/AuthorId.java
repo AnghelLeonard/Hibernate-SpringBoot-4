@@ -9,7 +9,11 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 
-@IdGeneratorType(CustomIdGenerator.class)
+@IdGeneratorType(CustomPooledGenerator.class)
 @Retention( RetentionPolicy.RUNTIME)
 @Target({ FIELD, METHOD})
-public @interface AuthorId {}
+public @interface AuthorId {
+    String sequenceName() default "custom_pooled_sequence";
+    int initialValue()    default 1;
+    int incrementSize()   default 100;
+}

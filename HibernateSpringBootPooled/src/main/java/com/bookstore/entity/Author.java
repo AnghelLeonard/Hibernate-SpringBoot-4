@@ -10,11 +10,21 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_pooled_sequence")
-    // @SequenceGenerator(name = "custom_pooled_sequence", allocationSize = 100)
+    @Id     
     @AuthorId
+    // @AuthorId(sequenceName="five_sequence", initialValue=5, incrementSize=5)
     private Long id;
+    
+    /* you can use this with "pooled" if you un-comment it in application.properties
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "author_seq_gen")
+    @SequenceGenerator(
+        name = "author_seq_gen", 
+        sequenceName = "author_seq", 
+        allocationSize = 50 
+    )
+    private Long id;
+    */
 
     private String name;
 

@@ -23,7 +23,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>26</java.version>
         <maven.compiler.release>26</maven.compiler.release>
-        <datasource-proxy.version>1.11.0</datasource-proxy.version>
     </properties>
 
     <dependencies>
@@ -47,12 +46,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.ttddyy</groupId>
-            <artifactId>datasource-proxy</artifactId>
-            <version>${datasource-proxy.version}</version>
-        </dependency>
+        </dependency>       
     </dependencies>
 
     <build>

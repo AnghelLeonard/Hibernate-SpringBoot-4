@@ -27,6 +27,6 @@ public class BookstoreService {
 
     @Transactional
     public void saveAuthorNative() {        
-        authorRepository.saveNative("Author_" + 4); // successfully inserts at id 201
+        authorRepository.saveNative("Author_" + 4); // successfully inserts at id 101
     }
 }

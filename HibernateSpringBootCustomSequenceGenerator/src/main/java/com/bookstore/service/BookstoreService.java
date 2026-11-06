@@ -15,7 +15,7 @@ public class BookstoreService {
     }
 
     @Transactional
-    public void save3Authors() {
+    public void saveAuthors() {
 
         for (int i = 1; i <= 105; i++) {
             Author author = new Author();
