@@ -63,7 +63,7 @@ public class IdGenBook implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
 }
