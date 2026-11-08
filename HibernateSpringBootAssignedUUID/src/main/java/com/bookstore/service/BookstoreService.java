@@ -16,7 +16,9 @@ public class BookstoreService {
 
     public void insertAuthor() {
         Author author = new Author();
-        author.setId(UUID.randomUUID());
+        
+        // author.setId(UUID.randomUUID());
+        
         author.setName("Joana Nimar");
         author.setGenre("History");
         author.setAge(34);

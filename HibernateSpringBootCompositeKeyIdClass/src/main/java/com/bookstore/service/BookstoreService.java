@@ -25,15 +25,15 @@ public class BookstoreService {
         author.setAge(38);
         author.setGenre("Anthology");
 
-        Book book1 = new Book();
+        Book book1 = new Book();        
         book1.setIsbn("001-AT");
         book1.setTitle("The book of swords");
 
-        Book book2 = new Book();
+        Book book2 = new Book();        
         book2.setIsbn("002-AT");
         book2.setTitle("Anthology of a day");
 
-        Book book3 = new Book();
+        Book book3 = new Book();        
         book3.setIsbn("003-AT");
         book3.setTitle("Anthology today");
 

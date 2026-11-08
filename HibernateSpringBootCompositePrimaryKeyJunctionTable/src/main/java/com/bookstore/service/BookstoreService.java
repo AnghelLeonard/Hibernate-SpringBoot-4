@@ -30,24 +30,29 @@ public class BookstoreService {
     public void insertAuthorsWithBooks() {
 
         Author alicia = new Author();
+        alicia.setId(1L);
         alicia.setName("Alicia Tom");
         alicia.setAge(38);
         alicia.setGenre("Anthology");
 
         Author mark = new Author();
+        mark.setId(2L);
         mark.setName("Mark Janel");
         mark.setAge(23);
         mark.setGenre("Anthology");
 
         Book bookOfSwords = new Book();
+        bookOfSwords.setId(1L);
         bookOfSwords.setIsbn("001-AT");
         bookOfSwords.setTitle("The book of swords");
 
         Book oneDay = new Book();
+        oneDay.setId(2L);
         oneDay.setIsbn("001-MJ");
         oneDay.setTitle("One Day");
         
         Book mistery = new Book();
+        mistery.setId(3L);
         mistery.setIsbn("002-MJ");
         mistery.setTitle("Mistery");
 

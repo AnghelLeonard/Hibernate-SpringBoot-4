@@ -45,6 +45,6 @@ public class JdbcTemplateDao implements AuthorDao {
             return ps;
         }, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        return ((Number) (keyHolder.getKeys().get("id"))).longValue();
     }
 }

@@ -4,13 +4,17 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.springframework.data.domain.Persistable;
 
 @Entity
-public class Author implements Serializable {
+public class Author implements Serializable, Persistable<AuthorId>  {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +47,22 @@ public class Author implements Serializable {
             iterator.remove();
         }
     }
+    
+    @Transient
+    private boolean isNew = true;
 
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
+    }
+
+    @Override
     public AuthorId getId() {
         return id;
     }

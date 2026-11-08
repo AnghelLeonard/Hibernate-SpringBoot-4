@@ -49,21 +49,13 @@ public class IdBook implements Serializable {
         if (this == obj) {
             return true;
         }
-        
-        if(obj == null) {
+               
+        if (!(obj instanceof IdBook)) {
             return false;
         }
 
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final IdBook other = (IdBook) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-
-        return true;
+        IdBook other = (IdBook) obj;        
+        return Objects.equals(this.id, other.id);
     }
 
     @Override

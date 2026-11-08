@@ -1,7 +1,9 @@
 package com.bookstore.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -10,7 +12,8 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id    
+    @Id
+    @Column(name = "id", updatable = false)
     private UUID id;
 
     private int age;
@@ -47,6 +50,16 @@ public class Author implements Serializable {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.id == null) {
+
+            // or, use any other library you want (for instance, you can use a 
+            // library that generates UUIDv7 instead of UUIDv4)
+            this.id = UUID.randomUUID();
+        }
     }
 
     @Override

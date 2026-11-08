@@ -13,7 +13,7 @@ public class Publisher implements Serializable {
     private static final long serialVersionUID = 1L;
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
         
     private int urc;
@@ -71,11 +71,7 @@ public class Publisher implements Serializable {
             return false;
         }
         
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        
-        return true;
+        return Objects.equals(this.name, other.name);
     }
 
     @Override

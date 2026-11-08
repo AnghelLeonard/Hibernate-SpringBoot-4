@@ -6,6 +6,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 import java.util.Objects;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Embeddable
 public class AuthorId implements Serializable {
@@ -14,6 +16,8 @@ public class AuthorId implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "publisher")
+    @OnDelete(action = OnDeleteAction.CASCADE) // this is not used, but it can be useful
+                                               // if you also want deleting a Publisher to cascade-delete Author rows
     private Publisher publisher;
 
     @Column(name = "name")
@@ -63,11 +67,7 @@ public class AuthorId implements Serializable {
             return false;
         }
         
-        if (!Objects.equals(this.publisher, other.publisher)) {
-            return false;
-        }
-        
-        return true;
+        return Objects.equals(this.publisher, other.publisher);
     }
 
     @Override

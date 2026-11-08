@@ -24,10 +24,10 @@ public class MainApplication {
         return args -> {            
             
             System.out.println("\nAdd publisher ...");
-            bookstoreService.addPublisher();
+            Long publisherId = bookstoreService.addPublisher();
             
             System.out.println("\nAdd author with books ...");
-            bookstoreService.addAuthorsWithBooks();
+            bookstoreService.addAuthorsWithBooks(publisherId);
             
             System.out.println("\nFetch author by name ...");
             bookstoreService.fetchAuthorByName();
@@ -35,8 +35,17 @@ public class MainApplication {
             System.out.println("\nRemove a book of an author ...");
             bookstoreService.removeBookOfAuthor();
             
+            System.out.println("\nRemove a book of an author (optimal) ...");
+            bookstoreService.removeBookOfAuthorOptimal();
+            
             System.out.println("\nRemove author (and books via cascade) ...");
             bookstoreService.removeAuthor();                       
+            
+            System.out.println("\nRemove author (optimal) ...");
+            bookstoreService.removeAuthorOptimal();
+            
+            System.out.println("\nRemove author (ON CASCADE DELETE) ...");
+            bookstoreService.removeAuthorBulk();              
         };
     }
 }

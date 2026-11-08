@@ -14,12 +14,12 @@ public class AuthorId implements Serializable {
     private String name;
     
     @Column(name = "age")
-    private int age;
+    private Integer age;
 
     public AuthorId() {
     }
 
-    public AuthorId(String name, int age) {
+    public AuthorId(String name, Integer age) {
         this.name = name;
         this.age = age;
     }
@@ -28,7 +28,7 @@ public class AuthorId implements Serializable {
         return name;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
@@ -56,15 +56,11 @@ public class AuthorId implements Serializable {
         }
         
         final AuthorId other = (AuthorId) obj;
-        if (this.age != other.age) {
+        if (!Objects.equals(this.age, other.age)) {
             return false;
         }
         
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        
-        return true;
+        return Objects.equals(this.name, other.name);
     }        
 
     @Override
