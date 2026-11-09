@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
@@ -13,16 +11,15 @@ public class Book implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     protected Long id;
 
     private String title;
     private String isbn;
-    private double price;
+    private Double price;
 
     @Transient
-    private double discounted;
+    private Double discounted;
 
     public Long getId() {
         return id;
@@ -48,15 +45,15 @@ public class Book implements Serializable {
         this.isbn = isbn;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public double getDiscounted() {
+    public Double getDiscounted() {
         return discounted;
     }
 

@@ -17,13 +17,14 @@ public class BookstoreService {
     public void insertBook() {
         Book book = new Book();
 
+        book.setId(1L);
         book.setTitle("Ancient History");
         book.setIsbn("001-AH");
         book.setPrice(13.99);
 
-        bookRepository.save(book);
+        Book savedBook = bookRepository.save(book);
 
-        System.out.println("Discounted price after insert: " + book.getDiscounted());
+        System.out.println("Discounted price after insert: " + savedBook.getDiscounted());
     }
 
     @Transactional
