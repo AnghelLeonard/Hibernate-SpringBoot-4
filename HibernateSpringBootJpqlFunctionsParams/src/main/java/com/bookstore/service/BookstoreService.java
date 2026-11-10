@@ -1,6 +1,7 @@
 package com.bookstore.service;
 
 import com.bookstore.dao.Dao;
+import com.bookstore.entity.Book;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
 import com.bookstore.repository.BookRepository;
@@ -25,8 +26,8 @@ public class BookstoreService {
         return bookRepository.callCosRadians();
     }
     
-    public int callField() {
-        return bookRepository.callField();        
+    public List<Object[]> calculateBookLoyaltyPoints() {
+        return bookRepository.calculateBookLoyaltyPoints();        
     }
     
     public List<Integer> callApplyDiscount() {

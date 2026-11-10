@@ -10,6 +10,7 @@ CREATE TABLE `book` (
   `price`     INT           NOT NULL,
   `title`     VARCHAR(255)  DEFAULT NULL,
   `isbn`      VARCHAR(255)  DEFAULT NULL,
+  `status`    VARCHAR(255)  DEFAULT NULL,
   CONSTRAINT `book_pk` PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ^;
 

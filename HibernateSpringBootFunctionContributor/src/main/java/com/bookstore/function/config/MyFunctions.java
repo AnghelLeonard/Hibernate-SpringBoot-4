@@ -2,9 +2,6 @@ package com.bookstore.function.config;
 
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.boot.model.FunctionContributor;
-import org.hibernate.query.sqm.function.NamedSqmFunctionDescriptor;
-import org.hibernate.query.sqm.produce.function.StandardArgumentsValidators;
-import org.hibernate.query.sqm.produce.function.StandardFunctionReturnTypeResolvers;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.spi.TypeConfiguration;
@@ -20,16 +17,12 @@ public class MyFunctions implements FunctionContributor {
         BasicType<Integer> intType = typeConfiguration
                 .getBasicTypeRegistry().resolve(StandardBasicTypes.INTEGER);
       
-        // Register the 'field' function
-        NamedSqmFunctionDescriptor fieldDescriptor = new NamedSqmFunctionDescriptor(
-            "field",                                                   // Function name used in HQL/JPQL
-            true,                                                      // Always include parentheses
-            StandardArgumentsValidators.min(2),                        // Enforce a minimum of 2 parameters               
-            StandardFunctionReturnTypeResolvers.invariant(intType),    // Return type is always Integer
-            null                                                       // No argument type overrides needed
-        );
-
-        fc.getFunctionRegistry().register("field", fieldDescriptor);
+        // Register the 'width_bucket' function
+        fc.getFunctionRegistry().registerPattern(
+            "width_bucket",
+            "width_bucket(?1, ?2, ?3, ?4)",
+            intType
+        );      
         
         // Register the 'slugify' function
         fc.getFunctionRegistry().registerPattern(

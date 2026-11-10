@@ -25,7 +25,7 @@ public class Dao<T, ID extends Serializable> implements GenericDao<T, ID> {
                                                   """
         )
                 .setParameter("symbol", symbol)
-                .setParameter("instant", instant)
+                .setParameter("instant", instant.toString())
                 .getSingleResult();
     }
 
@@ -38,7 +38,7 @@ public class Dao<T, ID extends Serializable> implements GenericDao<T, ID> {
                                          """
         )
                 .setParameter("symbol", symbol)
-                .setParameter("instant", instant)
+                .setParameter("instant", instant.toString())
                 .getResultList();
     }   
 }

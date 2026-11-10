@@ -25,8 +25,8 @@ public class BookstoreService {
         return bookRepository.callCosRadians();
     }
     
-    public int callField() {
-        return bookRepository.callField();        
+    public List<Object[]> calculateBookLoyaltyPoints() {
+        return bookRepository.calculateBookLoyaltyPoints();        
     }
     
     public List<Integer> callApplyDiscount() {

@@ -1,0 +1,20 @@
+-- insert books
+INSERT INTO `book` (`isbn`, `title`, `price`, `status`, `id`) VALUES 
+  ('001-JN', 'A History of Ancient Prague', 32, 'bestseller', 1),
+  ('002-JN', 'Modern History of Rome', 56, 'featured', 2),
+  ('003-JN', 'History Under The Cover', 26, 'standard', 3),
+  ('004-JN', 'The Fall of Byzantium', 45, 'bestseller', 4),
+  ('005-JN', 'Echoes of the Silk Road', 38, 'featured', 5),
+  ('006-JN', 'Medieval Castles of Europe', 29, 'standard', 6),
+  ('007-JN', 'Secrets of the Pharaohs', 41, 'bestseller', 7),
+  ('008-JN', 'Renaissance Art and Power', 64, 'featured', 8),
+  ('009-JN', 'The Viking Expansion', 33, 'clearance', 9),
+  ('010-JN', 'Industrial Revolution Chronicles', 27, 'standard', 10),
+  ('011-JN', 'Legends of the Samurai', 35, 'bestseller', 11),
+  ('012-JN', 'Ancient Maya Civilizations', 39, 'standard', 12),
+  ('013-JN', 'Empires of the Bronze Age', 48, 'featured', 13),
+  ('014-JN', 'The Ottoman Legacy', 31, 'clearance', 14),
+  ('015-JN', 'Cartography Through the Ages', 52, 'featured', 15),
+  ('016-JN', 'Forgotten Cities of Mesopotamia', 36, 'standard', 16),
+  ('017-JN', 'The Age of Exploration', 44, 'bestseller', 17),
+  ('018-JN', 'Cold War Diplomacy', 24, 'clearance', 18) ^;

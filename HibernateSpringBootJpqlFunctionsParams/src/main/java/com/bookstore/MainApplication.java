@@ -1,6 +1,8 @@
 package com.bookstore;
 
 import com.bookstore.service.BookstoreService;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,14 +26,18 @@ public class MainApplication {
         return args -> {
             System.out.println("callConcat() result: " + bookstoreService.callConcat());
             System.out.println("callCosRadians() result: " + bookstoreService.callCosRadians());
-            System.out.println("callField() result: " + bookstoreService.callField());
+            
+            List<Object[]> results = bookstoreService.calculateBookLoyaltyPoints();
+            System.out.println("calculateBookLoyaltyPoints() result: ");
+            results.forEach(row -> System.out.println(Arrays.toString(row)));
+            
             System.out.println("callApplyDiscount() result: " + bookstoreService.callApplyDiscount());
             System.out.println("callApplyDiscountInWhere() result: " + bookstoreService.callApplyDiscountInWhere());
             
-            System.out.println("titleAndPriceEm() result: " + bookstoreService.titleAndPriceEm());            
-            System.out.println("titleAndPriceGt25Em() result: " + bookstoreService.titleAndPriceGt25Em());            
-            System.out.println("titleAndPriceCb() result: " + bookstoreService.titleAndPriceCb());
-            System.out.println("titleAndPriceGt25Cb() result: " + bookstoreService.titleAndPriceGt25Cb());
+              System.out.println("titleAndPriceEm() result: " + bookstoreService.titleAndPriceEm());            
+              System.out.println("titleAndPriceGt25Em() result: " + bookstoreService.titleAndPriceGt25Em());            
+              System.out.println("titleAndPriceCb() result: " + bookstoreService.titleAndPriceCb());
+              System.out.println("titleAndPriceGt25Cb() result: " + bookstoreService.titleAndPriceGt25Cb());
         };
     }
 

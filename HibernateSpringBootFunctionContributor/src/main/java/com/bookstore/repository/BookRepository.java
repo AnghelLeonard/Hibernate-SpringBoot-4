@@ -23,11 +23,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     double callCosRadians();
     
     // use function() only to remain strictly JPA-compliant and portable 
-    @Query(value = """                   
-            SELECT (field('a', 'b', 'c', 'a', 'd') 
-                   + field('d', 'b', 'c', 'a', 'd'))
-            """)
-    int callField();
+    @Query(value = """
+            SELECT b.title, b.price,
+                b.price * width_bucket(b.price, 20, 65, 3) AS loyaltyPoints
+                FROM Book b ORDER BY loyaltyPoints DESC
+            """)            
+    List<Object[]> calculateBookLoyaltyPoints();
    
     // use function() only to remain strictly JPA-compliant and portable 
     @Query(value = """                   

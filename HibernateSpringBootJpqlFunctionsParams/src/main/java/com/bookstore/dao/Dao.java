@@ -22,17 +22,16 @@ public class Dao<T, ID extends Serializable> implements GenericDao<T, ID> {
 
     @Override
     public String fetchTitleAndPrice(String symbol, Instant instant) {
-
-        // SELECT concat_ws(:symbol, slugify(b.title), -> works
-        //        apply_discount(b.price, 10), :instant) 
-        // FROM Book b WHERE b.id = 1
-        
+       
         // remain strictly JPA-compliant and portable
         return (String) entityManager.createQuery("""                                                  
-                                                  SELECT function('concat_ws' as String, :symbol, 
-                                                         function('slugify' as String, b.title), 
-                                                         function('apply_discount' as Integer, b.price, 10), :instant) 
-                                                  FROM Book b WHERE b.id = 1
+                                                  SELECT cast(function('concat_ws', :symbol, 
+                                                         cast(function('slugify', b.title) AS String), 
+                                                         cast(function('apply_discount', b.price, 10) AS String), 
+                                                         cast(:instant AS String)
+                                                    ) AS String)
+                                                  FROM Book b 
+                                                  WHERE b.id = 1
                                                   """
         )
                 .setParameter("symbol", symbol)
@@ -42,18 +41,16 @@ public class Dao<T, ID extends Serializable> implements GenericDao<T, ID> {
 
     @Override
     public List<String> fetchTitleAndPriceGt25(String symbol, Instant instant) {
-
-        // SELECT concat_ws(:symbol, slugify(b.title), b.price, :instant) -> doesn't work
-        // FROM Book b WHERE apply_discount(b.price, 10) > 25
-        
-        // SELECT concat_ws(:symbol, slugify(b.title), b.price, :instant) -> works
-        // FROM Book b WHERE function('apply_discount', b.price, 10) > 25
-        
+      
         // remain strictly JPA-compliant and portable
         return entityManager.createQuery("""                                                  
-                                        SELECT function('concat_ws' as String, :symbol, 
-                                         function('slugify' as String, b.title), b.price, :instant) 
-                                        FROM Book b WHERE function('apply_discount' as Integer, b.price, 10) > 25
+                                        SELECT cast(function('concat_ws', :symbol, 
+                                               cast(function('slugify', b.title) AS String), 
+                                               cast(b.price AS String), 
+                                               cast(:instant AS String)
+                                        ) AS String)
+                                        FROM Book b 
+                                        WHERE cast(function('apply_discount', b.price, 10) AS Integer) > 25
                                          """
         )
                 .setParameter("symbol", symbol)
