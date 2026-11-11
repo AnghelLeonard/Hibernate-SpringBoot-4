@@ -3,7 +3,6 @@ package com.bookstore.service;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookstoreService {
@@ -16,6 +15,7 @@ public class BookstoreService {
 
     public void persistAuthor() {
         Author author = new Author();
+        author.setId(2L);
         author.setName("Joana Nimar");
         author.setGenre("History");
         author.setAge(34);

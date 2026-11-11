@@ -21,19 +21,20 @@ public class BookstoreService {
     @Transactional
     public void persistAuthorJdbcTemplate() {             
         
-        jdbcTemplate.update("INSERT INTO author (age,genre,name) VALUES (?, ?, ?)"
-                , 34, "History", "Joana Nimar");
+        jdbcTemplate.update("INSERT INTO author (id,age,genre,name) VALUES (?, ?, ?, ?)"
+                ,2, 34, "History", "Joana Nimar");
     }
     
     @Transactional
     public void persistAuthorNamedParameterJdbcTemplate() {       
 
         Map<String, Object> params = new HashMap<>();
-        params.put("p1", 54);
-        params.put("p2", "Anthology");
-        params.put("p3", "John Voliu");
+        params.put("p1", 3);
+        params.put("p2", 54);
+        params.put("p3", "Anthology");
+        params.put("p4", "John Voliu");
         
-        namedParameterJdbcTemplate.update("INSERT INTO author (age,genre,name) VALUES (:p1, :p2, :p3)",
+        namedParameterJdbcTemplate.update("INSERT INTO author (id,age,genre,name) VALUES (:p1, :p2, :p3, :p4)",
                 params);
     }
 

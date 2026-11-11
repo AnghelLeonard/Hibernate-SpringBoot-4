@@ -15,7 +15,10 @@
         <appender-ref ref="Console" />
     </root>
      
-    <!-- Log Binding Parameters for JdbcTemplate/NamedParameterJdbcTemplate -->        
-    <logger name="org.springframework.jdbc.core.StatementCreatorUtils" level="trace" />      
+    <!-- Logs the actual SQL query -->
+    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG" />
+    
+    <!-- Logs input parameter values (binding) -->
+    <logger name="org.springframework.jdbc.core.StatementCreatorUtils" level="TRACE" />      
  
 </configuration>
