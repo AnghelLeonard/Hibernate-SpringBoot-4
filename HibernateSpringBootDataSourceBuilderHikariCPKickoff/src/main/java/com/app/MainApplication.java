@@ -1,8 +1,6 @@
 package com.app;
 
-import com.app.repository.NumberRepository;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.app.service.PoolStressTestService;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,13 +8,11 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class MainApplication {
+   
+    private final PoolStressTestService poolStressTestService;
 
-    private static final ExecutorService executor = Executors.newFixedThreadPool(25);
-
-    private final NumberRepository numberRepository;
-
-    public MainApplication(NumberRepository numberRepository) {
-        this.numberRepository = numberRepository;
+    public MainApplication(PoolStressTestService poolStressTestService) {
+        this.poolStressTestService = poolStressTestService;
     }
 
     public static void main(String[] args) {
@@ -27,12 +23,9 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
-            while (true) {
-                executor.execute(numberRepository);
-
-                Thread.sleep((int) (Math.random() * 250));
-            }
-
+            System.out.println("Start inserting ...");
+            poolStressTestService.runConcurrentInserts(1_000);
+            System.out.println("Done ...");
         };
     }
 }

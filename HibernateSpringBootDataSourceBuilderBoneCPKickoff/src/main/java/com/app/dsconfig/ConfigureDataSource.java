@@ -25,7 +25,7 @@ public class ConfigureDataSource {
 
         hds.setJdbcUrl(properties.getUrl());
         hds.setUsername(properties.getUsername());
-        hds.setPassword(properties.getPassword());
+        hds.setPassword(properties.getPassword());               
 
         return hds;
     }
