@@ -20,6 +20,7 @@ public class AuthorBookService {
     public Author persistAuthor() {
         Author author = new Author();
 
+        author.setId(2L);
         author.setName("Alicia Tom");
         author.setGenre("Anthology");
         author.setAge(32);
@@ -31,6 +32,7 @@ public class AuthorBookService {
     public Book persistBook() {
         Book book = new Book();
 
+        book.setId(2L);
         book.setIsbn("001-AT");
         book.setTitle("Antholoy Of 1970");
         book.setAuthors("Alicia Tom");

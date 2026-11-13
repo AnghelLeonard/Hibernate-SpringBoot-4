@@ -14,6 +14,7 @@ public class AuthorService {
     public Author persistAuthor() {
         Author author = new Author();
 
+        author.setId(1L);
         author.setName("Joana Nimar");
         author.setGenre("History");
         author.setAge(34);
