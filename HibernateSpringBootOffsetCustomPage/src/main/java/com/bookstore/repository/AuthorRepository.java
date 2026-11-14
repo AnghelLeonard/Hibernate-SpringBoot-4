@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional(readOnly = true)
 public interface AuthorRepository extends PagingAndSortingRepository<Author, Long> {
 
     @Query("SELECT a FROM Author a WHERE a.genre = ?1")
