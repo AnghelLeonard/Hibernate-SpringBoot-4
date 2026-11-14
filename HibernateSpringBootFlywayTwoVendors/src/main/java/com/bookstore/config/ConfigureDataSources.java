@@ -45,6 +45,8 @@ public class ConfigureDataSources {
 
         return Flyway.configure()
                 .dataSource(primaryDataSource)
+                .baselineOnMigrate(true)    
+                .validateOnMigrate(true)
                 .locations(properties.getLocation())
                 .load();
     }
@@ -74,6 +76,8 @@ public class ConfigureDataSources {
             @Qualifier("configFlywayPostgreSql") FlywayDs2Properties properties) {
         return Flyway.configure()
                 .dataSource(secondDataSource)
+                .baselineOnMigrate(true)
+                .validateOnMigrate(true)
                 .schemas(properties.getSchema())
                 .locations(properties.getLocation())
                 .load();

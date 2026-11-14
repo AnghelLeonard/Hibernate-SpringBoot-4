@@ -23,11 +23,13 @@ public class BookstoreService {
     public void addAuthorWithBooks(){
         
         Author author = new Author();
+        author.setId(5L);
         author.setName("Alicia Tom");
         author.setAge(38);
         author.setGenre("Anthology");
         
         Book book = new Book();
+        book.setId(5L);
         book.setIsbn("001-AT");
         book.setTitle("The book of swords");
                 

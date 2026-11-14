@@ -1,6 +1,6 @@
 -- Table `book`
-CREATE TABLE `book` (
-  `id`        BIGINT        NOT NULL AUTO_INCREMENT,  
+CREATE TABLE IF NOT EXISTS `book` (
+  `id`        BIGINT        NOT NULL,  
   `author_id` BIGINT        NOT NULL,
   `title`     VARCHAR(255)  DEFAULT NULL,
   `isbn`      VARCHAR(255)  DEFAULT NULL,

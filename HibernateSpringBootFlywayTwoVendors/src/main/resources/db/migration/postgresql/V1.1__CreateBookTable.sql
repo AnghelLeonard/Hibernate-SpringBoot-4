@@ -1,13 +1,9 @@
-CREATE TABLE book (
-  id      BIGSERIAL NOT NULL,
-  isbn    CHARACTER VARYING(50) COLLATE pg_catalog."default",
-  title   CHARACTER VARYING(50) COLLATE pg_catalog."default",
-  authors CHARACTER VARYING(50) COLLATE pg_catalog."default",
-  CONSTRAINT book_pk PRIMARY KEY (id)
-)
-WITH (
-    OIDS = FALSE
-);
+-- Table "book"
+CREATE TABLE IF NOT EXISTS "book" (
+    "id" BIGINT NOT NULL,
+    "isbn" VARCHAR(255),
+    "title" VARCHAR(255),
+    "authors" VARCHAR(255),
+    CONSTRAINT "book_pk" PRIMARY KEY ("id"));
 
-ALTER TABLE book
-    OWNER to postgres;
+ALTER TABLE "book" OWNER TO "postgres";

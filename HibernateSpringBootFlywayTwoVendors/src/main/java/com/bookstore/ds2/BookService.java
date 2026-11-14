@@ -14,6 +14,7 @@ public class BookService {
     public Book persistBook() {
         Book book = new Book();
 
+        book.setId(2L);
         book.setIsbn("001-JN");
         book.setTitle("A History of Ancient Prague");
         book.setAuthors("Joaana Nimar");
