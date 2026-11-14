@@ -2,16 +2,14 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.AuditTable;
 
 @Entity
 @Audited
@@ -20,13 +18,12 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     protected Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -77,11 +74,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

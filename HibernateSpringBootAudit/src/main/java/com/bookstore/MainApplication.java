@@ -42,6 +42,10 @@ public class MainApplication {
             Thread.sleep(5000);
             System.out.println("Update books of an author ...");
             bookstoreService.updateBooks();            
+            
+            Thread.sleep(5000);
+            System.out.println("Display authors ...");
+            bookstoreService.displayAuthors();
         };
     }
 }

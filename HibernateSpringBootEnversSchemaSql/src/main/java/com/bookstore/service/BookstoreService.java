@@ -27,24 +27,29 @@ public class BookstoreService {
     public void registerAuthor() {
 
         Author a1 = new Author();
+        a1.setId(1L);
         a1.setName("Quartis Young");
         a1.setGenre("Anthology");
         a1.setAge(34);
 
         Author a2 = new Author();
+        a2.setId(2L);
         a2.setName("Mark Janel");
         a2.setGenre("Anthology");
         a2.setAge(23);
 
         Book b1 = new Book();
+        b1.setId(1L);
         b1.setIsbn("001");
         b1.setTitle("The Beatles Anthology");
 
         Book b2 = new Book();
+        b2.setId(2L);
         b2.setIsbn("002");
         b2.setTitle("A People's Anthology");
 
         Book b3 = new Book();
+        b3.setId(3L);
         b3.setIsbn("003");
         b3.setTitle("Anthology Myths");
 
@@ -78,12 +83,11 @@ public class BookstoreService {
         AuditReader reader = AuditReaderFactory.get(em);
 
         AuditQuery queryAtRev = reader.createQuery().forEntitiesAtRevision(Book.class, 3);
-        System.out.println("Get all Book instances modified at revision #3:");
+        System.out.println("•	Get all Book instances as they existed at revision #3:");
         System.out.println(queryAtRev.getResultList());
 
         AuditQuery queryOfRevs = reader.createQuery().forRevisionsOfEntity(Book.class, true, true);
         System.out.println("\nGet all Book instances in all their states that were audited:");
         System.out.println(queryOfRevs.getResultList());
-
     }
 }

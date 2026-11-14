@@ -57,7 +57,7 @@ public class Book extends BaseEntity<String> implements Serializable {
             return true;
         }
 
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Book)) {
             return false;
         }
 
@@ -66,12 +66,16 @@ public class Book extends BaseEntity<String> implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override
     public String toString() {
-        return "Book{" + "id=" + id + ", title=" + title + ", isbn=" + isbn + '}';
+        return "Book{" + "id=" + id + ", title=" + title + ", isbn=" + isbn 
+                + ", created=" + super.created
+                + ", createdBy=" + super.createdBy 
+                + ", lastModified=" + super.lastModified 
+                + ", lastModifiedBy=" + super.lastModifiedBy +'}';
     }
 
 }
