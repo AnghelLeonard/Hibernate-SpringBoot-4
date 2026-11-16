@@ -17,6 +17,11 @@ public class BookstoreService {
     }
 
     public List<AuthorDto> fetchNextPageOfAuthors(Instant ltime, Long lid, int size) {
+
+        if (ltime == null || lid == null) {
+            return authorRepository.fetchFirstPage(size);
+        }
+
         return authorRepository.fetchNextPage(ltime, lid, size);
     }
 
@@ -27,7 +32,12 @@ public class BookstoreService {
         Long newLastId = null;
         boolean hasNext = false;
 
-        List<AuthorDto> authors = authorRepository.fetchNextPage(lastCreatedAt, lastId, (size + 1));
+        List<AuthorDto> authors;
+        if (lastCreatedAt == null || lastId == null) {
+            authors = authorRepository.fetchFirstPage(size);
+        } else {
+            authors = authorRepository.fetchNextPage(lastCreatedAt, lastId, (size + 1));
+        }
 
         if (!authors.isEmpty()) {
             hasNext = authors.size() == (size + 1);

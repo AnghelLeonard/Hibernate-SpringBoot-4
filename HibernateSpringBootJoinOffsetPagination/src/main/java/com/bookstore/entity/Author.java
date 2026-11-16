@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
  
@@ -22,7 +23,8 @@ public class Author implements Serializable {
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
+    private Instant createdAt;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -63,11 +65,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -79,10 +81,17 @@ public class Author implements Serializable {
         this.books = books;
     }
 
-    @Override
-    public String toString() {
-        return "Author{" + "id=" + id + ", name=" + name
-                + ", genre=" + genre + ", age=" + age + '}';
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }   
+
+    @Override
+    public String toString() {
+        return "Author{" + "id=" + id + ", name=" + name + ", genre=" + genre 
+                + ", age=" + age + ", createdAt=" + createdAt + '}';
+    }        
 }

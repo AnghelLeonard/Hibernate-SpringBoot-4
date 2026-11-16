@@ -17,7 +17,8 @@ public interface AuthorRepository extends PagingAndSortingRepository<Author, Lon
     @Query(value = "SELECT a.name AS name, a.age AS age, COUNT(*) OVER() AS total FROM Author a ORDER BY age")
     List<AuthorDto> fetchAllLimit(Limit size);
 
-    @NativeQuery(value = "SELECT name, age, COUNT(*) OVER() AS total FROM author ORDER BY age LIMIT ?1, ?2")
-    List<AuthorDto> fetchAll(int page, int size);
+    // for MySQL, use LIMIT ?1 ?2
+    @NativeQuery(value = "SELECT name, age, COUNT(*) OVER() AS total FROM author ORDER BY age LIMIT ?1 OFFSET ?2")
+    List<AuthorDto> fetchAll(int size, int page);
 
 }

@@ -61,6 +61,7 @@ public class MainApplication {
             Integer randomAge = random.nextInt(18, 96);
 
             Author author = new Author();
+            author.setId((long) i);
             author.setName(fullName);
             author.setGenre(randomGenre);
             author.setAge(randomAge);
@@ -77,6 +78,6 @@ public class MainApplication {
             authorRepository.saveAll(batchList);
         }
 
-        System.out.println("Inserted: " + totalRecords + " ... try 'localhost:8080/authors'");
+        System.out.println("Inserted: " + totalRecords + " ... try 'localhost:8080'");
     }
 }

@@ -38,6 +38,6 @@ public class BookstoreController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(bookstoreService.fetchNextPageNative(page, size));
+        return ResponseEntity.ok(bookstoreService.fetchNextPageNative(size, page));
     }
 }

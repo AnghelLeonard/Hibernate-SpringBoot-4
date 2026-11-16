@@ -30,8 +30,8 @@ public class BookstoreService {
         return authorRepository.fetchAllJpqlAnsi(offset, size);
     }
      
-      public List<Author> fetchNextPageNative(int page, int size) {
+      public List<Author> fetchNextPageNative(int size, int page) {
 
-        return authorRepository.fetchAllNative(page, size);
+        return authorRepository.fetchAllNative(size, page);
     }
 }

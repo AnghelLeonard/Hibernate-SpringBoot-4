@@ -59,7 +59,7 @@ public class MainApplication {
 
             Instant processedAt = Instant.now().minus(random.nextInt(30), ChronoUnit.DAYS);
 
-            Transaction tx = new Transaction(status, amount, userId, processedAt);
+            Transaction tx = new Transaction((long) i, status, amount, userId, processedAt);
             batch.add(tx);
 
             if (i % batchSize == 0 || i == totalRecords) {

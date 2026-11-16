@@ -23,7 +23,7 @@ public interface AuthorRepository extends PagingAndSortingRepository<Author, Lon
      @NativeQuery(value = """
                    SELECT t.total, name, age FROM author, 
                    (SELECT count(*) AS total FROM author) AS t 
-                   ORDER BY age LIMIT ?1, ?2
+                   ORDER BY age LIMIT ?1 OFFSET ?2
                    """)
-    List<AuthorDto> fetchAllNative(int page, int size);
+    List<AuthorDto> fetchAllNative(int size, int page);
 }

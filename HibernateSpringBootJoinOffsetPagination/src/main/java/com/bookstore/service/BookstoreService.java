@@ -3,11 +3,11 @@ package com.bookstore.service;
 import com.bookstore.dto.AuthorBookCountFlatDto;
 import com.bookstore.dto.AuthorBookDto;
 import com.bookstore.dto.AuthorBookFlatDto;
-import com.bookstore.dto.AuthorBookFlatDtoWithCount;
+import com.bookstore.dto.AuthorBookFlatDtoKeyset;
 import com.bookstore.dto.AuthorDto;
 import com.bookstore.dto.BookDto;
 import com.bookstore.repository.AuthorRepository;
-import java.util.AbstractMap;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,75 +70,91 @@ public class BookstoreService {
         return pageOfAuthors;
     }
 
-    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoDenseRank(int start, int end) {
+    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoDenseRank(int offset, int size) {
 
         List<AuthorBookFlatDto> listOfAuthors
-                = authorRepository.fetchListOfDtoDenseRank("Anthology", start, end);
+                = authorRepository.fetchListOfDtoDenseRank("Anthology", offset, size);
+
+        return listOfAuthors;
+    }
+
+    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoDenseRankNative(int offset, int size) {
+
+        List<AuthorBookFlatDto> listOfAuthors
+                = authorRepository.fetchListOfDtoDenseRankNative("Anthology", offset, size);
+
+        return listOfAuthors;
+    }
+
+    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoExists(int offset, int size) {
+
+        List<AuthorBookFlatDto> listOfAuthors
+                = authorRepository.fetchListOfDtoExists("Anthology", offset, size);
+
+        return listOfAuthors;
+    }
+
+    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoExistsNative(int offset, int size) {
+
+        List<AuthorBookFlatDto> listOfAuthors
+                = authorRepository.fetchListOfDtoExistsNative("Anthology", offset, size);
 
         return listOfAuthors;
     }
 
     @Transactional(readOnly = true)
-    public AuthorBookFlatDtoWithCount fetchListOfAuthorsWithBooksDtoDenseRankWithCount(int start, int end) {
+    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoExistsTwoQueries(int offset, int size) {
 
+        List<Long> ids = authorRepository.fetchListOfDtoExistsIds("Anthology", offset, size);
         List<AuthorBookFlatDto> listOfAuthors
-                = authorRepository.fetchListOfDtoDenseRank("Anthology", start, end);
-        long total = authorRepository.countByGenre("Anthology");
-
-        AuthorBookFlatDtoWithCount listOfAuthorsWithCount = new AuthorBookFlatDtoWithCount(listOfAuthors, total);
-
-        return listOfAuthorsWithCount;
-    }
-
-    public List<AuthorBookFlatDto> fetchListOfAuthorsWithBooksDtoDenseRankNative(int start, int end) {
-
-        List<AuthorBookFlatDto> listOfAuthors
-                = authorRepository.fetchListOfDtoDenseRankNative("Anthology", start, end);
+                = authorRepository.fetchListOfDtoExistsBooks(ids);
 
         return listOfAuthors;
     }
 
-    @Transactional(readOnly = true)
-    public Map.Entry<List<Object[]>, Long> fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCount(int start, int end) {
+    public List<AuthorBookFlatDtoKeyset> fetchListOfAuthorsWithBooksDtoKeyset(
+            Instant lastCreatedAt, Long lastId, int size) {
 
-        List<Object[]> listOfAuthors
-                = authorRepository.fetchListOfRawDenseRank("Anthology", start, end);
-        long total = authorRepository.countByGenre("Anthology");
+        List<AuthorBookFlatDtoKeyset> listOfAuthors = (lastCreatedAt == null || lastId == null)
+                ? authorRepository.fetchFirstListOfDtoKeyset("Anthology", size)
+                : authorRepository.fetchNextListOfDtoKeyset("Anthology", lastCreatedAt, lastId, size);
 
-        return new AbstractMap.SimpleImmutableEntry<>(listOfAuthors, total);
+        return listOfAuthors;
     }
 
-    public AuthorBookDto mapToDto(List<Object[]> listOfAuthors, Long total) {
-
-        Map<Long, AuthorDto> authorDtoMap = new LinkedHashMap<>();
-
-        for (Object[] row : listOfAuthors) {
-            Long authorId = (Long) row[0];
-            String authorName = (String) row[1];
-            Integer authorAge = (Integer) row[2];
-            Long bookId = (Long) row[3];
-            String bookTitle = (String) row[4];
-            String bookIsbn = (String) row[5];
-
-            authorDtoMap.computeIfAbsent(authorId, id
-                    -> new AuthorDto(authorId, authorName, authorAge, new ArrayList<>())
-            );
-
-            if (bookId != null) {
-                BookDto bookDto = new BookDto(bookId, bookTitle, bookIsbn);
-                authorDtoMap.get(authorId).books().add(bookDto);
-            }
-        }
-
-        List<AuthorDto> content = new ArrayList<>(authorDtoMap.values());
-
-        return new AuthorBookDto(content, total);
-    }
-
-    public AuthorBookDto fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCountCTE(int start, int end) {
+    public List<Object[]> fetchDenseRankedAndTotal(int offset, int size) {
 
         List<Object[]> listOfAuthors
-                = authorRepository.fetchListOfRawDenseRankWithCount("Anthology", start, end);
+                = authorRepository.fetchDenseRankedAndTotal("Anthology", offset, size);
+
+        return listOfAuthors;
+    }
+
+    public List<Object[]> fetchRowNumberAndTotal(int offset, int size) {
+
+        List<Object[]> listOfAuthors
+                = authorRepository.fetchRowNumberAndTotal("Anthology", offset, size);
+
+        return listOfAuthors;
+    }
+
+    public AuthorBookDto fetchHierarchyDenseRankedAndTotal(int offset, int size) {
+
+        List<Object[]> listOfAuthors
+                = authorRepository.fetchDenseRankedAndTotal("Anthology", offset, size);
+
+        return mapToDto(listOfAuthors);
+    }
+
+    public AuthorBookDto fetchHierarchyRowNumberAndTotal(int offset, int size) {
+
+        List<Object[]> listOfAuthors
+                = authorRepository.fetchRowNumberAndTotal("Anthology", offset, size);
+
+        return mapToDto(listOfAuthors);
+    }
+
+    private AuthorBookDto mapToDto(List<Object[]> listOfAuthors) {
 
         Map<Long, AuthorDto> authorDtoMap = new LinkedHashMap<>();
 

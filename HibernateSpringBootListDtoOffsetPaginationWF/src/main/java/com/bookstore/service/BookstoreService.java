@@ -15,9 +15,9 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public List<AuthorDto> fetchNextPage(int page, int size) {
+    public List<AuthorDto> fetchNextPage(int size, int page) {
 
-        return authorRepository.fetchAll(page, size);
+        return authorRepository.fetchAll(size, page);
     }
     
     public List<AuthorDto> fetchLimitSize(int size) {

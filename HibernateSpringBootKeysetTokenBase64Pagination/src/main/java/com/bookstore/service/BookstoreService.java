@@ -14,22 +14,27 @@ public class BookstoreService {
 
     public BookstoreService(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
-    }      
-    
-   public KeysetDto<AuthorDto> fetchNextPageOfAuthors(String cursorToken, int size) {
-       
+    }
+
+    public KeysetDto<AuthorDto> fetchNextPageOfAuthors(String cursorToken, int size) {
+
         // decode the opaque token into raw database fields
         Cursor.DecodedCursor cursor = Cursor.decode(cursorToken);
 
         // query the database
-        List<AuthorDto> products = authorRepository.fetchNextPage(cursor.createdAt(), cursor.id(), (size+1));
+        List<AuthorDto> products;
+        if (cursor.createdAt() == null || cursor.id() == null) {
+            products = authorRepository.fetchFirstPage((size + 1));
+        } else {
+            products = authorRepository.fetchNextPage(cursor.createdAt(), cursor.id(), (size + 1));
+        }
 
-        boolean hasNext = products.size() == (size +1);
+        boolean hasNext = products.size() == (size + 1);
         products.remove(products.size() - 1);
-        
+
         String nextCursorToken = null;
 
-        if (hasNext) {            
+        if (hasNext) {
             // extract the last item and encode its fields into a new opaque token
             AuthorDto lastItem = products.get(products.size() - 1);
             nextCursorToken = Cursor.encode(lastItem.getCreatedAt(), lastItem.getId());
@@ -38,4 +43,3 @@ public class BookstoreService {
         return new KeysetDto<>(products, nextCursorToken, hasNext);
     }
 }
-

@@ -58,18 +58,21 @@ public class Book implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
+        
         if (this == obj) {
             return true;
         }
+        
         if (!(obj instanceof Book)) {
             return false;
         }
+        
         return id != null && id.equals(((Book) obj).id);
     }
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override

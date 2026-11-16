@@ -18,16 +18,31 @@ public class BookstoreService {
     }
 
     public List<Author> fetchNextPageOfAuthors(Long lid, int size) {
+        
+        if (lid == null) {
+            return authorRepository.fetchFirstPage(size);
+        }
+
         return authorRepository.fetchNextPage(lid, size);
     }
-    
-    public List<Author> fetchNextPageableOfAuthors(Long lid, int size) {        
+
+    public List<Author> fetchNextPageableOfAuthors(Long lid, int size) {
+        
         Pageable pageable = PageRequest.of(0, size);
         
+        if(lid == null) {
+            return authorRepository.fetchFirstPageable(pageable);
+        }
+
         return authorRepository.fetchNextPageable(lid, pageable);
     }
-    
+
     public List<AuthorDto> fetchNextPageAsDtoOfAuthors(Long lid, int size) {
+        
+        if(lid == null) {
+            return authorRepository.fetchFirstPageDto(size);
+        }
+        
         return authorRepository.fetchNextPageDto(lid, size);
     }
 }

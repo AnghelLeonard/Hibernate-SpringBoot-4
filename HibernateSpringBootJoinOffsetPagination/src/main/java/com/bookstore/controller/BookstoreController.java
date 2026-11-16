@@ -3,16 +3,13 @@ package com.bookstore.controller;
 import com.bookstore.dto.AuthorBookCountFlatDto;
 import com.bookstore.dto.AuthorBookDto;
 import com.bookstore.dto.AuthorBookFlatDto;
-import com.bookstore.dto.AuthorBookFlatDtoWithCount;
-import com.bookstore.dto.AuthorDto;
+import com.bookstore.dto.AuthorBookFlatDtoKeyset;
 import com.bookstore.service.BookstoreService;
+import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import static org.springframework.data.domain.Sort.sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.SortDefault.SortDefaults;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +31,9 @@ public class BookstoreController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @SortDefaults({
-                @SortDefault(sort = "name", direction = Sort.Direction.ASC),
-                @SortDefault(sort = "title", direction = Sort.Direction.ASC) 
-            }) Sort sort) {
+        @SortDefault(sort = "name", direction = Sort.Direction.ASC),
+        @SortDefault(sort = "title", direction = Sort.Direction.ASC)
+    }) Sort sort) {
 
         return ResponseEntity.ok(bookstoreService.fetchPageOfAuthorsWithBooksByGenreDto(page, size, sort));
     }
@@ -67,45 +64,83 @@ public class BookstoreController {
 
     @GetMapping("/authorsAndBooksDenseRank")
     public ResponseEntity<List<AuthorBookFlatDto>> fetchListOfAuthorsWithBooksDtoDenseRank(
-            @RequestParam(defaultValue = "0") int start,
-            @RequestParam(defaultValue = "1") int end) {
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
 
-        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoDenseRank(start, end));
-    }
-    
-    @GetMapping("/authorsAndBooksDenseRankWithCount")
-    public ResponseEntity<AuthorBookFlatDtoWithCount> fetchListOfAuthorsWithBooksDtoDenseRankWithCount(
-            @RequestParam(defaultValue = "0") int start,
-            @RequestParam(defaultValue = "1") int end) {
-
-        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoDenseRankWithCount(start, end));
+        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoDenseRank(offset, size));
     }
 
     @GetMapping("/authorsAndBooksDenseRankNative")
     public ResponseEntity<List<AuthorBookFlatDto>> fetchListOfAuthorsWithBooksDtoDenseRankNative(
-            @RequestParam(defaultValue = "0") int start,
-            @RequestParam(defaultValue = "1") int end) {
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
 
-        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoDenseRankNative(start, end));
+        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoDenseRankNative(offset, size));
+    }
+
+    @GetMapping("/authorsAndBooksExists")
+    public ResponseEntity<List<AuthorBookFlatDto>> fetchListOfAuthorsWithBooksDtoExists(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoExists(offset, size));
+    }
+
+    @GetMapping("/authorsAndBooksExistsNative")
+    public ResponseEntity<List<AuthorBookFlatDto>> fetchListOfAuthorsWithBooksDtoExistsNative(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoExistsNative(offset, size));
+    }
+
+    @GetMapping("/authorsAndBooksExists2Queries")
+    public ResponseEntity<List<AuthorBookFlatDto>> fetchListOfAuthorsWithBooksDtoExistsTwoQueries(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoExistsTwoQueries(offset, size));
+    }
+
+    @GetMapping("/authorsAndBooksKeyset")
+    public ResponseEntity<List<AuthorBookFlatDtoKeyset>> fetchListOfAuthorsWithBooksDtoKeyset(
+            @RequestParam(required = false) Instant lastCreatedAt,
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchListOfAuthorsWithBooksDtoKeyset(
+                lastCreatedAt, lastId, size));
+    }
+
+    @GetMapping("/authorsAndBooksDenseRankTotal")
+    public ResponseEntity<List<Object[]>> fetchDenseRankedAndTotal(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchDenseRankedAndTotal(offset, size));
     }
     
-    @GetMapping("/authorsAndBooksHierarchy")
-    public ResponseEntity<AuthorBookDto> fetchPageOfAuthorsWithBooksByGenreHierarchy(
-            @RequestParam(defaultValue = "0") int start,
-            @RequestParam(defaultValue = "1") int end) {
+    @GetMapping("/authorsAndBooksRowNumberTotal")
+    public ResponseEntity<List<Object[]>> fetchRowNumberAndTotal(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchRowNumberAndTotal(offset, size));
+    }
+    
+    @GetMapping("/hierarchyOfAuthorsAndBooksDenseRankTotal")
+    public ResponseEntity<AuthorBookDto> fetchHierarchyDenseRankedAndTotal(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
+
+        return ResponseEntity.ok(bookstoreService.fetchHierarchyDenseRankedAndTotal(offset, size));
+    }
         
-        Map.Entry<List<Object[]>, Long> result = bookstoreService
-                .fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCount(start, end);
+    @GetMapping("/hierarchyOfAuthorsAndBooksRowNumberTotal")
+    public ResponseEntity<AuthorBookDto> fetchHierarchyRowNumberAndTotal(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "1") int size) {
 
-        return ResponseEntity.ok(bookstoreService.mapToDto(result.getKey(), result.getValue()));
-    }
-    
-    @GetMapping("/authorsAndBooksHierarchyCTE")
-    public ResponseEntity<AuthorBookDto> fetchPageOfAuthorsWithBooksByGenreHierarchyCTE(
-            @RequestParam(defaultValue = "0") int start,
-            @RequestParam(defaultValue = "1") int end) {              
-
-        return ResponseEntity.ok(
-                bookstoreService.fetchHierarchyOfAuthorsWithBooksDtoDenseRankWithCountCTE(start, end));
+        return ResponseEntity.ok(bookstoreService.fetchHierarchyRowNumberAndTotal(offset, size));
     }
 }

@@ -15,22 +15,40 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query(value = """
+                   SELECT a FROM Author a                    
+                   ORDER BY a.id DESC LIMIT :size
+                   """)
+    List<Author> fetchFirstPage(@Param("size") int size);
+    
+    @Query(value = """
                    SELECT a FROM Author a 
-                   WHERE :lid IS NULL OR a.id < :lid
+                   WHERE a.id < :lid
                    ORDER BY a.id DESC LIMIT :size
                    """)
     List<Author> fetchNextPage(@Param("lid") Long lid, @Param("size") int size);
     
     @Query(value = """
-                   SELECT a FROM Author a 
-                   WHERE :lid IS NULL OR a.id < :lid
+                   SELECT a FROM Author a                    
                    ORDER BY a.id DESC
                    """)
-    List<Author> fetchNextPageable(@Param("lid") Long lid, Pageable pagrable);
+    List<Author> fetchFirstPageable(Pageable pageable);
+    
+    @Query(value = """
+                   SELECT a FROM Author a 
+                   WHERE a.id < :lid
+                   ORDER BY a.id DESC
+                   """)
+    List<Author> fetchNextPageable(@Param("lid") Long lid, Pageable pageable);
 
     @Query(value = """
+                   SELECT a.name AS name, a.age AS age FROM Author a                    
+                   ORDER BY a.id DESC LIMIT :size
+                   """)
+    List<AuthorDto> fetchFirstPageDto(@Param("size") int size);
+    
+    @Query(value = """
                    SELECT a.name AS name, a.age AS age FROM Author a 
-                   WHERE :lid IS NULL OR a.id < :lid
+                   WHERE a.id < :lid
                    ORDER BY a.id DESC LIMIT :size
                    """)
     List<AuthorDto> fetchNextPageDto(@Param("lid") Long lid, @Param("size") int size);

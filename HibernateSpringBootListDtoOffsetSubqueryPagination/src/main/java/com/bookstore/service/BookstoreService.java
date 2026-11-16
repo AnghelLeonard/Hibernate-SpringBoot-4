@@ -24,8 +24,8 @@ public class BookstoreService {
         return authorRepository.fetchAllJpql(pageable);
     }
     
-     public List<AuthorDto> fetchNextPageNative(int page, int size) {
+     public List<AuthorDto> fetchNextPageNative(int size, int page) {
 
-        return authorRepository.fetchAllNative(page, size);
+        return authorRepository.fetchAllNative(size, page);
     }
 }

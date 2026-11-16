@@ -4,7 +4,6 @@ import com.bookstore.dto.KeysetDto;
 import com.bookstore.entity.Author;
 import com.bookstore.service.BookstoreService;
 import java.time.Instant;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +20,7 @@ public class BookstoreController {
 
     @GetMapping("/authors")
      public ResponseEntity<KeysetDto<Author>> fetchNextPageOfAuthors(            
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant lastCreatedAt,
+            @RequestParam(required = false) Instant lastCreatedAt,
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size) {
 

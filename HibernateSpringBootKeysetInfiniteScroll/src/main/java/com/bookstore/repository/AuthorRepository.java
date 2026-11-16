@@ -16,8 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuthorRepository extends JpaRepository<Author, Long> {
       
     @Query(value = """
+                   SELECT a FROM Author a                    
+                   ORDER BY a.createdAt DESC, a.id DESC
+                   """)
+    Slice<AuthorDto> fetchFirstPage(Pageable pageable);  
+    
+    @Query(value = """
                    SELECT a FROM Author a 
-                   WHERE :ltime IS NULL OR (a.createdAt, a.id) < (:ltime, :lid)
+                   WHERE (a.createdAt, a.id) < (:ltime, :lid)
                    ORDER BY a.createdAt DESC, a.id DESC
                    """)
     Slice<AuthorDto> fetchNextPage(

@@ -14,20 +14,30 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query(value = """
-                         SELECT b.name AS name,b.age AS age,b.total AS total FROM (
-                           SELECT a.name AS name, a.age AS age, COUNT(*) OVER() AS total,
-                           ROW_NUMBER() OVER (ORDER BY age) AS row_num FROM Author a
-                         ) b 
-                         WHERE b.row_num BETWEEN ?1 AND ?2
+                   SELECT b.name AS name, b.age AS age, b.total AS total 
+                        FROM (
+                            SELECT a.name AS name, 
+                                   a.age AS age, 
+                                   COUNT(*) OVER() AS total,
+                                   ROW_NUMBER() OVER (ORDER BY a.age ASC, a.id ASC) AS row_num 
+                            FROM Author a
+                        ) b 
+                        WHERE b.row_num BETWEEN ?1 AND ?2
+                        ORDER BY b.row_num ASC
                          """)
     List<AuthorDto> fetchPageJpql(int start, int end);
 
     @NativeQuery(value = """
-                         SELECT * FROM (
-                           SELECT name, age, COUNT(*) OVER() AS total,
-                           ROW_NUMBER() OVER (ORDER BY age) AS row_num FROM author
-                         ) AS a 
-                         WHERE row_num BETWEEN ?1 AND ?2
+                         SELECT b.name AS name, b.age AS age, b.total AS total 
+                             FROM (
+                                 SELECT a.name AS name, 
+                                        a.age AS age, 
+                                        COUNT(*) OVER() AS total,
+                                        ROW_NUMBER() OVER (ORDER BY a.age ASC, a.id ASC) AS row_num 
+                                 FROM author a
+                             ) b 
+                             WHERE b.row_num BETWEEN ?1 AND ?2
+                             ORDER BY b.row_num ASC
                          """)
     List<AuthorDto> fetchPageNative(int start, int end);
 }

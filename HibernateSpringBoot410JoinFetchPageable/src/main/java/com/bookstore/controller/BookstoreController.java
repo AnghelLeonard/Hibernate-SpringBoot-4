@@ -49,7 +49,10 @@ public class BookstoreController {
     public ResponseEntity<Page<Book>> fetchWithAuthorsByIsbnCQ(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @SortDefault(sort = "title", direction = Sort.Direction.ASC) Sort sort) {
+            @SortDefaults({
+                @SortDefault(sort = "title", direction = Sort.Direction.ASC),
+                @SortDefault(sort = "id", direction = Sort.Direction.ASC) 
+            }) Sort sort) {
 
         return ResponseEntity.ok(bookstoreService.fetchWithAuthorsByIsbnCQ(page, size, sort));
     }
@@ -58,7 +61,10 @@ public class BookstoreController {
     public ResponseEntity<Page<Book>> fetchWithAuthorsByIsbnEG(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @SortDefault(sort = "title", direction = Sort.Direction.ASC) Sort sort) {
+            @SortDefaults({
+                @SortDefault(sort = "title", direction = Sort.Direction.ASC),
+                @SortDefault(sort = "id", direction = Sort.Direction.ASC) 
+            }) Sort sort) {
 
         return ResponseEntity.ok(bookstoreService.fetchWithAuthorsByIsbnEG(page, size, sort));
     }

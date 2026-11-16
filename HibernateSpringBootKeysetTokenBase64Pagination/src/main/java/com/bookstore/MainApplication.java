@@ -61,6 +61,7 @@ public class MainApplication {
             Integer randomAge = random.nextInt(18, 96);
 
             Author author = new Author();
+            author.setId((long) i);
             author.setName(fullName);
             author.setGenre(randomGenre);
             author.setAge(randomAge);

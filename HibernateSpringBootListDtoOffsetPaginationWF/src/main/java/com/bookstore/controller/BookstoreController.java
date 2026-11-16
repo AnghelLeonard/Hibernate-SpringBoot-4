@@ -22,7 +22,7 @@ public class BookstoreController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(bookstoreService.fetchNextPage(page, size));
+        return ResponseEntity.ok(bookstoreService.fetchNextPage(size, page));
     }
 
     @GetMapping("/authors/limit")

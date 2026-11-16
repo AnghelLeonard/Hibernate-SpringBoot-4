@@ -36,10 +36,16 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Query(value = "SELECT a.id FROM Author a WHERE a.genre = ?1")
     List<Long> fetchListOfIdsByGenre(String genre, Pageable pageable);
     
-    @Query(value = "SELECT a FROM Author a LEFT JOIN FETCH a.books WHERE a.id IN ?1")
+    @Query(value = """
+                   SELECT a FROM Author a LEFT JOIN FETCH a.books WHERE a.id IN ?1 
+                   ORDER BY a.name ASC, a.id ASC
+                   """)
     List<Author> fetchWithBooksJoinFetch(List<Long> authorIds);
     
     @EntityGraph(attributePaths = {"books"}, type = EntityGraph.EntityGraphType.FETCH)    
-    @Query(value = "SELECT a FROM Author a WHERE a.id IN ?1")
+    @Query(value = """
+                   SELECT a FROM Author a WHERE a.id IN ?1 
+                   ORDER BY a.name ASC, a.id ASC
+                    """)
     List<Author> fetchWithBooksEntityGraph(List<Long> authorIds);
 }

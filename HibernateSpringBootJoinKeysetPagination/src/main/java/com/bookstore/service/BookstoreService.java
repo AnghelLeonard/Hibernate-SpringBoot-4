@@ -24,8 +24,13 @@ public class BookstoreService {
     public KeysetDto<AuthorBookFlatDto> fetchPageOfAuthorsWithBooksByGenreFlatDto(
             Long lastAuthorId, Long lastBookId, int size) {
 
-        List<AuthorBookFlatDto> listOfAuthors = authorRepository.fetchPageOfDto(
-                "Anthology", lastAuthorId, lastBookId, Limit.of(size + 1));
+        List<AuthorBookFlatDto> listOfAuthors;
+        if (lastAuthorId == null || lastBookId == null) {
+            listOfAuthors = authorRepository.fetchFirstPageOfDto("Anthology", Limit.of(size + 1));
+        } else {
+            listOfAuthors = authorRepository.fetchNextPageOfDto(
+                    "Anthology", lastAuthorId, lastBookId, Limit.of(size + 1));
+        }
 
         boolean hasMore = false;
         if (listOfAuthors.size() == (size + 1)) {
@@ -43,19 +48,24 @@ public class BookstoreService {
 
         return new KeysetDto<>(listOfAuthors, nextAuthorId, nextBookId, hasMore);
     }
-    
+
     public KeysetDto<AuthorDto> fetchPageOfAuthorsWithBooksByGenreDto(
             Long lastAuthorId, Long lastBookId, int size) {
 
-        List<Object[]> listOfObjects = authorRepository.fetchPageOfRaw(
-                "Anthology", lastAuthorId, lastBookId, Limit.of(size + 1));
+        List<Object[]> listOfObjects;
+        if (lastAuthorId == null || lastBookId == null) {
+            listOfObjects = authorRepository.fetchFirstPageOfRaw("Anthology", Limit.of(size + 1));
+        } else {
+            listOfObjects = authorRepository.fetchNextPageOfRaw(
+                    "Anthology", lastAuthorId, lastBookId, Limit.of(size + 1));
+        }
 
         boolean hasMore = false;
         if (listOfObjects.size() == (size + 1)) {
             hasMore = true;
             listOfObjects.remove(listOfObjects.size() - 1);
         }
-        
+
         Map<Long, AuthorDto> authorDtoMap = new LinkedHashMap<>();
 
         for (Object[] row : listOfObjects) {
@@ -65,17 +75,17 @@ public class BookstoreService {
             Long bookId = (Long) row[3];
             String bookTitle = (String) row[4];
             String bookIsbn = (String) row[5];
-            
-            authorDtoMap.computeIfAbsent(authorId, id -> 
-                new AuthorDto(authorId, authorName, authorAge, new ArrayList<>())
+
+            authorDtoMap.computeIfAbsent(authorId, id
+                    -> new AuthorDto(authorId, authorName, authorAge, new ArrayList<>())
             );
-           
+
             if (bookId != null) {
                 BookDto bookDto = new BookDto(bookId, bookTitle, bookIsbn);
                 authorDtoMap.get(authorId).books().add(bookDto);
             }
         }
-       
+
         List<AuthorDto> listOfAuthors = new ArrayList<>(authorDtoMap.values());
 
         Long nextAuthorId = null;

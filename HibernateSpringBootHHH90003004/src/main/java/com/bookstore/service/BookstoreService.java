@@ -27,7 +27,8 @@ public class BookstoreService {
     @Transactional(readOnly = true)
     public Page<Author> fetchPageOfAuthorsWithBooksByGenre(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.ASC, "name", "id"));
 
         Page<Long> pageOfIds = authorRepository.fetchPageOfIdsByGenre("Anthology", pageable);        
         List<Author> listOfAuthors = authorRepository.fetchWithBooksJoinFetch(pageOfIds.getContent());
@@ -39,7 +40,8 @@ public class BookstoreService {
     @Transactional(readOnly = true)
     public Slice<Author> fetchSliceOfAuthorsWithBooksByGenre(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.ASC, "name", "id"));
 
         Slice<Long> pageOfIds = authorRepository.fetchSliceOfIdsByGenre("Anthology", pageable);
         List<Author> listOfAuthors = authorRepository.fetchWithBooksJoinFetch(pageOfIds.getContent());
@@ -51,7 +53,8 @@ public class BookstoreService {
     @Transactional(readOnly = true)
     public List<Author> fetchListOfAuthorsWithBooksByGenre(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.ASC, "name", "id"));
 
         List<Long> listOfIds = authorRepository.fetchListOfIdsByGenre("Anthology", pageable);
         List<Author> listOfAuthors = authorRepository.fetchWithBooksJoinFetch(listOfIds);
@@ -62,7 +65,8 @@ public class BookstoreService {
     @Transactional(readOnly = true)
     public Page<Author> fetchPageOfAuthorsWithBooksByGenreEntityGraph(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.ASC, "name", "id"));
 
         Page<Long> pageOfIds = authorRepository.fetchPageOfIdsByGenre("Anthology", pageable);
         List<Author> listOfAuthors = authorRepository.fetchWithBooksEntityGraph(pageOfIds.getContent());
@@ -74,7 +78,8 @@ public class BookstoreService {
     @Transactional(readOnly = true)
     public Page<Author> fetchPageOfAuthorsWithBooksByGenreTuple(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by(Sort.Direction.ASC, "name", "id"));
 
         List<Tuple> tuples = authorRepository.fetchTupleOfIdsByGenre("Anthology", pageable);
         
