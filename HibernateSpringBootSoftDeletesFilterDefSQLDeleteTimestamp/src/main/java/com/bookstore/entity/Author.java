@@ -2,13 +2,10 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,19 +13,18 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLDelete;
 
 @Entity
-@SQLDelete(sql = "UPDATE author SET deleted = UTC_TIMESTAMP() WHERE id = ?")
+@SQLDelete(sql = "UPDATE author SET deleted = CURRENT_TIMESTAMP WHERE id = ?")
 @Filter(name = "excludeDeleted", condition = "deleted IS NULL")
 public class Author extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @Filter(name = "excludeDeleted", condition = "deleted IS NULL")
     @OneToMany(cascade = CascadeType.ALL,
@@ -80,11 +76,11 @@ public class Author extends BaseEntity implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

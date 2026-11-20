@@ -12,13 +12,18 @@ public class BookstoreService {
         this.authorRepository = authorRepository;
     }
 
-    public void countAnthologyAuthors() {
+    public void countAnthologyAuthors1() {
         Integer result = authorRepository.countByGenre("Anthology");
         System.out.println("Result: " + result);
     }
     
-    public void countAuthorsOlderThan50() {
-        Integer result = authorRepository.countByGtAge(50);
+    public void countAnthologyAuthors2() {
+        Integer result = authorRepository.countByGenre("Anthology");
+        System.out.println("Result: " + result);
+    }
+    
+    public void countAnthologyAuthors3() {
+        Integer result = authorRepository.countByGenreFunc("Anthology");
         System.out.println("Result: " + result);
     }
 }

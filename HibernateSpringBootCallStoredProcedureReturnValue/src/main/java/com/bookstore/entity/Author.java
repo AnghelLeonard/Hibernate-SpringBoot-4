@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedStoredProcedureQueries;
 import jakarta.persistence.NamedStoredProcedureQuery;
@@ -14,7 +12,7 @@ import java.io.Serializable;
 @NamedStoredProcedureQueries({
     @NamedStoredProcedureQuery(
             name = "CountByGenreProcedure",
-            procedureName = "COUNT_AUTHOR_BY_GENRE",
+            procedureName = "count_author_by_genre",
             resultClasses = {Author.class},
             parameters = {
                 @StoredProcedureParameter(
@@ -30,13 +28,13 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
-    private int age;
+    private Integer age;
     private String name;
     private String genre;
+    private String nickname;
 
     public Long getId() {
         return id;
@@ -62,17 +60,25 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     @Override
     public String toString() {
-        return "Author{" + "id=" + id + ", age=" + age
-                + ", name=" + name + ", genre=" + genre + '}';
-    }
+        return "Author{" + "id=" + id + ", age=" + age + ", name=" + name 
+                + ", genre=" + genre + ", nickname=" + nickname + '}';
+    }        
 }

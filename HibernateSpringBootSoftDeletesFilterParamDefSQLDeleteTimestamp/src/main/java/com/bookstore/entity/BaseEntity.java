@@ -10,7 +10,7 @@ import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 
 @MappedSuperclass
-@FilterDef(name = "includeExcludeDeleted", autoEnabled = true,
+@FilterDef(name = "includeExcludeDeleted", autoEnabled = true, applyToLoadByKey=true,
         parameters = {
             @ParamDef(
                     name = "includeDeleted",

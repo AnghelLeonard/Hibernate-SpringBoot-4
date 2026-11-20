@@ -6,7 +6,7 @@ import java.time.Instant;
 import org.hibernate.annotations.FilterDef;
 
 @MappedSuperclass
-@FilterDef(name = "excludeDeleted", autoEnabled = true)
+@FilterDef(name = "excludeDeleted", autoEnabled = true, applyToLoadByKey = true)
 public abstract class BaseEntity {
  
     @Column(name = "deleted")

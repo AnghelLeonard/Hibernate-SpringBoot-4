@@ -19,27 +19,32 @@ public class BookstoreService {
     @Transactional
     public void insertAuthorsWithBooks() {
 
-        Author alicia = new Author();       
+        Author alicia = new Author(); 
+        alicia.setId(1L);
         alicia.setName("Alicia Tom");
         alicia.setAge(38);
         alicia.setGenre("Anthology");
 
         Author mark = new Author();       
+        mark.setId(2L);
         mark.setName("Mark Janel");
         mark.setAge(23);
         mark.setGenre("Anthology");
 
-        Book bookOfSwords = new Book();       
+        Book bookOfSwords = new Book();  
+        bookOfSwords.setId(1L);
         bookOfSwords.setIsbn("001-AT-MJ");
         bookOfSwords.setTitle("The book of swords");
 
-        Book oneDay = new Book();        
+        Book oneDay = new Book();  
+        oneDay.setId(2L);
         oneDay.setIsbn("002-AT-MJ");
         oneDay.setTitle("One Day");
         
-        Book solo = new Book();        
-        oneDay.setIsbn("003-MJ");
-        oneDay.setTitle("Solo");
+        Book solo = new Book();    
+        solo.setId(3L);
+        solo.setIsbn("003-MJ");
+        solo.setTitle("Solo");
 
         alicia.addBook(bookOfSwords); // use addBook() helper
         alicia.addBook(oneDay);

@@ -26,12 +26,14 @@ public class MainApplication {
             System.out.println("\n-----------------------");
             System.out.println("---------REMOVE--------");
             System.out.println("-----------------------\n");
+            System.out.println("\n Soft-delete author:");
             bookstoreService.softDeleteAuthor();           
            
             bookstoreService.displayAllIncludeDeletedAuthors();
             bookstoreService.displayAllExceptDeletedAuthors();
             bookstoreService.displayAllOnlyDeletedAuthors();
             
+            System.out.println("\n Soft-delete book:");
             bookstoreService.softDeleteBook();
 
             bookstoreService.displayAllIncludeDeletedBooks();

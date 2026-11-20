@@ -22,8 +22,9 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {
-            bookstoreService.countAnthologyAuthors();
-            bookstoreService.countAuthorsOlderThan50();
+            bookstoreService.countAnthologyAuthors1();
+            bookstoreService.countAnthologyAuthors2();
+            bookstoreService.countAnthologyAuthors3();
         };
     }
 }

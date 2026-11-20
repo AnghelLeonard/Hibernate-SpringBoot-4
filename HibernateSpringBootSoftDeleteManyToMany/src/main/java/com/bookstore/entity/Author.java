@@ -2,31 +2,32 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import org.hibernate.annotations.SoftDelete;
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @SoftDelete
-public class Author implements Serializable {
+public class Author implements Serializable, Persistable<Long> {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @SoftDelete
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -57,8 +58,23 @@ public class Author implements Serializable {
         }
     }
 
+    @Transient
+    private boolean isNew = true;
+
+    @Override
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostLoad
+    @PostPersist
+    void markNotNew() {
+        this.isNew = false;
     }
 
     public void setId(Long id) {
@@ -81,11 +97,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -98,17 +114,13 @@ public class Author implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {     
-        
+    public boolean equals(Object obj) {
+
         if (this == obj) {
             return true;
         }
-        
-        if(obj == null) {
-            return false;
-        }
 
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Author)) {
             return false;
         }
 
@@ -117,7 +129,7 @@ public class Author implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override

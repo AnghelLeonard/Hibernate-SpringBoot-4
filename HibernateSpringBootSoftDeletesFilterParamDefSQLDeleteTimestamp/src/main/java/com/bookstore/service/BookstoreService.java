@@ -24,8 +24,8 @@ public class BookstoreService {
 
     @Transactional
     public void softDeleteAuthor() {
-        Author author = authorRepository.findById(1L).get(); // bypass the filter
-        // Author author = authorRepository.findAllById(List.of(1L)).getFirst(); // use the filter
+        Author author = authorRepository.findById(1L).get();
+        // Author author = authorRepository.findAllById(List.of(1L)).getFirst(); // use the filter as well
 
         authorRepository.delete(author);
     }
@@ -73,8 +73,8 @@ public class BookstoreService {
 
     @Transactional
     public void softDeleteBook() {
-        Author author = authorRepository.findById(4L).get();  // bypass the filter
-        Book book = author.getBooks().get(0);  // use the filter
+        Author author = authorRepository.findById(4L).get();  
+        Book book = author.getBooks().get(0);
 
         author.removeBook(book);
     }

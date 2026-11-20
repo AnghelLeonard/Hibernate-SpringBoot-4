@@ -23,12 +23,15 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
             
-            System.out.println("\n-----------------------");
+             System.out.println("\n-----------------------");
             System.out.println("---------REMOVE--------");
             System.out.println("-----------------------\n");
+            System.out.println("\nSoft-delete author:");
             bookstoreService.softDeleteAuthor();
+            System.out.println("\nSoft-delete book:");
             bookstoreService.softDeleteBook();
            
+            System.out.println("\nDisplay details:");
             bookstoreService.displayAllIncludeDeletedAuthors();
             bookstoreService.displayAllExceptDeletedAuthors();
             bookstoreService.displayAllOnlyDeletedAuthors();
@@ -40,10 +43,13 @@ public class MainApplication {
            
             System.out.println("\n-----------------------");
             System.out.println("---------RESTORE-------");
-            System.out.println("-----------------------\n");            
+            System.out.println("-----------------------\n");  
+            System.out.println("\nRestore author:");
             bookstoreService.restoreAuthor();
+            System.out.println("\nRestore book:");
             bookstoreService.restoreBook();
            
+            System.out.println("\nDisplay details:");
             bookstoreService.displayAllIncludeDeletedAuthors();
             bookstoreService.displayAllExceptDeletedAuthors();
             bookstoreService.displayAllOnlyDeletedAuthors();
