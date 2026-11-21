@@ -23,7 +23,7 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {            
             bookstoreService.insertAnthologyAuthorInView();
-            bookstoreService.insertHistoryAuthorInView();
+            //bookstoreService.insertHistoryAuthorInView();
         };
     }
 }

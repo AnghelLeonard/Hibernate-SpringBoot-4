@@ -25,6 +25,7 @@ public class BookstoreService {
     public void insertAuthorViaView() {
         AuthorAnthologyView newAuthor = new AuthorAnthologyView();
         
+        newAuthor.setId(7L);
         newAuthor.setName("Toij Kalu");
         newAuthor.setGenre("Anthology");
         newAuthor.setAge(42);

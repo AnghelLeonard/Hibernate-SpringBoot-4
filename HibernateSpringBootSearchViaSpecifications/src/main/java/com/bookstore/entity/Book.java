@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.io.Serializable;
 
@@ -11,14 +9,13 @@ public class Book implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String title;
     private String isbn;
-    private int price;
+    private Integer price;
 
     public Long getId() {
         return id;
@@ -52,11 +49,11 @@ public class Book implements Serializable {
         this.name = name;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 

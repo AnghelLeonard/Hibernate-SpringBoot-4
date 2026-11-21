@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.io.Serializable;
 
@@ -11,16 +9,15 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
-    private int sellrank;
-    private int royalties;
-    private int rating;
+    private Integer age;
+    private Integer sellrank;
+    private Integer royalties;
+    private Integer rating;
 
     public Long getId() {
         return id;
@@ -46,35 +43,35 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
-    public int getSellrank() {
+    public Integer getSellrank() {
         return sellrank;
     }
 
-    public void setSellrank(int sellrank) {
+    public void setSellrank(Integer sellrank) {
         this.sellrank = sellrank;
     }
 
-    public int getRoyalties() {
+    public Integer getRoyalties() {
         return royalties;
     }
 
-    public void setRoyalties(int royalties) {
+    public void setRoyalties(Integer royalties) {
         this.royalties = royalties;
     }
 
-    public int getRating() {
+    public Integer getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
 

@@ -1,8 +1,6 @@
 package com.bookstore.view;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.io.Serializable;
@@ -13,12 +11,11 @@ public class AuthorAnthologyView implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
-    private int age;
+    private Integer age;
     private String genre;
 
     public Long getId() {
@@ -45,11 +42,11 @@ public class AuthorAnthologyView implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

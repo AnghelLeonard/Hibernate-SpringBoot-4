@@ -53,9 +53,8 @@
             <classifier>jakarta</classifier> <!-- Necessary for Spring Boot 3+ / Jakarta EE -->
         </dependency> 
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>                           
         <dependency>
             <groupId>org.springframework.boot</groupId>

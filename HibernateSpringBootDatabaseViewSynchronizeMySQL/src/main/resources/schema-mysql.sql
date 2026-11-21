@@ -5,7 +5,7 @@ USE `bookstoredb`;
 
 -- Table `orders`
 CREATE TABLE `orders` (
-  `id`          BIGINT        NOT NULL AUTO_INCREMENT,
+  `id`          BIGINT        NOT NULL,
   `amount`      DECIMAL(38,2) NOT NULL,
   `created_at`  DATETIME(6)   NOT NULL,
   `customer_id` BIGINT        NOT NULL,  

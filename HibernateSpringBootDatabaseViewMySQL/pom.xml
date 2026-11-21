@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>java.modern.challenge</groupId>
-    <artifactId>HibernateSpringBootDatabaseView</artifactId>
+    <artifactId>HibernateSpringBootDatabaseViewMySQL</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>HibernateSpringBootDatabaseView</name>
+    <name>HibernateSpringBootDatabaseViewMySQL</name>
     <description>Hibernate - Spring Boot 4</description>
 
     <parent>

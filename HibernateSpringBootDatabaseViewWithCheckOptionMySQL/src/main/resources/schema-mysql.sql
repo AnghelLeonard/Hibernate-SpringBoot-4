@@ -5,7 +5,7 @@ USE `bookstoredb`;
 
 -- Table `author`
 CREATE TABLE `author` (
-  `id`        BIGINT        NOT NULL AUTO_INCREMENT,
+  `id`        BIGINT        NOT NULL,
   `age`       INT(11)       NOT NULL,
   `genre`     VARCHAR(255)  DEFAULT NULL,
   `name`      VARCHAR(255)  DEFAULT NULL,
