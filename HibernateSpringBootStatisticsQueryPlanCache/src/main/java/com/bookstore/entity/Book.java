@@ -17,7 +17,7 @@ public class Book implements Serializable {
 
     private String title;
     private String isbn;
-    private int price;
+    private Integer price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", referencedColumnName = "id")
@@ -47,11 +47,11 @@ public class Book implements Serializable {
         this.isbn = isbn;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }        
 

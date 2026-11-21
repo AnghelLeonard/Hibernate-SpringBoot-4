@@ -28,6 +28,7 @@ public class MainApplication {
 
             // this can come via a controller endpoint
             Book book = new Book();
+            book.setId(1L);
             book.setTitle("Carrie");
             book.setGenre("Horror");
             book.setIsbn("001-OG");
