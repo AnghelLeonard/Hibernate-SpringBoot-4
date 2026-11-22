@@ -41,6 +41,7 @@ public class BookstoreService {
                 Chapter chapter = chapterRepository.findById(1L).orElseThrow();
 
                 Modification modification = new Modification();
+                modification.setId(1L);
                 modification.setDescription("Rewording first paragraph");
                 modification.setModification("Reword: ... Added: ...");
                 modification.setChapter(chapter);
@@ -54,6 +55,7 @@ public class BookstoreService {
                         Chapter chapter = chapterRepository.findById(1L).orElseThrow();
 
                         Modification modification = new Modification();
+                        modification.setId(2L);
                         modification.setDescription("Formatting second paragraph");
                         modification.setModification("Format ...");
                         modification.setChapter(chapter);

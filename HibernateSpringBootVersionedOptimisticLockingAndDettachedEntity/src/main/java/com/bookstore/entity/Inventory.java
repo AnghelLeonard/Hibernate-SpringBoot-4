@@ -14,10 +14,10 @@ public class Inventory implements Serializable {
     private Long id;
 
     private String title;
-    private int quantity;
+    private Integer quantity;
 
     @Version
-    private Short version;
+    private Integer version;
 
     public Long getId() {
         return id;
@@ -35,16 +35,15 @@ public class Inventory implements Serializable {
         this.title = title;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    public Short getVersion() {
+    public Integer getVersion() {
         return version;
     }
-
 }

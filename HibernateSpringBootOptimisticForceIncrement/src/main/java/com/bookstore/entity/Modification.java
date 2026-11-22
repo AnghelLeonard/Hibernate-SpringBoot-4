@@ -2,19 +2,20 @@ package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
+import org.springframework.data.domain.Persistable;
 
 @Entity
-public class Modification implements Serializable {
+public class Modification implements Serializable, Persistable<Long> {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
     
     private String description;
@@ -23,8 +24,23 @@ public class Modification implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)  
     private Chapter chapter;
 
+    @Transient
+    private boolean isNew = true;
+
+    @Override
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostLoad
+    @PostPersist
+    void markNotNew() {
+        this.isNew = false;
     }
 
     public void setId(Long id) {
@@ -53,5 +69,11 @@ public class Modification implements Serializable {
 
     public void setChapter(Chapter chapter) {
         this.chapter = chapter;
-    }   
+    }  
+
+    @Override
+    public String toString() {
+        return "Modification{" + "id=" + id + ", description=" + description 
+                + ", modification=" + modification + '}';
+    }        
 }

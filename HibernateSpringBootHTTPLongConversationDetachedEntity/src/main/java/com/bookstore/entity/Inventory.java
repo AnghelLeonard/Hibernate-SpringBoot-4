@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 import java.io.Serializable;
@@ -14,8 +12,7 @@ public class Inventory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String title;
@@ -55,4 +52,9 @@ public class Inventory implements Serializable {
         return version;
     }
 
+    @Override
+    public String toString() {
+        return "Inventory{" + "id=" + id + ", title=" + title 
+                + ", quantity=" + quantity + ", version=" + version + '}';
+    }   
 }
