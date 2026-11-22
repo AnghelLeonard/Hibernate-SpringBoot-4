@@ -1,38 +1,47 @@
 package com.bookstore.service;
 
-import com.bookstore.entity.Inventory;
-import com.bookstore.repository.InventoryRepository;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class BookstoreService implements Runnable {
+public class BookstoreService {
 
-    private final InventoryRepository inventoryRepository;
+    private static final Logger log = LoggerFactory.getLogger(BookstoreService.class);
+    private final InventoryService inventoryService;
 
-    public BookstoreService(InventoryRepository inventoryRepository) {
-        this.inventoryRepository = inventoryRepository;
+    public BookstoreService(InventoryService inventoryService) {
+        this.inventoryService = inventoryService;
     }
 
-    @Override
-    @Transactional
-    public void run() {
+    public void simulateConcurrentPurchases(Long inventoryId) {
+        CompletableFuture<Void> buyer1 = CompletableFuture.runAsync(()
+                -> attemptPurchase("Buyer-1", inventoryId, 2)
+        );
 
-        Inventory inventory = inventoryRepository.findById(1L).orElseThrow();
+        CompletableFuture<Void> buyer2 = CompletableFuture.runAsync(()
+                -> attemptPurchase("Buyer-2", inventoryId, 2)
+        );
 
+        // wait for both tasks to finish
+        CompletableFuture.allOf(buyer1, buyer2).join();
+    }
+
+    private void attemptPurchase(String buyerName, Long inventoryId, int amount) {
         try {
-            Thread.sleep(1000); // this is added just to ensure that both transactions are here
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-
-        int quantity = inventory.getQuantity();
-        if ((quantity - 2) >= 0) { // of course, it can be any quantity, 2 is just an example
-            inventory.setQuantity(inventory.getQuantity() - 2);
-        } else {
-            System.out.println("Notify the client (" + Thread.currentThread().getName()
-                    + ") that there are no more books available ...");
+            inventoryService.deductStock(inventoryId, amount, 1000);
+            log.info("{} successfully purchased {} books.", buyerName, amount);
+        } catch (ObjectOptimisticLockingFailureException ex) {
+            log.warn("{} failed due to concurrent update (Optimistic Lock triggered)!", buyerName);
+        } catch (CompletionException ex) {
+            if (ex.getCause() instanceof ObjectOptimisticLockingFailureException) {
+                log.warn("{} failed due to concurrent update (Optimistic Lock triggered)!", buyerName);
+            } else {
+                throw ex;
+            }
         }
     }
-
 }
