@@ -5,8 +5,6 @@ import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -18,15 +16,14 @@ import java.io.Serializable;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
         discriminatorType = DiscriminatorType.INTEGER,
-        columnDefinition = "TINYINT"
+        columnDefinition = "SMALLINT"
 )
 @DiscriminatorValue("1")
 public class Book implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
     
     private String title;
@@ -75,7 +72,7 @@ public class Book implements Serializable {
             return true;
         }
 
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Book)) {
             return false;
         }
 
@@ -84,7 +81,7 @@ public class Book implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override

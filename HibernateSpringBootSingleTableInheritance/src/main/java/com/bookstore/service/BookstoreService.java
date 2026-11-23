@@ -34,21 +34,25 @@ public class BookstoreService {
     public void persistAuthorWithBooks() {
 
         Author author = new Author();
+        author.setId(1L);
         author.setName("Alicia Tom");
         author.setAge(38);
         author.setGenre("Anthology");
 
         Book book = new Book();
+        book.setId(10L);
         book.setIsbn("001-AT");
         book.setTitle("The book of swords");
 
-        Paperback paperback = new Paperback();
+        Paperback paperback = new Paperback();       
+        paperback.setId(20L);
         paperback.setIsbn("002-AT");
         paperback.setTitle("The beatles anthology");
         paperback.setSizeIn("7.5 x 1.3 x 9.2");
         paperback.setWeightLbs("2.7");
 
         Ebook ebook = new Ebook();
+        ebook.setId(30L);
         ebook.setIsbn("003-AT");
         ebook.setTitle("Anthology myths");
         ebook.setFormat("kindle");
@@ -159,7 +163,7 @@ public class BookstoreService {
 
     public void fetchEbooksAndAuthorsJ() {
         List<Ebook> ebooks = ebookRepository.fetchEbooksAndAuthorsJ();
-        System.out.println(ebooks + "   |   " + ebooks.get(0).getAuthor().getBooks());
+        System.out.println(ebooks + "   |   " + ebooks.get(0).getAuthor());
     }
 
     public void fetchEbooksAndAuthorsJF() {
@@ -198,10 +202,39 @@ public class BookstoreService {
         authors.forEach(author -> System.out.println(author.getBooks()));
     }
     
+    public void fetchAuthorsWithEbooksKindleType() {
+        List<Author> authors = authorRepository.fetchAuthorsWithEbooksKindleType();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+    
     public void fetchAuthorsWithEbooksTreat() {
         List<Author> authors = authorRepository.fetchAuthorsWithEbooksTreat();
         System.out.println(authors);
         authors.forEach(author -> System.out.println(author.getBooks()));
     }
+    
+    public void fetchAuthorsAndEbooksKindleTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsAndEbooksKindleTreat();
+        System.out.println(authors);
+        authors.forEach(author -> System.out.println(author.getBooks()));
+    }
+    
+    public void fetchAuthorsHavingEbooksKindleTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsHavingEbooksKindleTreat();
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // LazyInitializationException 
+    }
 
+    public void fetchAuthorsHavingEbooksTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsHavingEbooksTreat();
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // LazyInitializationException
+    }
+    
+    public void fetchAuthorsJFHavingEbooksKindleTreat() {
+        List<Author> authors = authorRepository.fetchAuthorsJFHavingEbooksKindleTreat();
+        System.out.println(authors);
+        // authors.forEach(author -> System.out.println(author.getBooks())); // LazyInitializationException
+    }    
 }

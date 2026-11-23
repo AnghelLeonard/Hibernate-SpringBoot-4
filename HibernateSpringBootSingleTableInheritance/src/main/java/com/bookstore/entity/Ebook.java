@@ -6,7 +6,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@DiscriminatorValue("2")
+@DiscriminatorValue("3")
 public class Ebook extends Book implements Serializable {
 
     private static final long serialVersionUID = 1L;

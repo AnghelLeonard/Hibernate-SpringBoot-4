@@ -50,8 +50,8 @@ public class MainApplication {
             System.out.println("\n\nfetchEbookByFormatQuery():");
             bookstoreService.fetchEbookByFormatQuery();
 
-            System.out.println("\n\nfetchEbooksAndAuthorsJ():");
-            bookstoreService.fetchEbooksAndAuthorsJ();
+           System.out.println("\n\nfetchEbooksAndAuthorsJ():");
+           bookstoreService.fetchEbooksAndAuthorsJ();
 
             System.out.println("\n\nfetchEbooksAndAuthorsJF():");
             bookstoreService.fetchEbooksAndAuthorsJF();
@@ -71,8 +71,23 @@ public class MainApplication {
             System.out.println("\n\nfetchAuthorsWithEbooksType():");
             bookstoreService.fetchAuthorsWithEbooksType();
             
+            System.out.println("\n\nfetchAuthorsWithEbooksKindleType:");
+            bookstoreService.fetchAuthorsWithEbooksKindleType();
+            
             System.out.println("\n\nfetchAuthorsWithEbooksTreat():");
             bookstoreService.fetchAuthorsWithEbooksTreat();
+            
+            System.out.println("\n\nfetchAuthorsAndEbooksKindleTreat():");
+            bookstoreService.fetchAuthorsAndEbooksKindleTreat();
+            
+            System.out.println("\n\nfetchAuthorsHavingEbooksKindleTreat():");
+            bookstoreService.fetchAuthorsHavingEbooksKindleTreat();
+            
+            System.out.println("\n\nfetchAuthorsHavingEbooksTreat():");
+            bookstoreService.fetchAuthorsHavingEbooksTreat();   
+            
+            System.out.println("\n\nfetchAuthorsJFHavingEbooksKindleTreat():");
+            bookstoreService.fetchAuthorsJFHavingEbooksKindleTreat();              
         };
     }
 }

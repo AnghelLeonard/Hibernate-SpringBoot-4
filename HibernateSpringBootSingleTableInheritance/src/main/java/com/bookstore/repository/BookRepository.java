@@ -14,8 +14,8 @@ public interface BookRepository extends BookBaseRepository<Book> {
     @Query("SELECT b FROM Book b WHERE b.author.id = ?1")
     List<Book> fetchBooksByAuthorId(Long authorId);
     
-    // '2' is the discriminator value for Ebook
-    @Query("SELECT b FROM Book b WHERE b.title = ?1 AND TYPE(b) = 2")
+    // '3' is the discriminator value for Ebook
+    @Query("SELECT b FROM Book b WHERE b.title = ?1 AND TYPE(b) = Ebook")
     Ebook fetchEBooksOfTitleType(String title);
     
     @Query("SELECT b FROM Book b WHERE TREAT(b AS Ebook).title = ?1")
