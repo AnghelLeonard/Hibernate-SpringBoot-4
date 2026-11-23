@@ -3,6 +3,7 @@ package com.bookstore.service;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
@@ -122,6 +123,7 @@ public class BookstoreService {
                     log.info("Starting second transaction ...");
 
                     Author author = new Author();
+                    author.setId(ThreadLocalRandom.current().nextLong(10, 1000));
                     author.setAge(43);
                     author.setName("Joel Bornis");
                     author.setGenre("Anthology");

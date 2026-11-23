@@ -31,10 +31,7 @@ public class BookstoreService {
         this.template = template;
         this.entityManager = entityManager;
     }
-
-    // For all dialects (MySQL5Dialect, MySQL5InnoDBDialect, MySQL8Dialect)            
-    // running the below method will throw: jakarta.persistence.OptimisticLockException
-    // Caused by: org.hibernate.StaleObjectStateException:
+    
     public void editChapterTestVersion() {
         template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -56,6 +53,7 @@ public class BookstoreService {
                         Chapter chapter = chapterRepository.findById(1L).orElseThrow();
 
                         Modification modification = new Modification();
+                        modification.setId(1L);
                         modification.setDescription("Formatting second paragraph");
                         modification.setModification("Format ...");
                         modification.setChapter(chapter);
@@ -73,6 +71,7 @@ public class BookstoreService {
                 entityManager.lock(chapter, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
 
                 Modification modification = new Modification();
+                modification.setId(2L);
                 modification.setDescription("Rewording first paragraph");
                 modification.setModification("Reword: ... Added: ...");
                 modification.setChapter(chapter);
@@ -83,59 +82,6 @@ public class BookstoreService {
             }
         });
 
-        log.info("Done!");
-    }
-
-    // For MySQL5Dialect (MyISAM) stoare engine): row-level locking not supported
-    // For MySQL5InnoDBDialect (InnoDB storage engine): row-level locking is aquired via FOR UPDATE
-    // For MySQL8Dialect (InnoDB storage engine): row-level locking is aquired via FOR UPDATE NOWAIT
-    // running the below method will throw: org.hibernate.QueryTimeoutException
-    // Caused by: com.mysql.cj.jdbc.exceptions.MySQLTimeoutException
-    public void editChapterTestLocking() {
-        template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        template.setTimeout(3); // 3 seconds
-
-        template.execute(new TransactionCallbackWithoutResult() {
-
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-
-                log.info("Starting first transaction ...");
-
-                Chapter chapter = chapterRepository.findById(1L).orElseThrow();
-
-                Modification modification = new Modification();
-                modification.setDescription("Rewording first paragraph");
-                modification.setModification("Reword: ... Added: ...");
-                modification.setChapter(chapter);
-
-                template.execute(new TransactionCallbackWithoutResult() {
-                    @Override
-                    protected void doInTransactionWithoutResult(TransactionStatus status) {
-
-                        log.info("Starting second transaction ...");
-
-                        Chapter chapter = chapterRepository.findById(1L).orElseThrow();
-
-                        Modification modification = new Modification();
-                        modification.setDescription("Formatting second paragraph");
-                        modification.setModification("Format ...");
-                        modification.setChapter(chapter);
-
-                        modificationRepository.save(modification);
-
-                        log.info("Commit second transaction ...");
-                    }
-                });
-
-                log.info("Resuming first transaction ...");
-                
-                modificationRepository.save(modification);
-
-                log.info("Commit first transaction ...");
-            }
-        });
-
-        log.info("Done!");
+        log.info("Done!");        
     }
 }
