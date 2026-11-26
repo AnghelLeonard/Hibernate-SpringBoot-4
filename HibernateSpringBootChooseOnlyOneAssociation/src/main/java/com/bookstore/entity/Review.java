@@ -3,21 +3,18 @@ package com.bookstore.entity;
 import com.bookstore.validation.JustOneOfMany;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 
 @Entity
-@JustOneOfMany // for testing the TRIGGER from data-mysql.sql you have to comment this line
+@JustOneOfMany // for testing the TRIGGER from data-postgresql.sql you have to comment this line
 public class Review implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String content;

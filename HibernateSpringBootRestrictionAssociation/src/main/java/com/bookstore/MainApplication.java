@@ -25,11 +25,11 @@ public class MainApplication {
             System.out.println("\nAuthor with all books ...");
             bookstoreService.fetchAuthorWithAllBooks();
 
-            System.out.println("\nAuthor with cheap books ...");
-            bookstoreService.fetchAuthorWithCheapBooks();
+            System.out.println("\nAuthor with available books ...");
+            bookstoreService.fetchAuthorWithDiscontinuedBooks();
 
-            System.out.println("\nAuthor with rest of books ...");
-            bookstoreService.fetchAuthorWithRestOfBooks();
+            System.out.println("\nAuthor with not available books ...");
+            bookstoreService.fetchAuthorWithNotDiscontinuedBooks();
         };
     }
 }

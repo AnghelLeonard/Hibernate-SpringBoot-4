@@ -1,6 +1,5 @@
 package com.bookstore.strategy;
 
-import com.bookstore.entity.Book;
 import com.bookstore.entity.Paperback;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,7 @@ public class PaperbackDeliver implements Delivery<Paperback> {
     }
 
     @Override
-    public Class<? extends Book> ofBook() {
+    public Class<Paperback> ofBook() {
         return Paperback.class;
     }
 

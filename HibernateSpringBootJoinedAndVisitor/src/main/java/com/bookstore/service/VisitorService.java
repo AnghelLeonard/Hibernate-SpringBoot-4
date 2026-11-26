@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +17,6 @@ public class VisitorService implements Visitable {
 
     private final BookRepository bookRepository;
     private final List<Visitor> visitors;
-
     private final Map<Class<? extends Visitor>, Visitor> visitorsMap = new HashMap<>();
 
     public VisitorService(BookRepository bookRepository, List<Visitor> visitors) {
@@ -25,34 +25,35 @@ public class VisitorService implements Visitable {
     }
 
     @PostConstruct
+    @SuppressWarnings("unchecked")
     public void init() {
-        visitors.forEach((visitor) -> {
-            visitorsMap.put(visitor.getClass(), visitor);
+        visitors.forEach(visitor -> {
+            Class<? extends Visitor> targetClass
+                    = (Class<? extends Visitor>) AopUtils.getTargetClass(visitor);
+            visitorsMap.put(targetClass, visitor);
         });
     }
 
     @Override
     public void accept(Class<? extends Visitor> clazzVisitor) {
+        
+        Visitor currentVisitor = visitorsMap.get(clazzVisitor);
+        
+        if (currentVisitor == null) {
+            throw new IllegalArgumentException("No visitor registered for: " + clazzVisitor.getName());
+        }
 
         List<Book> allBooks = bookRepository.findAll();
-
-        if (!allBooks.isEmpty()) {
-
-            Visitor currentVisitor = visitorsMap.get(clazzVisitor);
-
-            for (Book book : allBooks) {
-                ClazzName clazzName = ClazzName.valueOf(book.getClass().getSimpleName());
-
-                switch (clazzName) {
-                    case Ebook -> currentVisitor.visit((Ebook) book);
-                    case Paperback -> currentVisitor.visit((Paperback) book);
-                    default -> throw new IllegalArgumentException("Unkown book type!");
-                }
+        for (Book book : allBooks) {
+            Book unproxied = (Book) org.hibernate.Hibernate.unproxy(book);
+            switch (unproxied) {
+                case Ebook ebook ->
+                    currentVisitor.visit(ebook);
+                case Paperback paperback ->
+                    currentVisitor.visit(paperback);
+                default ->
+                    throw new IllegalArgumentException("Unknown book type: " + unproxied.getClass());
             }
         }
-    }
-
-    enum ClazzName {
-        Ebook, Paperback
     }
 }

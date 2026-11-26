@@ -2,8 +2,6 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -18,13 +16,12 @@ public class AuthorSet implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "author_book_set",
@@ -78,11 +75,11 @@ public class AuthorSet implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -101,11 +98,7 @@ public class AuthorSet implements Serializable {
             return true;
         }
         
-        if (obj == null) {
-            return false;
-        }
-
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof AuthorSet)) {
             return false;
         }
 
@@ -114,7 +107,7 @@ public class AuthorSet implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override

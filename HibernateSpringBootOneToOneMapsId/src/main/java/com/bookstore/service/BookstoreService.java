@@ -25,7 +25,7 @@ public class BookstoreService {
 
         Author author = authorRepository.findById(1L).orElseThrow();
 
-        Book book = new Book();
+        Book book = new Book();    
         book.setTitle("A History of Ancient Prague");
         book.setIsbn("001-JN");
 

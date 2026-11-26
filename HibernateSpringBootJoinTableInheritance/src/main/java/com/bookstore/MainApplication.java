@@ -59,14 +59,14 @@ public class MainApplication {
             System.out.println("\n\nfetchEBookOfTitle():");
             bookstoreService.fetchEBookOfTitle();
             
-            System.out.println("\n\nfetchEBooksOfTitleTreat():");
-            bookstoreService.fetchEBooksOfTitleTreat();
+            System.out.println("\n\nfetchEBookOfTitleTreat():");
+            bookstoreService.fetchEBookOfTitleTreat();
             
             System.out.println("\n\nfetchEBookOfFormat():");
             bookstoreService.fetchEBookOfFormat();
             
-            System.out.println("\n\nfetchEBooksOfFormatTreat():");
-            bookstoreService.fetchEBooksOfFormatTreat();
+            System.out.println("\n\nfetchEBookOfFormatTreat():");
+            bookstoreService.fetchEBookOfFormatTreat();
             
             System.out.println("\n\nfetchAuthorAndBooksLazy():");
             bookstoreService.fetchAuthorAndBooksLazy();

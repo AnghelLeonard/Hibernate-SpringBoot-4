@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import java.io.Serializable;
 
 @Entity
-@DiscriminatorValue("2")
+@DiscriminatorValue("3")
 public class Ebook extends Book implements Serializable {
 
     private static final long serialVersionUID = 1L;

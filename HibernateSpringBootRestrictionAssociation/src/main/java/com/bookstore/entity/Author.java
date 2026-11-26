@@ -2,8 +2,6 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.io.Serializable;
@@ -17,13 +15,12 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -31,13 +28,13 @@ public class Author implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
-    @SQLRestriction(value = "price <= 20")
-    private List<Book> cheapBooks = new ArrayList<>();
+    @SQLRestriction("discontinued = false")
+    private List<Book> availableBooks = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
-    @SQLRestriction(value = "price > 20")    
-    private List<Book> restOfBooks = new ArrayList<>();
+    @SQLRestriction("discontinued = true")    
+    private List<Book> notAvailableBooks = new ArrayList<>();
 
     public void addBook(Book book) {
         this.books.add(book);
@@ -84,29 +81,29 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
-    public List<Book> getCheapBooks() {
-        return cheapBooks;
+    public List<Book> getAvailableBooks() {
+        return availableBooks;
     }
 
-    public void setCheapBooks(List<Book> cheapBooks) {
-        this.cheapBooks = cheapBooks;
+    public void setAvailableBooks(List<Book> availableBooks) {
+        this.availableBooks = availableBooks;
     }
 
-    public List<Book> getRestOfBooks() {
-        return restOfBooks;
+    public List<Book> getNotAvailableBooks() {
+        return notAvailableBooks;
     }
 
-    public void setRestOfBooks(List<Book> restOfBooks) {
-        this.restOfBooks = restOfBooks;
-    }
+    public void setNotAvailableBooks(List<Book> notAvailableBooks) {
+        this.notAvailableBooks = notAvailableBooks;
+    }    
 
     public List<Book> getBooks() {
         return books;

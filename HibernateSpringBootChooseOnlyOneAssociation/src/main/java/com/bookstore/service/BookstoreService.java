@@ -28,22 +28,58 @@ public class BookstoreService {
     public void persistReviewOk() {
 
         Review review = new Review();
+        review.setId(1L);
         review.setContent("This is a book review ...");
         review.setBook(bookRepository.findById(1L).get());
-        
+
         reviewRepository.save(review);
     }
+
+    @Transactional
+    public Review persistBookReview() {
+        Review review = new Review();
+        review.setId(2L);
+        review.setContent("Great book on Java coding problems.");
+        review.setBook(bookRepository.findById(1L).orElseThrow());
+        return reviewRepository.save(review);
+    }
+
+    @Transactional
+    public Review persistArticleReview() {
+        Review review = new Review();
+        review.setId(3L);
+        review.setContent("Helpful CSS3 tricks.");
+        review.setArticle(articleRepository.findById(1L).orElseThrow());
+        return reviewRepository.save(review);
+    }
+
+    @Transactional
+    public Review persistMagazineReview() {
+        Review review = new Review();
+        review.setId(4L);
+        review.setContent("Informative Java QA issue.");
+        review.setMagazine(magazineRepository.findById(1L).orElseThrow());
+        return reviewRepository.save(review);
+    }
+
+    @Transactional
+    public Review persistReviewWithNoAssociation() {
+        Review review = new Review();
+        review.setId(5L);
+        review.setContent("Orphan review with no book, article, or magazine.");
+        return reviewRepository.save(review);
+    }
     
-    // Calling this method will cause a javax.validation.ConstraintViolationException
-    // 'A review can be associated with either a book, a magazine or an article'
     @Transactional
     public void persistReviewWrong() {
-
         Review review = new Review();
+        review.setId(6L);
         review.setContent("This is an article and magazine review ...");
-        review.setArticle(articleRepository.findById(1L).get());
-        review.setMagazine(magazineRepository.findById(1L).get());
-        
+        review.setArticle(articleRepository.findById(1L).orElseThrow());
+
+        // This sets a second association, which violates the "just one of many" rule
+        review.setMagazine(magazineRepository.findById(1L).orElseThrow());
+
         reviewRepository.save(review);
     }
 }

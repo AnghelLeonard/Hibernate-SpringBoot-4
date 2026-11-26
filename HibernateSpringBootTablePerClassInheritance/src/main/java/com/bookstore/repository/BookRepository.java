@@ -14,7 +14,8 @@ public interface BookRepository extends BookBaseRepository<Book> {
     @Query("SELECT b FROM Book b WHERE b.author.id = ?1")
     List<Book> fetchBooksByAuthorId(Long authorId);
 
-    @Query("SELECT b FROM Book b WHERE b.title = ?1")
+    // @Query("SELECT b FROM Book b WHERE b.title = ?1") // Polymorphic risk
+    @Query("SELECT b FROM Ebook b WHERE b.title = ?1")
     Ebook fetchEBookOfTitle(String title);
 
     @Query("SELECT b FROM Book b WHERE TREAT(b AS Ebook).title = ?1")

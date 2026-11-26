@@ -21,19 +21,23 @@ public class BookstoreService {
     public void insertAuthorWithBooks() {
 
         Author jn = new Author();
+        jn.setId(1L);
         jn.setName("Joana Nimar");
         jn.setAge(34);
         jn.setGenre("History");
 
         Book jn01 = new Book();
+        jn01.setId(1L);
         jn01.setIsbn("001-JN");
         jn01.setTitle("A History of Ancient Prague");
 
         Book jn02 = new Book();
+        jn02.setId(2L);
         jn02.setIsbn("002-JN");
         jn02.setTitle("A People's History");
 
         Book jn03 = new Book();
+        jn03.setId(3L);
         jn03.setIsbn("003-JN");
         jn03.setTitle("World History");
 
@@ -50,6 +54,7 @@ public class BookstoreService {
         Author author = authorRepository.fetchByName("Joana Nimar");
 
         Book book = new Book();
+        book.setId(4L);
         book.setIsbn("004-JN");
         book.setTitle("History Details");
 

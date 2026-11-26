@@ -19,12 +19,12 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Query("SELECT a FROM Author a JOIN FETCH a.books b JOIN TREAT(b as Ebook) eb")
     public List<Author> fetchAuthorsWithEbooksTreat(); 
     
-    @Query("SELECT a FROM Author a JOIN TREAT(a.books as Ebook)")
+    @Query("SELECT DISTINCT a FROM Author a JOIN TREAT(a.books as Ebook)")
     public List<Author> fetchAuthorsNoBooksTreat(); 
     
-    @Query("SELECT a FROM Author a JOIN TREAT(a.books as Ebook) eb WHERE eb.format = ?1")
+    @Query("SELECT DISTINCT a FROM Author a JOIN TREAT(a.books as Ebook) eb WHERE eb.format = ?1")
     public List<Author> fetchAuthorsNoBooksFormatTreat(String format); 
     
-    @Query("SELECT a FROM Author a JOIN TREAT(a.books as Ebook) eb WHERE eb.title = ?1")
+    @Query("SELECT DISTINCT a FROM Author a JOIN TREAT(a.books as Ebook) eb WHERE eb.title = ?1")
     public List<Author> fetchAuthorsNoBooksTitleTreat(String title);
 }

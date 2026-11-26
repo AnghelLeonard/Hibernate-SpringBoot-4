@@ -31,22 +31,18 @@ public class BookstoreService {
         // Author author = authorRepository.findByName("Joana Nimar");        
 
         Book book = new Book();
+        book.setId(5L);
         book.setIsbn("003-JN");
         book.setTitle("History Of Present");
         book.setAuthor(author);
 
-        bookRepository.save(book);
-        
-        // book.setIsbn("not available"); // this will trigger an UPDATE
+        bookRepository.save(book);        
     }
-    
-    @Transactional
+      
     public void fetchBooksOfAuthorById() {
         List<Book> books = bookRepository.fetchBooksOfAuthorById(4L);
 
-        System.out.println(books);
-        
-        // books.get(0).setIsbn("not available"); // this will trigger an UPDATE
+        System.out.println(books);        
     }
 
     public void fetchPageBooksOfAuthorById() {
@@ -61,6 +57,7 @@ public class BookstoreService {
         List<Book> books = bookRepository.fetchBooksOfAuthorById(4L);
 
         Book book = new Book();
+        book.setId(6L);
         book.setIsbn("004-JN");
         book.setTitle("History Facts");
         book.setAuthor(books.get(0).getAuthor());          

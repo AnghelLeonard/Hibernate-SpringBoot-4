@@ -1,8 +1,6 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import java.io.Serializable;
@@ -14,8 +12,7 @@ public class BookSet implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String title;
@@ -63,11 +60,7 @@ public class BookSet implements Serializable {
             return true;
         }
         
-        if (obj == null) {
-            return false;
-        }
-        
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof BookSet)) {
             return false;
         }
         
@@ -76,7 +69,7 @@ public class BookSet implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override

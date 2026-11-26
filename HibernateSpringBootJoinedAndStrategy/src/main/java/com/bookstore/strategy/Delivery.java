@@ -4,7 +4,6 @@ import com.bookstore.entity.Book;
 
 public interface Delivery<T extends Book> {
 
-    Class<? extends Book> ofBook();
-    
+    Class<T> ofBook();    
     void deliver(T book);
 }

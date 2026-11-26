@@ -30,11 +30,13 @@ public class BookstoreService {
     public void persistAuthorWithBooks() {
 
         Author author = new Author();
+        author.setId(1L);
         author.setName("Alicia Tom");
         author.setAge(38);
         author.setGenre("Anthology");
 
         Paperback paperback = new Paperback();
+        paperback.setId(10L);
         paperback.setIsbn("002-AT");
         paperback.setTitle("The beatles anthology");
         paperback.setSizeIn("7.5 x 1.3 x 9.2");
@@ -42,6 +44,7 @@ public class BookstoreService {
         paperback.setAuthor(author);
 
         Ebook ebook = new Ebook();
+        ebook.setId(20L);
         ebook.setIsbn("003-AT");
         ebook.setTitle("Anthology myths");
         ebook.setFormat("kindle");

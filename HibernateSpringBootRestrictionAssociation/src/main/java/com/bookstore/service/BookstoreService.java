@@ -27,19 +27,19 @@ public class BookstoreService {
     }
 
     @Transactional(readOnly = true)
-    public void fetchAuthorWithCheapBooks() {
+    public void fetchAuthorWithDiscontinuedBooks() {
 
         Author author = authorRepository.findById(1L).orElseThrow();
-        List<Book> books = author.getCheapBooks();
+        List<Book> books = author.getAvailableBooks();
 
         System.out.println(books);
     }
 
     @Transactional(readOnly = true)
-    public void fetchAuthorWithRestOfBooks() {
+    public void fetchAuthorWithNotDiscontinuedBooks() {
 
         Author author = authorRepository.findById(1L).orElseThrow();
-        List<Book> books = author.getRestOfBooks();
+        List<Book> books = author.getNotAvailableBooks();
 
         System.out.println(books);
     }
