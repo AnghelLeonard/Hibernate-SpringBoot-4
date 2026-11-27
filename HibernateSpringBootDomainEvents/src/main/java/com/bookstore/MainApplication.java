@@ -33,6 +33,7 @@ public class MainApplication {
             bookstoreService.insertBook();
 
             BookReview bookReview = new BookReview();
+            bookReview.setId(1L);
             bookReview.setContent("Very good book!");
             bookReview.setEmail("marinv@gmail.com");
             bookReview.setStatus(CHECK);

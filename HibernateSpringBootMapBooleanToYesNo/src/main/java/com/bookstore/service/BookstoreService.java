@@ -16,6 +16,7 @@ public class BookstoreService {
     public void persistAuthor() {
         Author author = new Author();
         
+        author.setId(7L);
         author.setAge(43);
         author.setName("Alicia Weys");
         author.setGenre("Horror");

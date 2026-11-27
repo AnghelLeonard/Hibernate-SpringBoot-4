@@ -18,6 +18,7 @@ public class BookstoreService {
     public void newAuthor() {
 
         Author author = new Author();
+        author.setId(2L);
         author.setName("Joana Nimar");
         author.setAge(34);
         author.setGenre("History");

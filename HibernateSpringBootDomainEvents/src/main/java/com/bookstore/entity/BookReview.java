@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,8 +16,7 @@ public class BookReview extends AbstractAggregateRoot<BookReview> implements Ser
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String content;
@@ -77,11 +74,7 @@ public class BookReview extends AbstractAggregateRoot<BookReview> implements Ser
     }   
     
     @Override
-    public boolean equals(Object obj) {
-
-        if (obj == null) {
-            return false;
-        }
+    public boolean equals(Object obj) {     
 
         if (this == obj) {
             return true;
@@ -96,7 +89,7 @@ public class BookReview extends AbstractAggregateRoot<BookReview> implements Ser
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
 }

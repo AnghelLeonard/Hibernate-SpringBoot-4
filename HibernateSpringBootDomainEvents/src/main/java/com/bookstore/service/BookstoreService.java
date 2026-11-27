@@ -23,6 +23,7 @@ public class BookstoreService {
 
     public void insertBook() {
         Book book = new Book();
+        book.setId(1L);
         book.setAuthor("Mark Janel");
         book.setIsbn("001-LD");
         book.setTitle("Lucky Day");

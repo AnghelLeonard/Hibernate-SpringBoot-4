@@ -17,12 +17,7 @@ public class BookstoreService {
     @Transactional
     public void saveAndUpdateUser() {
 
-        Author author = new Author();
-        author.setName("Joana Nimar");
-        author.setGenre("History");
-        author.setAge(34);
-
-        authorRepository.save(author);
+        Author author = authorRepository.getReferenceById(1L);
 
         author.setAge(35);
     }
