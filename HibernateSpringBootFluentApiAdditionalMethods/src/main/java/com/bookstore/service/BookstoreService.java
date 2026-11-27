@@ -18,15 +18,18 @@ public class BookstoreService {
     public void persistAuthorWithBooks() {
 
         Author author = new Author()
-                .name("Joana Nimar")
-                .age(34)
-                .genre("History")
+                .withId(1L)
+                .withName("Joana Nimar")
+                .withAge(34)
+                .withGenre("History")
                 .addBook(new Book()
-                        .title("A History of Ancient Prague")
-                        .isbn("001-JN"))
+                        .withId(1L)
+                        .withTitle("A History of Ancient Prague")
+                        .withIsbn("001-JN"))
                 .addBook(new Book()
-                        .title("A People's History")
-                        .isbn("002-JN"));
+                        .withId(2L)
+                        .withTitle("A People's History")
+                        .withIsbn("002-JN"));
 
         authorRepository.save(author);
     }

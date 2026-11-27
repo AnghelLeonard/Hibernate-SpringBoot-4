@@ -23,7 +23,10 @@ public class MainApplication {
     public ApplicationRunner init() {
         return args -> {
 
+            System.out.println("\n\nCall fetchAuthorById()");
             bookstoreService.fetchAuthorById();
+            
+            System.out.println("\n\nCall fetchAuthorFromBook()");
             bookstoreService.fetchAuthorFromBook();
         };
     }

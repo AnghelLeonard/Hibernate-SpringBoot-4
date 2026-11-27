@@ -2,8 +2,6 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.io.Serializable;
@@ -15,13 +13,12 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @OneToMany(cascade = CascadeType.ALL,
             mappedBy = "author", orphanRemoval = true)
@@ -43,7 +40,7 @@ public class Author implements Serializable {
         return id;
     }
     
-    public Author id(Long id) {
+    public Author withId(Long id) {
         this.id = id;
         return this;
     }
@@ -56,7 +53,7 @@ public class Author implements Serializable {
         return name;
     }
 
-    public Author name(String name) {
+    public Author withName(String name) {
         this.name = name;
         return this;
     }
@@ -69,7 +66,7 @@ public class Author implements Serializable {
         return genre;
     }
 
-    public Author genre(String genre) {
+    public Author withGenre(String genre) {
         this.genre = genre;
         return this;
     }
@@ -78,11 +75,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public Author age(int age) {
+    public Author withAge(Integer age) {
         this.age = age;
         return this;
     }
@@ -95,7 +92,7 @@ public class Author implements Serializable {
         return books;
     }
     
-    public Author books(List<Book> books) {
+    public Author withBooks(List<Book> books) {
         this.books = books;
         return this;
     }

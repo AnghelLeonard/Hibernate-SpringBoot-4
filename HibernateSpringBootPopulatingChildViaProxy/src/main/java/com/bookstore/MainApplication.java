@@ -20,9 +20,11 @@ public class MainApplication {
     @Bean
     public ApplicationRunner init() {
         return args -> {            
-            bookstoreService.addBookToAuthor();
-            bookstoreService.removeDetachedAuthor();
-            bookstoreService.removeDetachedBookstoreClerk();
+            System.out.println("\n\n Call findById():");
+            bookstoreService.addBookToAuthorFindById();
+            
+            System.out.println("\n\n Call getReferenceById():");
+            bookstoreService.addBookToAuthorReferenceById();            
         };
     }
 }

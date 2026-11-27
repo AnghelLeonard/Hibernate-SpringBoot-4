@@ -18,13 +18,16 @@ public class BookstoreService {
     public void persistAuthorWithBooks() {
 
         Author author = new Author()
+                .setId(1L)
                 .setName("Joana Nimar")
                 .setAge(34)
                 .setGenre("History")
                 .addBook(new Book()
+                        .setId(1L)
                         .setTitle("A History of Ancient Prague")
                         .setIsbn("001-JN"))
                 .addBook(new Book()
+                        .setId(2L)
                         .setTitle("A People's History")
                         .setIsbn("002-JN"));
 
