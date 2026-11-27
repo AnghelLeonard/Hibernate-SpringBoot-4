@@ -2,8 +2,6 @@ package com.bookstore.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -18,13 +16,12 @@ public class Author implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id    
     private Long id;
 
     private String name;
     private String genre;
-    private int age;
+    private Integer age;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "author_book",
@@ -45,12 +42,14 @@ public class Author implements Serializable {
         } else {
             // clone each book
             for (Book book : author.getBooks()) {
-                addBook(new Book(book));
+                Book bookClone = new Book(book);
+                bookClone.setId(book.getId() + 10L);
+                addBook(bookClone);
             }
         }
     }
 
-    public void addBook(Book book) {
+    public final void addBook(Book book) {
         this.books.add(book);
         book.getAuthors().add(this);
     }
@@ -95,11 +94,11 @@ public class Author implements Serializable {
         this.genre = genre;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -118,11 +117,7 @@ public class Author implements Serializable {
             return true;
         }
 
-        if (obj == null) {
-            return false;
-        }
-
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Author)) {
             return false;
         }
 
@@ -131,7 +126,7 @@ public class Author implements Serializable {
 
     @Override
     public int hashCode() {
-        return 2021;
+        return getClass().hashCode();
     }
 
     @Override

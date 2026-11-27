@@ -20,6 +20,7 @@ public class BookstoreService {
         Author author = authorRepository.fetchByName("Mark Janel");
 
         Author authorClone = new Author(author, false);
+        authorClone.setId(2L);
         authorClone.setAge(54);
         authorClone.setName("Farell Tliop");                
 
