@@ -1,5 +1,6 @@
--- Drop tables
-DROP TABLE IF EXISTS "author", "book" CASCADE;
+-- Drop schema
+DROP SCHEMA IF EXISTS "public" CASCADE;
+CREATE SCHEMA "public";
 
 -- Table book
 CREATE TABLE "book" (
