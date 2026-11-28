@@ -18,6 +18,7 @@ public class BookstoreService {
     public Long insertOrderWithBookLine(String customerName, String isbn, int quantity, double price) {
                 
         Order newOrder = new Order();
+        newOrder.setId(3L);
         newOrder.setCustomerName(customerName);
         
         // add the book line inside the aggregate boundary
